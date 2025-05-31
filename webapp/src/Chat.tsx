@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQ_listChatsByUserId, useM_createChat, useQ_listAssistants } from './api/chat-api';
-import type { Thread, Assistant } from './api/chat-api';
+import type { Assistant } from './api/chat-api';
 import { ChatThread } from './ChatThread';
 
 interface ChatProps {
