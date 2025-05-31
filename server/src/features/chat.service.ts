@@ -8,15 +8,10 @@ import { prisma } from '../prisma';
 
 const assistants = [
 	{
-		id: 'asst_DBVI33JWzoqmwjT5HsyKrIcB',
-		name: 'shirgal',
-		label: 'Shirgal',
-	},
-	{
-		id: 'asst_1ZN4h0qheVLr7rpqaibRiHw9',
+		id: 'asst_9cw3eNl5AIUH1YAsyDmKgK85',
 		name: 'elal-7787',
 		label: 'Elal 7787',
-	},	
+	},
 ]
 
 @Injectable()
