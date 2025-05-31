@@ -106,5 +106,10 @@ export function useQ_getChatMessages(threadId: string) {
     queryKey: ['messages', threadId],
     queryFn: () => getChatMessages(threadId),
     enabled: !!threadId,
+    // never refetch automatically
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
-} 
+}

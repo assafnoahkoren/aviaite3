@@ -123,7 +123,6 @@ export class ChatService {
       openaiThreadId,
       {
         assistant_id: assistantId,
-        instructions: 'Please address the user as Jane Doe. The user has a premium account.'
       }
     );
 
@@ -132,7 +131,7 @@ export class ChatService {
         run.thread_id
       );
       // Find the latest assistant message
-      const assistantMessage = messages.data.reverse().find(m => m.role === 'assistant');
+      const assistantMessage = messages.data.find(m => m.role === 'assistant');
       let assistantResponse = null;
       if (assistantMessage && Array.isArray(assistantMessage.content)) {
         const textBlock = assistantMessage.content.find(
