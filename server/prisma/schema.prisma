@@ -24,11 +24,12 @@ model User {
 }
 
 model Thread {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
-  assistantId String
-  profileId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  openaiThreadId String
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: NoAction)
+  assistantId    String
+  profileId      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

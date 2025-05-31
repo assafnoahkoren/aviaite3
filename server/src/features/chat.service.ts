@@ -39,11 +39,14 @@ export class ChatService {
    * @param profileId - The ID of the profile
    */
   async createChat(userId: string, assistantId: string, profileId: string) {
+	const thread = await this.openai.beta.threads.create();
+
     return prisma.thread.create({
       data: {
         userId,
         assistantId,
         profileId,
+		openaiThreadId: thread.id,
       },
     });
   }
@@ -57,5 +60,28 @@ export class ChatService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async getChatMessages(threadId: string) {
+    
+  }
+
+  /**
+   * Creates a message in a thread for a user
+   * @param threadId - The ID of the thread
+   * @param userId - The ID of the user
+   * @param content - The content of the message
+   */
+  async createMessage(threadId: string, userId: string, content: string) {
+    // Placeholder: You may want to save this to your DB and/or send to OpenAI
+    // For now, just return a mock object
+    // TODO: Integrate with OpenAI or persist in DB as needed
+    return {
+      id: Math.random().toString(36).substr(2, 9),
+      threadId,
+      userId,
+      content,
+      createdAt: new Date().toISOString(),
+    };
   }
 } 
