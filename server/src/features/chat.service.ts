@@ -63,7 +63,33 @@ export class ChatService {
   }
 
   async getChatMessages(threadId: string) {
-    
+    // Fetch the thread to get the openaiThreadId
+    const thread = await prisma.thread.findUnique({
+      where: { id: threadId },
+    });
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+    const openaiThreadId = thread.openaiThreadId;
+
+    // Fetch messages from OpenAI
+    const messages = await this.openai.beta.threads.messages.list(openaiThreadId);
+    // Map OpenAI messages to the expected format
+    return messages.data.reverse().map((msg: any) => {
+      let text = null;
+      if (Array.isArray(msg.content)) {
+        const textBlock = msg.content.find((block: any) => block.type === 'text');
+        text = textBlock && 'text' in textBlock ? textBlock.text.value : null;
+      }
+      return {
+        id: msg.id,
+        threadId,
+        userId: msg.role === 'user' ? (msg.user_id || 'user') : 'assistant',
+        content: text,
+        createdAt: msg.created_at ? new Date(msg.created_at * 1000).toISOString() : new Date().toISOString(),
+        role: msg.role,
+      };
+    });
   }
 
   /**
@@ -73,15 +99,65 @@ export class ChatService {
    * @param content - The content of the message
    */
   async createMessage(threadId: string, userId: string, content: string) {
-    // Placeholder: You may want to save this to your DB and/or send to OpenAI
-    // For now, just return a mock object
-    // TODO: Integrate with OpenAI or persist in DB as needed
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      threadId,
-      userId,
-      content,
-      createdAt: new Date().toISOString(),
-    };
+    // Find the thread in the database to get the assistantId and openaiThreadId
+    const thread = await prisma.thread.findFirst({
+      where: { openaiThreadId: threadId },
+    });
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+    const assistantId = thread.assistantId;
+    const openaiThreadId = thread.openaiThreadId;
+
+    // Create the user message in the OpenAI thread
+    const message = await this.openai.beta.threads.messages.create(
+      openaiThreadId,
+      {
+        role: 'user',
+        content,
+      }
+    );
+
+    // Run the assistant and poll for completion
+    let run = await this.openai.beta.threads.runs.createAndPoll(
+      openaiThreadId,
+      {
+        assistant_id: assistantId,
+        instructions: 'Please address the user as Jane Doe. The user has a premium account.'
+      }
+    );
+
+    if (run.status === 'completed') {
+      const messages = await this.openai.beta.threads.messages.list(
+        run.thread_id
+      );
+      // Find the latest assistant message
+      const assistantMessage = messages.data.reverse().find(m => m.role === 'assistant');
+      let assistantResponse = null;
+      if (assistantMessage && Array.isArray(assistantMessage.content)) {
+        const textBlock = assistantMessage.content.find(
+          (block: any) => block.type === 'text'
+        );
+        assistantResponse = textBlock && 'text' in textBlock ? textBlock.text.value : null;
+      }
+      return {
+        id: message.id,
+        threadId,
+        userId,
+        content,
+        createdAt: message.created_at ? new Date(message.created_at * 1000).toISOString() : new Date().toISOString(),
+        assistantResponse,
+      };
+    } else {
+      return {
+        id: message.id,
+        threadId,
+        userId,
+        content,
+        createdAt: message.created_at ? new Date(message.created_at * 1000).toISOString() : new Date().toISOString(),
+        assistantResponse: null,
+        runStatus: run.status,
+      };
+    }
   }
 } 

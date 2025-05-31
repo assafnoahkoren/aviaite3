@@ -12,6 +12,7 @@ export interface Thread {
   id: string;
   userId: string;
   assistantId: string;
+  openaiThreadId: string;
   profileId: string;
   createdAt: string;
   updatedAt: string;
@@ -21,6 +22,20 @@ export interface CreateChatDto {
   userId: string;
   assistantId: string;
   profileId: string;
+}
+
+export interface CreateMessageDto {
+  threadId: string;
+  userId: string;
+  content: string;
+}
+
+export interface Message {
+  id: string;
+  threadId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
 }
 
 // List all assistants
@@ -38,6 +53,18 @@ export async function createChat(dto: CreateChatDto): Promise<Thread> {
 // List all chats (threads) for a user
 export async function listChatsByUserId(userId: string): Promise<Thread[]> {
   const res = await api.get(`/api/chat/user/${userId}`);
+  return res.data;
+}
+
+// Create a new message in a thread
+export async function createMessage(dto: CreateMessageDto): Promise<Message> {
+  const res = await api.post('/api/chat/message', dto);
+  return res.data;
+}
+
+// Get messages for a thread
+export async function getChatMessages(threadId: string): Promise<Message[]> {
+  const res = await api.get(`/api/chat/thread/${threadId}/messages`);
   return res.data;
 }
 
@@ -65,5 +92,19 @@ export function useM_createChat() {
       // Invalidate the user's chat list after creating a chat
       queryClient.invalidateQueries({ queryKey: ['chats', variables.userId] });
     },
+  });
+}
+
+export function useM_createMessage() {
+  return useMutation({
+    mutationFn: createMessage,
+  });
+}
+
+export function useQ_getChatMessages(threadId: string) {
+  return useQuery({
+    queryKey: ['messages', threadId],
+    queryFn: () => getChatMessages(threadId),
+    enabled: !!threadId,
   });
 } 

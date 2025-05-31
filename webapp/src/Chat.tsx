@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useQ_listChatsByUserId, useM_createChat } from './api/chat-api';
-import type { Thread } from './api/chat-api';
+import { useQ_listChatsByUserId, useM_createChat, useQ_listAssistants } from './api/chat-api';
+import type { Thread, Assistant } from './api/chat-api';
+import { ChatThread } from './ChatThread';
 
 interface ChatProps {
   userId: string;
@@ -9,6 +10,7 @@ interface ChatProps {
 export const Chat: React.FC<ChatProps> = ({ userId }) => {
   const { data: chats, isLoading, error } = useQ_listChatsByUserId(userId);
   const createChatMutation = useM_createChat();
+  const { data: assistants, isLoading: loadingAssistants, error: assistantsError } = useQ_listAssistants();
 
   const [assistantId, setAssistantId] = useState('');
   const [profileId, setProfileId] = useState('');
@@ -28,22 +30,34 @@ export const Chat: React.FC<ChatProps> = ({ userId }) => {
       {error && <div>Error loading chats</div>}
       <ul>
         {chats && chats.map((chat: Thread) => (
-          <li key={chat.id}>
-            <strong>Assistant:</strong> {chat.assistantId} | <strong>Profile:</strong> {chat.profileId} | <strong>Created:</strong> {new Date(chat.createdAt).toLocaleString()}
-          </li>
+          <ChatThread key={chat.id} chat={chat} userId={userId} />
         ))}
       </ul>
       <h3>Create New Chat</h3>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Assistant ID: </label>
-          <input value={assistantId} onChange={e => setAssistantId(e.target.value)} required />
+          <label>Assistant: </label>
+          {loadingAssistants && <span>Loading assistants...</span>}
+          {assistantsError && <span style={{color: 'red'}}>Error loading assistants</span>}
+          <select
+            value={assistantId}
+            onChange={e => setAssistantId(e.target.value)}
+            required
+            disabled={loadingAssistants || !assistants}
+          >
+            <option value="">Select an assistant</option>
+            {assistants && assistants.map((assistant: Assistant) => (
+              <option key={assistant.id} value={assistant.id}>
+                {assistant.label || assistant.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label>Profile ID: </label>
           <input value={profileId} onChange={e => setProfileId(e.target.value)} required />
         </div>
-        <button type="submit" disabled={createChatMutation.isPending}>Create Chat</button>
+        <button type="submit" disabled={createChatMutation.isPending || loadingAssistants || !assistants}>Create Chat</button>
         {createChatMutation.isError && <span style={{color: 'red'}}>Error creating chat</span>}
       </form>
     </div>
