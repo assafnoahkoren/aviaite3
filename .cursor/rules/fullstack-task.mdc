@@ -1,0 +1,87 @@
+---
+description: Tasks that are fullstack - backend to frontend
+globs: 
+alwaysApply: false
+---
+# Fullstack Task Workflow (`fullstack-task`)
+
+This document describes the step-by-step process for implementing new features or updating your application, starting from the Prisma schema and ending with UI integration. Follow these steps to ensure consistency and completeness across your stack.
+
+---
+
+## 1. Prisma Schema Change & Migration
+
+- **Edit** your `prisma/schema.prisma` to add, remove, or modify models as needed.
+- **Apply changes** by running:
+  ```bash
+  cd server
+  npx prisma migrate dev
+  ```
+- This will update your database and generate new Prisma client types.
+
+---
+
+## 2. Backend (NestJS) Module/Service/Controller
+
+- **Check if a module exists** for the new model/entity in `server/src`.
+- **If not, generate** the necessary files:
+  ```bash
+  nest g module <entity>
+  nest g service <entity>
+  nest g controller <entity>
+  ```
+- **Register the new module** in `app.module.ts` by adding it to the `imports` array.
+- **Implement or update** the service and controller logic to support the new feature (CRUD or custom logic).
+
+---
+
+## 3. Frontend API & Typings
+
+- **Update or create** a new API file in `webapp/src/api` (e.g., `user.ts` for a `User` entity).
+- **Use the shared `api` instance** from `index.ts` for all requests.
+- **Add or update TypeScript typings** in `webapp/src/types` (e.g., `user.ts`).
+- **Example API file:**
+  ```ts
+  // webapp/src/api/user.ts
+  import { api } from './index';
+  import { User } from '../types/user';
+
+  export const getUsers = () => api.get<User[]>('/users');
+  export const createUser = (data: Partial<User>) => api.post<User>('/users', data);
+  // ...etc
+  ```
+
+---
+
+## 4. UI Component Creation & Integration
+
+- **Create a new component** in `webapp/src/components` (e.g., `UserList.tsx`).
+- **Use the new API functions** to fetch and display data.
+- **Integrate the component** into the appropriate page or view.
+
+---
+
+## 5. Checklist Summary
+
+1. [ ] Update `prisma/schema.prisma` and run `prisma migrate dev`.
+2. [ ] Generate or update NestJS module, service, and controller.
+3. [ ] Register new module in `app.module.ts`.
+4. [ ] Implement or update backend logic.
+5. [ ] Update or create frontend API file and typings.
+6. [ ] Create or update UI component and integrate it.
+
+---
+
+## 6. Automation (Optional)
+
+Consider creating a script (Node.js, bash, etc.) to automate steps 2–5 for faster iteration.
+
+---
+
+**Rule Name:** fullstack-task
+
+**Description:**
+A repeatable workflow for fullstack feature development, starting from the Prisma schema and ending with UI integration, ensuring all layers are updated and consistent.
+
+
+
