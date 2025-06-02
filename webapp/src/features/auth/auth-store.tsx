@@ -56,6 +56,11 @@ export class AuthStore {
       localStorage.removeItem('auth_user');
     }
   }
+
+  logout() {
+    this.setCurrentUser(null, null);
+    window.location.href = '/login';
+  }
 }
 
 export function useCreateStore_Auth() {

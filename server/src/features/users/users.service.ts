@@ -62,7 +62,8 @@ export class UsersService {
 			throw new UnauthorizedException('Please verify your email before logging in.');
 		}
 		const token = JwtUtil.signUserJwt(user);
-		return { message: 'Login successful', userId: user.id, token };
+		const { password, ...userWithoutPassword } = user;
+		return { message: 'Login successful', userId: user.id, token, user: userWithoutPassword };
 	}
 
 	async verify(userId: string, token: string): Promise<{ success: boolean; message: string; token?: string; user?: any }> {

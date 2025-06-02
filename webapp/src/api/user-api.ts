@@ -16,6 +16,17 @@ export interface AuthResponse {
   message: string;
   userId: string;
   token?: string;
+  user?: {
+    id: string;
+    fullName?: string | null;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+    isActive: boolean;
+    verified: boolean;
+    organizationId?: string | null;
+    // Add other non-sensitive fields if needed
+  };
 }
 
 export interface VerifyResponse {

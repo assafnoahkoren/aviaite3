@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TextInput, PasswordInput, Button, Paper, Title, Stack, Alert } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Auth } from './auth-store';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const LoginPage = observer(() => {
   const auth = useStore_Auth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  // Set up onSuccess handler for login
+  useEffect(() => {
+    if (auth.loginMutation.isSuccess && auth.loginMutation.data?.token) {
+      auth.setCurrentUser(auth.loginMutation.data.user ?? null, auth.loginMutation.data.token);
+      navigate('/');
+    }
+  }, [auth.loginMutation.isSuccess, auth.loginMutation.data, auth, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
