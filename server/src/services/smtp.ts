@@ -10,12 +10,15 @@ class SmtpService {
 
 	async sendMail({ to, from, subject, html, cc, attachments }: {
 		to: { email: string, name?: string }[],
-		from: { email: string, name?: string },
+		from?: { email: string, name?: string },
 		subject: string,
 		html: string,
 		cc?: { email: string, name?: string }[],
 		attachments?: string[]
 	}) {
+		if (!from) {
+			from = { email: 'noreply@aviaite.com', name: 'Aviaite' };
+		}
 		let mailService = this.api.mail()
 			.from(from)
 			.subject(subject)

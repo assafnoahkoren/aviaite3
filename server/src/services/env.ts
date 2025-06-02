@@ -22,6 +22,8 @@ export const ENV = {
 	DATABASE_URL: getEnvVar('DATABASE_URL'),
 	SMTP2GO_API_KEY: getEnvVar('SMTP2GO_API_KEY'),
 	SMTP2GO_BASE_URL: getEnvVar('SMTP2GO_BASE_URL'),
+	JWT_SECRET: getEnvVar('JWT_SECRET'),
+	FRONTEND_URL: getEnvVar('FRONTEND_URL'),
 
 };
 
