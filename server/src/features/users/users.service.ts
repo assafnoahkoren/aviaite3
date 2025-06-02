@@ -31,7 +31,7 @@ export class UsersService {
 
 	private async sendVerificationEmail(user: { id: string; email: string; fullName?: string | null }) {
 		const token = randomBytes(32).toString('hex');
-		const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
+		const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
 		await prisma.verificationToken.create({
 			data: {
 				entityId: user.id,
@@ -61,7 +61,28 @@ export class UsersService {
 		if (!user.verified) {
 			throw new UnauthorizedException('Please verify your email before logging in.');
 		}
-		const token = JwtUtil.signUserJwt({ id: user.id, email: user.email, fullName: user.fullName || '' });
+		const token = JwtUtil.signUserJwt(user);
 		return { message: 'Login successful', userId: user.id, token };
+	}
+
+	async verify(userId: string, token: string): Promise<{ success: boolean; message: string; token?: string; user?: any }> {
+		const record = await prisma.verificationToken.findFirst({
+			where: {
+				entityId: userId,
+				entityType: 'user',
+				kind: 'email_verification',
+				token,
+				usedAt: null,
+				expiresAt: { gt: new Date() },
+			},
+		});
+		if (!record) {
+			return { success: false, message: 'Invalid or expired verification token.' };
+		}
+		const updatedUser = await prisma.user.update({ where: { id: userId }, data: { verified: true } });
+		await prisma.verificationToken.update({ where: { id: record.id }, data: { usedAt: new Date() } });
+		const jwt = JwtUtil.signUserJwt(updatedUser);
+		const { password, ...userWithoutPassword } = updatedUser;
+		return { success: true, message: 'Email verified successfully.', token: jwt, user: userWithoutPassword };
 	}
 } 

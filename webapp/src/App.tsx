@@ -1,13 +1,27 @@
-import { Chat } from "./Chat"
-import "./App.css"
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ClickToComponent } from 'click-to-react-component';
+import { MantineProvider } from '@mantine/core';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router';
+import { useCreateStore_Auth } from './features/auth/auth-store';
+
+const queryClient = new QueryClient();
 
 function App() {
-
+  const authStore = useCreateStore_Auth();
   return (
-    <>
-      <Chat userId={'b47dedd4-03cd-45b4-96b6-b5e7f22e759d'} />
-    </>
-  )
+    <React.StrictMode>
+      <ClickToComponent editor="cursor" />
+      <QueryClientProvider client={queryClient}>
+        <MantineProvider>
+          <authStore.context>
+            <RouterProvider future={{v7_startTransition: true}} router={router} />
+          </authStore.context>
+        </MantineProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
 }
 
-export default App
+export default App;
