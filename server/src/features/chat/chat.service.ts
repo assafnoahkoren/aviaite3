@@ -3,8 +3,8 @@
 
 import { Injectable } from '@nestjs/common';
 import { OpenAI } from 'openai';
-import { ENV } from '../env';
-import { prisma } from '../prisma';
+import { ENV } from '../../env';
+import { prisma } from '../../prisma';
 
 const assistants = [
 	{

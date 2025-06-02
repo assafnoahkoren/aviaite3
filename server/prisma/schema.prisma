@@ -14,17 +14,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EntityType {
+  user
+  organization
+}
+
+enum VerificationKind {
+  email_verification
+  password_reset
+}
+
 model User {
   id             String        @id @default(uuid())
+  fullName       String?
   email          String        @unique
   password       String
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   Threads        Thread[]
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  Organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: NoAction)
   isActive       Boolean       @default(true)
-  accessControls AccessControl[]
+  AccessControls AccessControl[]
+  verified       Boolean       @default(false)
+
+  @@index([organizationId])
 }
 
 model Organization {
@@ -33,6 +47,9 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Users     User[]
+  isActive  Boolean  @default(true)
+
+  @@index([isActive])
 }
 
 model Thread {
@@ -44,14 +61,35 @@ model Thread {
   profileId      String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model AccessControl {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   userId      String
-  assetId     String
-  assetType   String
+  entityId    String
+  entityType  EntityType
   accessType  String
   accessLevel Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive    Boolean    @default(true)
+
+  @@index([isActive])
+  @@index([entityId, entityType])
+  @@index([userId])
+}
+
+model VerificationToken {
+  id         String           @id @default(cuid())
+  entityId   String
+  entityType EntityType
+  kind       VerificationKind
+  token      String
+  usedAt     DateTime?
+  createdAt  DateTime         @default(now())
+  expiresAt  DateTime
+
+  @@index([entityId, entityType])
+  @@index([expiresAt])
 }
