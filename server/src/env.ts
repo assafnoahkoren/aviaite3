@@ -20,6 +20,8 @@ export const ENV = {
 	PORT: getEnvVar('PORT', '3000'),
 	OPENAI_API_KEY: getEnvVar('OPENAI_API_KEY'),
 	DATABASE_URL: getEnvVar('DATABASE_URL'),
+	SMTP2GO_API_KEY: getEnvVar('SMTP2GO_API_KEY'),
+	SMTP2GO_BASE_URL: getEnvVar('SMTP2GO_BASE_URL'),
 
 };
 

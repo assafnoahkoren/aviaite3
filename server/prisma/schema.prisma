@@ -15,21 +15,43 @@ datasource db {
 }
 
 model User {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  password       String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  Threads        Thread[]
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  isActive       Boolean       @default(true)
+  accessControls AccessControl[]
+}
+
+model Organization {
   id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Thread    Thread[]
+  Users     User[]
 }
 
 model Thread {
   id             String   @id @default(uuid())
   openaiThreadId String
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: NoAction)
+  User           User     @relation(fields: [userId], references: [id], onDelete: NoAction)
   assistantId    String
   profileId      String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model AccessControl {
+  id          String   @id @default(uuid())
+  userId      String
+  assetId     String
+  assetType   String
+  accessType  String
+  accessLevel Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
