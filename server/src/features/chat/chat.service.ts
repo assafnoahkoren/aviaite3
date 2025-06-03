@@ -8,6 +8,21 @@ import { prisma } from '../../services/prisma';
 
 const assistants = [
 	{
+		id: 'asst_GiwIP1vySr6XctY9w7NvunLw',
+		name: 'Co-Pilot-737-V2',
+		label: 'Co-Pilot 737 V2',
+	},
+  {
+		id: 'asst_fZC1wK2LvYo8a93nqMVgGrnf',
+		name: '787-NEW',
+		label: '787 NEW',
+	},
+  {
+		id: 'asst_StHM7qcEs2TkCFvc89KGBETy',
+		name: 'elal-737',
+		label: 'Elal 737',
+	},
+  {
 		id: 'asst_9cw3eNl5AIUH1YAsyDmKgK85',
 		name: 'elal-7787',
 		label: 'Elal 7787',

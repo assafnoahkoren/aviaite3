@@ -1,0 +1,95 @@
+.sidebar {
+  background: #f7f8fa;
+  height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+  width: clamp(180px, 22vw, 320px);
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.chatsList {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  /* Subtle scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 #f7f8fa;
+}
+.chatsList::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.chatsList::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+.chatsList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chatsList::-webkit-scrollbar-button {
+  display: none;
+}
+
+.chatItem {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+  font-size: 15px;
+  color: #222;
+}
+
+.chatItem:hover {
+  background: #e6eaf3;
+}
+
+.empty {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.userArea {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.userEmail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+  font-size: 15px;
+  color: #444;
+} 

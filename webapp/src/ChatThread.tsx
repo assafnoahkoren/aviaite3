@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useQ_getChatMessages, useM_createMessage } from './api/chat-api';
-import type { Thread } from './api/chat-api';
+import { useQ_getChatMessages, useQ_listChatsByUserId, useM_createMessage } from './api/chat-api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -15,11 +14,16 @@ if (!heeboFontLink) {
 }
 
 interface ChatThreadProps {
-  chat: Thread;
+  chatId: string;
 }
 
-export const ChatThread: React.FC<ChatThreadProps> = ({ chat }) => {
-  const { data: messages, isLoading: loadingMessages } = useQ_getChatMessages(chat.id);
+export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
+  const { data: chats } = useQ_listChatsByUserId();
+  const chat = chats?.find((c) => c.id === chatId);
+
+  
+
+  const { data: messages, isLoading: loadingMessages } = useQ_getChatMessages(chatId);
   const createMessageMutation = useM_createMessage();
   const [messageInput, setMessageInput] = useState('');
   const [localMessages, setLocalMessages] = useState<any[]>([]);
@@ -34,6 +38,8 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chat }) => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [allMessages, waitingForAssistant]);
+
+  if (!chat) return null;
 
   const handleSendMessage = () => {
     if (!messageInput) return;
@@ -75,18 +81,22 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chat }) => {
   return (
     <div style={{ 
       width: '100%', 
+      height: '100%',
+      minHeight: 0,
       margin: '0 auto', 
       background: '#f9f9f9', 
       borderRadius: 12, 
       boxShadow: '0 2px 8px #0001', 
       padding: 24, 
       fontFamily: 'Heebo, sans-serif',
-      boxSizing: 'border-box' 
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       <div style={{ marginBottom: 16, color: '#555', fontSize: 14 }}>
         <strong>Assistant:</strong> {chat.assistantId} | <strong>Profile:</strong> {chat.profileId} | <strong>Created:</strong> {new Date(chat.createdAt).toLocaleString()}
       </div>
-      <div style={{ minHeight: 320, maxHeight: 400, overflowY: 'auto', background: '#fff', borderRadius: 8, padding: 16, marginBottom: 16, border: '1px solid #eee', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflowY: 'auto', background: '#fff', borderRadius: 8, padding: 16, marginBottom: 16, border: '1px solid #eee', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loadingMessages && <div style={{ textAlign: 'center', color: '#888' }}>Loading messages...</div>}
         {allMessages.map((msg) => (
           <div
