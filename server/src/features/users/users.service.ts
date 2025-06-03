@@ -86,4 +86,57 @@ export class UsersService {
 		const { password, ...userWithoutPassword } = updatedUser;
 		return { success: true, message: 'Email verified successfully.', token: jwt, user: userWithoutPassword };
 	}
+
+	async createResetPasswordToken(email: string): Promise<{ success: boolean; message: string }> {
+		const user = await prisma.user.findUnique({ where: { email } });
+		if (!user) {
+			return { success: false, message: 'If an account exists, a password reset link has been sent.' };
+		}
+
+		const token = randomBytes(32).toString('hex');
+		const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+		await prisma.verificationToken.create({
+			data: {
+				entityId: user.id,
+				entityType: 'user',
+				kind: 'password_reset',
+				token,
+				expiresAt,
+			},
+		});
+
+		const resetUrl = `${ENV.FRONTEND_URL}/reset-password?userId=${user.id}&token=${token}`;
+		await smtpService.sendMail({
+			to: [{ email: user.email, name: user.fullName || undefined }],
+			subject: 'Reset your password',
+			html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`
+		});
+
+		return { success: true, message: 'If an account exists, a password reset link has been sent.' };
+	}
+
+	async resetPassword(userId: string, token: string, newPassword: string): Promise<{ success: boolean; message: string; user?: any }> {
+		const record = await prisma.verificationToken.findFirst({
+			where: {
+				entityId: userId,
+				entityType: 'user',
+				kind: 'password_reset',
+				token,
+				usedAt: null,
+				expiresAt: { gt: new Date() },
+			},
+		});
+
+		if (!record) {
+			return { success: false, message: 'Invalid or expired reset token.' };
+		}
+
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		const updatedUser = await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword } });
+		await prisma.verificationToken.update({ where: { id: record.id }, data: { usedAt: new Date() } });
+
+		const { password, ...userWithoutPassword } = updatedUser;
+		return { success: true, message: 'Password has been reset successfully.', user: userWithoutPassword };
+	}
 } 

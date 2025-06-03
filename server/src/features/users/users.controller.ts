@@ -21,4 +21,18 @@ export class UsersController {
   async verify(@Query('userId') userId: string, @Query('token') token: string) {
     return this.usersService.verify(userId, token);
   }
+
+  @Post('api/users/reset-password-token')
+  async createResetPasswordToken(@Body('email') email: string) {
+    return this.usersService.createResetPasswordToken(email);
+  }
+
+  @Post('api/users/reset-password')
+  async resetPassword(
+    @Body('userId') userId: string,
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.usersService.resetPassword(userId, token, newPassword);
+  }
 } 

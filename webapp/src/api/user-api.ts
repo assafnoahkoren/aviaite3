@@ -1,5 +1,26 @@
 import { api } from './index';
 import { useMutation } from '@tanstack/react-query';
+import type { User } from './models';
+
+export interface AuthResponse {
+  message: string;
+  userId: string;
+  token?: string;
+  user?: User;
+}
+
+export interface VerifyResponse {
+  success: boolean;
+  message: string;
+  token: string;
+  user?: User;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  user?: User;
+}
 
 export interface RegisterDto {
   fullName: string;
@@ -12,38 +33,10 @@ export interface LoginDto {
   password: string;
 }
 
-export interface AuthResponse {
-  message: string;
+export interface ResetPasswordDto {
   userId: string;
-  token?: string;
-  user?: {
-    id: string;
-    fullName?: string | null;
-    email: string;
-    createdAt: string;
-    updatedAt: string;
-    isActive: boolean;
-    verified: boolean;
-    organizationId?: string | null;
-    // Add other non-sensitive fields if needed
-  };
-}
-
-export interface VerifyResponse {
-  success: boolean;
-  message: string;
   token: string;
-  user?: {
-    id: string;
-    fullName?: string | null;
-    email: string;
-    createdAt: string;
-    updatedAt: string;
-    isActive: boolean;
-    verified: boolean;
-    organizationId?: string | null;
-    // Add other non-sensitive fields if needed
-  };
+  newPassword: string;
 }
 
 export async function register(dto: RegisterDto): Promise<AuthResponse> {
@@ -58,6 +51,16 @@ export async function login(dto: LoginDto): Promise<AuthResponse> {
 
 export async function verify({ userId, token }: { userId: string; token: string }): Promise<VerifyResponse> {
   const res = await api.get(`/api/users/verify?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`);
+  return res.data;
+}
+
+export async function createResetPasswordToken(email: string): Promise<ResetPasswordResponse> {
+  const res = await api.post('/api/users/reset-password-token', { email });
+  return res.data;
+}
+
+export async function resetPassword(dto: ResetPasswordDto): Promise<ResetPasswordResponse> {
+  const res = await api.post('/api/users/reset-password', dto);
   return res.data;
 }
 
@@ -76,5 +79,17 @@ export function useM_login() {
 export function useM_verify() {
   return useMutation({
     mutationFn: verify,
+  });
+}
+
+export function useM_resetPassword() {
+  return useMutation({
+    mutationFn: resetPassword,
+  });
+}
+
+export function useM_createResetPasswordToken() {
+  return useMutation({
+    mutationFn: createResetPasswordToken,
   });
 } 

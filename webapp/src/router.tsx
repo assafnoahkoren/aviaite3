@@ -6,6 +6,8 @@ import {
 import { LoginPage } from './features/auth/login-page';
 import { RegisterPage } from './features/auth/register-page';
 import { VerifyPage } from './features/auth/verify-page';
+import { RequestResetPasswordPage } from './features/auth/request-reset-password-page';
+import { ResetPasswordPage } from './features/auth/reset-password-page';
 import { useStore_Auth } from './features/auth/auth-store';
 import { Button } from '@mantine/core';
 
@@ -31,6 +33,8 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/verify', element: <VerifyPage /> },
+  { path: '/request-reset-password', element: <RequestResetPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
   // Private routes
   {
     element: <PrivateRoute />,

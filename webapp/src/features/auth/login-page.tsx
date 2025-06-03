@@ -47,7 +47,8 @@ export const LoginPage = observer(() => {
           <Button type="submit" loading={auth.loginMutation.isLoading} fullWidth>
             Login
           </Button>
-		  <Button component={Link} to="/register" variant="subtle" fullWidth>Register</Button>
+          <Button component={Link} to="/register" variant="subtle" fullWidth>Register</Button>
+          <Button component={Link} to="/request-reset-password" variant="subtle" fullWidth>Forgot Password?</Button>
         </Stack>
       </form>
     </Paper>

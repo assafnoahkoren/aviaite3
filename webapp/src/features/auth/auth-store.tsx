@@ -1,27 +1,36 @@
 import { createContext, useContext, useMemo } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { MobxMutation } from '../../infra/mobx-query';
-import { login, register, verify } from '../../api/user-api';
-import type { LoginDto, RegisterDto, AuthResponse, VerifyResponse } from '../../api/user-api';
+import { login, register, verify, createResetPasswordToken, resetPassword } from '../../api/user-api';
+import type { User } from '../../api/models';
+import type { LoginDto, RegisterDto, AuthResponse, VerifyResponse, ResetPasswordDto, ResetPasswordResponse } from '../../api/user-api';
 
 export class AuthStore {
-  loginMutation: MobxMutation<AuthResponse, unknown, LoginDto>;
-  registerMutation: MobxMutation<AuthResponse, unknown, RegisterDto>;
-  verifyMutation: MobxMutation<VerifyResponse, unknown, { userId: string; token: string }>;
+  loginMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { email: string; password: string }>;
+  registerMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { fullName: string; email: string; password: string }>;
+  verifyMutation: MobxMutation<{ success: boolean; message: string; token: string; user?: User }, unknown, { userId: string; token: string }>;
+  createResetPasswordTokenMutation: MobxMutation<{ success: boolean; message: string }, unknown, string>;
+  resetPasswordMutation: MobxMutation<{ success: boolean; message: string; user?: User }, unknown, { userId: string; token: string; newPassword: string }>;
 
-  user: VerifyResponse['user'] | null = null;
+  user: User | null = null;
   token: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
-    this.loginMutation = new MobxMutation<AuthResponse, unknown, LoginDto>({
+    this.loginMutation = new MobxMutation({
       mutationFn: login,
     });
-    this.registerMutation = new MobxMutation<AuthResponse, unknown, RegisterDto>({
+    this.registerMutation = new MobxMutation({
       mutationFn: register,
     });
-    this.verifyMutation = new MobxMutation<VerifyResponse, unknown, { userId: string; token: string }>({
+    this.verifyMutation = new MobxMutation({
       mutationFn: verify,
+    });
+    this.createResetPasswordTokenMutation = new MobxMutation({
+      mutationFn: createResetPasswordToken,
+    });
+    this.resetPasswordMutation = new MobxMutation({
+      mutationFn: resetPassword,
     });
 
     this.loadFromLocalStorage();
@@ -42,7 +51,7 @@ export class AuthStore {
     }
   }
 
-  setCurrentUser(user: VerifyResponse['user'] | null, token: string | null) {
+  setCurrentUser(user: User | null, token: string | null) {
     this.user = user;
     this.token = token;
     if (token) {
