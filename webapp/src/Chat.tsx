@@ -7,7 +7,7 @@ interface ChatProps {
 }
 
 export const Chat: React.FC<ChatProps> = ({ chatId }) => {
-	const { data: chats, isLoading, error } = useQ_listChatsByUserId();
+	const { data: chats } = useQ_listChatsByUserId();
 	useQ_listAssistants(); // Only for possible cache, not used directly
 
 	const selectedChat = chats?.find((chat) => chat.id === chatId) || null;

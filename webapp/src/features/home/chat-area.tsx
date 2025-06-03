@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './chat-area.module.scss';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
