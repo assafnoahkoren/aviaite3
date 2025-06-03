@@ -4,6 +4,14 @@ import { User } from '../../generated/prisma';
 
 export const JwtUtil = {
 	signUserJwt(user: User): string {
-		return jwt.encode(user, ENV.JWT_SECRET);
+		const { password, ...userWithoutPassword } = user;
+		return jwt.encode(userWithoutPassword, ENV.JWT_SECRET);
+	},
+	verifyUserJwt(token: string): Omit<User, 'password'> {
+		try {
+			return jwt.decode(token, ENV.JWT_SECRET);
+		} catch (e) {
+			throw new Error('Invalid or expired token');
+		}
 	}
 } 

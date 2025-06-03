@@ -3,12 +3,8 @@ import { useQ_listChatsByUserId, useM_createChat, useQ_listAssistants } from './
 import type { Assistant } from './api/chat-api';
 import { ChatThread } from './ChatThread';
 
-interface ChatProps {
-	userId: string;
-}
-
-export const Chat: React.FC<ChatProps> = ({ userId }) => {
-	const { data: chats, isLoading, error } = useQ_listChatsByUserId(userId);
+export const Chat: React.FC = () => {
+	const { data: chats, isLoading, error } = useQ_listChatsByUserId();
 	const createChatMutation = useM_createChat();
 	const { data: assistants, isLoading: loadingAssistants, error: assistantsError } = useQ_listAssistants();
 
@@ -33,7 +29,7 @@ export const Chat: React.FC<ChatProps> = ({ userId }) => {
 		const selectedAssistant = assistants?.find((a: Assistant) => a.id === assistantId);
 		const profileId = selectedAssistant?.name || '';
 		if (!profileId) return;
-		createChatMutation.mutate({ userId, assistantId, profileId });
+		createChatMutation.mutate({ assistantId, profileId });
 		setAssistantId('');
 	};
 
@@ -61,7 +57,7 @@ export const Chat: React.FC<ChatProps> = ({ userId }) => {
 				</div>
 			)}
 
-			{selectedChat && <ChatThread key={selectedChat.id} chat={selectedChat} userId={userId} />}
+			{selectedChat && <ChatThread key={selectedChat.id} chat={selectedChat} />}
 			<h3>Create New Chat</h3>
 			<form onSubmit={handleSubmit}>
 				<div>

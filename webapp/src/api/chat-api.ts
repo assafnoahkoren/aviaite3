@@ -19,14 +19,12 @@ export interface Thread {
 }
 
 export interface CreateChatDto {
-  userId: string;
   assistantId: string;
   profileId: string;
 }
 
 export interface CreateMessageDto {
   threadId: string;
-  userId: string;
   content: string;
 }
 
@@ -50,9 +48,9 @@ export async function createChat(dto: CreateChatDto): Promise<Thread> {
   return res.data;
 }
 
-// List all chats (threads) for a user
-export async function listChatsByUserId(userId: string): Promise<Thread[]> {
-  const res = await api.get(`/api/chat/user/${userId}`);
+// List all chats (threads) for the current user (guarded)
+export async function listChatsByUserId(): Promise<Thread[]> {
+  const res = await api.get('/api/chat/user');
   return res.data;
 }
 
@@ -76,11 +74,10 @@ export function useQ_listAssistants() {
   });
 }
 
-export function useQ_listChatsByUserId(userId: string) {
+export function useQ_listChatsByUserId() {
   return useQuery({
-    queryKey: ['chats', userId],
-    queryFn: () => listChatsByUserId(userId),
-    enabled: !!userId,
+    queryKey: ['chats'],
+    queryFn: listChatsByUserId,
   });
 }
 
@@ -88,9 +85,9 @@ export function useM_createChat() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createChat,
-    onSuccess: (_data, variables) => {
+    onSuccess: (_data) => {
       // Invalidate the user's chat list after creating a chat
-      queryClient.invalidateQueries({ queryKey: ['chats', variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
     },
   });
 }

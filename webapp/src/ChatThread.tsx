@@ -16,10 +16,9 @@ if (!heeboFontLink) {
 
 interface ChatThreadProps {
   chat: Thread;
-  userId: string;
 }
 
-export const ChatThread: React.FC<ChatThreadProps> = ({ chat, userId }) => {
+export const ChatThread: React.FC<ChatThreadProps> = ({ chat }) => {
   const { data: messages, isLoading: loadingMessages } = useQ_getChatMessages(chat.id);
   const createMessageMutation = useM_createMessage();
   const [messageInput, setMessageInput] = useState('');
@@ -41,7 +40,6 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chat, userId }) => {
     const userMessage = {
       id: `local-user-${Date.now()}`,
       threadId: chat.id,
-      userId,
       content: messageInput,
       createdAt: new Date().toISOString(),
       role: 'user',
@@ -50,7 +48,7 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chat, userId }) => {
     setMessageInput('');
     setWaitingForAssistant(true);
     createMessageMutation.mutate(
-      { threadId: chat.openaiThreadId, userId, content: userMessage.content },
+      { threadId: chat.openaiThreadId, content: userMessage.content },
       {
         onSuccess: (result) => {
           const assistantResponse = (result as any).assistantResponse;

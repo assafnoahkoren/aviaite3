@@ -10,6 +10,8 @@ import { RequestResetPasswordPage } from './features/auth/request-reset-password
 import { ResetPasswordPage } from './features/auth/reset-password-page';
 import { useStore_Auth } from './features/auth/auth-store';
 import { Button } from '@mantine/core';
+import { useCreateStore_ChatHistory } from './features/chat-history/chat-history-store';
+import { observer } from 'mobx-react-lite';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -18,15 +20,33 @@ function PrivateRoute() {
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 }
 
-const HomePage = () => {
+const HomePage = observer(() => {
   const auth = useStore_Auth();
+  const chatHistoryStore = useCreateStore_ChatHistory();
+  const chats = chatHistoryStore.store.chatsQuery.data ?? [];
+  const createChat = () => {
+    // For demo, use dummy values. Replace with real values or a form as needed.
+    chatHistoryStore.store.createChatMutation.mutate({
+      assistantId: 'demo-assistant',
+      profileId: 'demo-profile',
+    });
+  };
   return (
-    <>
+    <chatHistoryStore.context>
       <div>Hello {auth.user?.fullName} your email is {auth.user?.email}</div>
       <Button onClick={() => auth.logout()}>Logout</Button>
-    </>
+      <Button onClick={createChat} disabled={chatHistoryStore.store.createChatMutation.isLoading}>
+        {chatHistoryStore.store.createChatMutation.isLoading ? 'Creating...' : 'Create Chat'}
+      </Button>
+      {chatHistoryStore.store.createChatMutation.isError && (
+        <div style={{ color: 'red' }}>Error creating chat</div>
+      )}
+      {chats.map((chat) => (
+        <div key={chat.id}>{chat.id}</div>
+      ))}
+    </chatHistoryStore.context>
   );
-};
+});
 
 export const router = createBrowserRouter([
   // Public routes

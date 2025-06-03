@@ -1,9 +1,9 @@
 import { IsString } from 'class-validator';
 
-export class CreateChatDto {
+export class CreateMessageDto {
   @IsString()
-  assistantId: string;
+  threadId: string;
 
   @IsString()
-  profileId: string;
+  content: string;
 } 
