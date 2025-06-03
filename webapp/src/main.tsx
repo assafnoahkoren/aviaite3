@@ -9,4 +9,3 @@ import '@mantine/core/styles.css';
 createRoot(document.getElementById('root')!).render(
   <App />
 )
-assafnoahkoren+123123@gmail.com
