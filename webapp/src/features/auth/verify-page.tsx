@@ -16,7 +16,7 @@ export const VerifyPage = observer(() => {
       if (auth.verifyMutation.isLoading) return;
       auth.verifyMutation.mutate({ userId, token }).then((res) => {
         if (res?.success) {
-          auth.setCurrentUser(res.user, res.token);
+          auth.setCurrentUser(res.user || null, res.token);
           navigate('/');
         } else {
           navigate('/login');

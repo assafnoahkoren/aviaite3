@@ -3,7 +3,6 @@ import { makeAutoObservable } from 'mobx';
 import { MobxMutation } from '../../infra/mobx-query';
 import { login, register, verify, createResetPasswordToken, resetPassword } from '../../api/user-api';
 import type { User } from '../../api/models';
-import type { LoginDto, RegisterDto, AuthResponse, VerifyResponse, ResetPasswordDto, ResetPasswordResponse } from '../../api/user-api';
 
 export class AuthStore {
   loginMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { email: string; password: string }>;
