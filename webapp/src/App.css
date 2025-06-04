@@ -1,19 +1,29 @@
 /* GFM Markdown styles for .markdown-body */
 .markdown-body table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
   margin-bottom: 1em;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fafbfc;
+  box-shadow: 0 1px 4px #0001;
 }
 .markdown-body th, .markdown-body td {
-  border: 1px solid #ccc;
-  padding: 6px 13px;
+  border: 1px solid #ececec;
+  padding: 8px 14px;
+  transition: background 0.2s;
 }
 .markdown-body th {
   background: #f6f8fa;
   font-weight: bold;
+  border-top: none;
 }
 .markdown-body tr:nth-child(even) {
-  background: #f6f8fa;
+  background: #f8fafd;
+}
+.markdown-body tr {
+  border-radius: 8px;
 }
 .markdown-body code {
   background: #f6f8fa;

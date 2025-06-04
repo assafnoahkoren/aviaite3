@@ -3,6 +3,7 @@ import { useQ_getChatMessages, useQ_listChatsByUserId, useM_createMessage } from
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+
 // Add Heebo font via Google Fonts
 const heeboFontLink = document.getElementById('heebo-font');
 if (!heeboFontLink) {
@@ -120,7 +121,7 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
                 wordBreak: 'break-word',
               }}
             >
-              <div className="markdown-body">
+              <div className="markdown-body" dir={isRTL(msg.content) ? 'rtl' : 'ltr'}>
 			  	{/* @ts-ignore */}
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
               </div>
@@ -180,3 +181,8 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
     </div>
   );
 }; 
+
+
+function isRTL(text: string) {
+  return new Intl.Collator('ar').compare(text, 'rtl') > 0;
+}

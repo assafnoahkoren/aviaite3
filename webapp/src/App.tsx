@@ -5,7 +5,7 @@ import { MantineProvider } from '@mantine/core';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useCreateStore_Auth } from './features/auth/auth-store';
-
+import "./App.css"
 const queryClient = new QueryClient();
 
 function App() {
