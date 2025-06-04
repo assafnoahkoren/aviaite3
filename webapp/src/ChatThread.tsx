@@ -18,6 +18,11 @@ interface ChatThreadProps {
   chatId: string;
 }
 
+// Utility to remove custom bracket link syntax
+function removeBracketLinks(text: string) {
+  return text.replace(/【\d+:\d+†[^】]+?】/g, '');
+}
+
 export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
   const { data: chats } = useQ_listChatsByUserId();
   const chat = chats?.find((c) => c.id === chatId);
@@ -122,8 +127,8 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
               }}
             >
               <div className="markdown-body" dir={isRTL(msg.content) ? 'rtl' : 'ltr'}>
-			  	{/* @ts-ignore */}
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                {/* @ts-ignore */}
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{removeBracketLinks(msg.content)}</ReactMarkdown>
               </div>
             </div>
             <span style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
