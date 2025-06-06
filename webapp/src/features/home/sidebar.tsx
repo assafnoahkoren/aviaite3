@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './sidebar.module.scss';
 import { Button, Group, Menu, Stack, Text, Select } from '@mantine/core';
 import { IconLogout, IconUserCircle } from '@tabler/icons-react';
@@ -24,6 +24,15 @@ const Sidebar = observer(() => {
   if (!selectedAssistantId && assistants.length > 0) {
     setSelectedAssistantId(assistants[0].id);
   }
+
+  useEffect(() => {
+    if (chatHistory.chatsQuery.isSuccess && !chatStore.currentChatId && chats.length > 0) {
+      const sortedChats = [...chats].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      chatStore.setCurrentChatId(sortedChats[0].id);
+    }
+  }, [chatHistory.chatsQuery.isSuccess, chats, chatStore]);
 
   const handleNewChat = () => {
     if (!selectedAssistantId) return;
