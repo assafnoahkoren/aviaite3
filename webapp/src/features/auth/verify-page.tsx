@@ -14,16 +14,24 @@ export const VerifyPage = observer(() => {
   useEffect(() => {
     if (userId && token) {
       if (auth.verifyMutation.isLoading) return;
-      auth.verifyMutation.mutate({ userId, token }).then((res) => {
-        if (res?.success) {
-          auth.setCurrentUser(res.user || null, res.token);
-          navigate('/');
-        } else {
+
+      const verify = async () => {
+        try {
+          const res = await auth.verifyMutation.mutateAsync({ userId, token });
+          if (res?.success) {
+            auth.setCurrentUser(res.user || null, res.token);
+            navigate('/');
+          } else {
+            // This case might be handled by the error case, but as a fallback
+            navigate('/login');
+          }
+        } catch (error) {
+          console.error('Verification failed', error);
           navigate('/login');
         }
-      }).catch(() => {
-        navigate('/login');
-      });
+      };
+
+      verify();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, token]);
