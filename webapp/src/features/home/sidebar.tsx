@@ -1,3 +1,4 @@
+import cx from 'clsx';
 import { useState, useEffect } from 'react';
 import styles from './sidebar.module.scss';
 import { Button, Group, Menu, Stack, Text, Select } from '@mantine/core';
@@ -8,7 +9,12 @@ import { observer } from 'mobx-react-lite';
 import { useStore_Chat } from '../chat/chat-store';
 import { useQ_listAssistants } from '../../api/chat-api';
 
-const Sidebar = observer(() => {
+type Props = {
+  onClose?: () => void;
+  className?: string;
+};
+
+const Sidebar = observer(({ onClose, className }: Props) => {
   const chatHistory = useStore_ChatHistory();
   const chatStore = useStore_Chat();
   const auth = useStore_Auth();
@@ -44,6 +50,7 @@ const Sidebar = observer(() => {
       })
       .then((newChat) => {
         chatStore.setCurrentChatId(newChat.id);
+        onClose?.();
       });
   };
 
@@ -56,7 +63,7 @@ const Sidebar = observer(() => {
   };
 
   return (
-    <div className={styles.sidebar}>
+    <div className={cx(styles.sidebar, className)}>
       {/* Top: New Chat button */}
       <Button fullWidth onClick={handleNewChat} variant="light" loading={isCreating} disabled={isCreating || !selectedAssistantId} mb={8}>
         {isCreating ? 'Creating...' : 'New Chat'}
@@ -83,7 +90,10 @@ const Sidebar = observer(() => {
             h="max-content"
             py={8}
             mih="max-content"
-            onClick={() => chatStore.setCurrentChatId(chat.id)}
+            onClick={() => {
+              chatStore.setCurrentChatId(chat.id);
+              onClose?.();
+            }}
             style={chatStore.currentChatId === chat.id ? { fontWeight: 600 } : {}}
           >
             <Stack gap={4} align="flex-start">
