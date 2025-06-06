@@ -9,6 +9,13 @@
   background: #fafbfc;
   box-shadow: 0 1px 4px #0001;
 }
+
+@media (max-width: 768px) {
+  .markdown-body table {
+    zoom: 0.3;
+  }
+}
+
 .markdown-body th, .markdown-body td {
   border: 1px solid #ececec;
   padding: 8px 14px;
