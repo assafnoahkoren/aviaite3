@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.content {
+  max-width: 600px;
+}
+
+.questionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.questionBox {
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #f1f3f5;
+  }
+} 

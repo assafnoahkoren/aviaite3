@@ -132,4 +132,25 @@
 .errorMessage {
   color: red;
   margin-left: 8px;
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.actionButton {
+  background-color: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
 } 

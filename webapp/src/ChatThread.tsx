@@ -4,7 +4,15 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Text, Box } from '@mantine/core';
 import styles from './ChatThread.module.scss';
+import { EmptyThreadPlaceholder } from './EmptyThreadPlaceholder';
 
+const actionButtons = [
+  'תרחיב',
+  'תמקד',
+  'רכז לי בטבלה',
+  'תתרגם לאנגלית',
+  'תבדוק שוב את התשובה',
+];
 
 // Add Heebo font via Google Fonts
 const heeboFontLink = document.getElementById('heebo-font');
@@ -49,6 +57,42 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
 
   if (!chat) return null;
 
+  const simulateSendMessage = (content: string) => {
+    if (!content) return;
+    const userMessage = {
+      id: `local-user-${Date.now()}`,
+      threadId: chat.id,
+      content: content,
+      createdAt: new Date().toISOString(),
+      role: 'user',
+    };
+    setLocalMessages((prev) => [...prev, userMessage]);
+    setWaitingForAssistant(true);
+    createMessageMutation.mutate(
+      { threadId: chat.openaiThreadId, content: userMessage.content },
+      {
+        onSuccess: (result) => {
+          const assistantResponse = (result as any).assistantResponse;
+          if (assistantResponse) {
+            const assistantMessage = {
+              id: `local-assistant-${Date.now()}`,
+              threadId: chat.id,
+              userId: 'assistant',
+              content: assistantResponse,
+              createdAt: new Date().toISOString(),
+              role: 'assistant',
+            };
+            setLocalMessages((prev) => [...prev, assistantMessage]);
+          }
+          setWaitingForAssistant(false);
+        },
+        onError: () => {
+          setWaitingForAssistant(false);
+        },
+      }
+    );
+  };
+
   const handleSendMessage = () => {
     if (!messageInput) return;
     const userMessage = {
@@ -90,6 +134,9 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
     <div className={styles.chatThread}>
       <div className={styles.messagesContainer}>
         {loadingMessages && <div className={styles.loadingMessages}>Loading messages...</div>}
+        {!loadingMessages && allMessages.length === 0 && (
+          <EmptyThreadPlaceholder onQuestionClick={simulateSendMessage} />
+        )}
         {allMessages.map((msg) => (
           <div
             key={msg.id}
@@ -103,6 +150,15 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{removeBracketLinks(msg.content)}</ReactMarkdown>
               </div>
             </div>
+            {msg.role === 'assistant' && (
+              <div className={styles.actionButtons}>
+                {actionButtons.map((text) => (
+                  <button key={text} className={styles.actionButton} onClick={() => simulateSendMessage(text)}>
+                    {text}
+                  </button>
+                ))}
+              </div>
+            )}
             <span className={styles.timestamp}>
               {msg.role === 'user' ? 'You' : 'Assistant'} &middot; {new Date(msg.createdAt).toLocaleTimeString()}
             </span>
