@@ -99,9 +99,6 @@ export const ChatThread: React.FC<ChatThreadProps> = ({ chatId }) => {
       display: 'flex',
       flexDirection: 'column',
     }}>
-      <div style={{ marginBottom: 16, color: '#555', fontSize: 14 }}>
-        <strong>Assistant:</strong> {chat.assistantId} | <strong>Profile:</strong> {chat.profileId} | <strong>Created:</strong> {new Date(chat.createdAt).toLocaleString()}
-      </div>
       <div style={{ flex: 1, minHeight: 0, maxHeight: '100%', overflowY: 'auto', background: '#fff', borderRadius: 8, padding: 16, marginBottom: 16, border: '1px solid #eee', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loadingMessages && <div style={{ textAlign: 'center', color: '#888' }}>Loading messages...</div>}
         {allMessages.map((msg) => (

@@ -28,10 +28,14 @@ const Sidebar = observer(() => {
   const handleNewChat = () => {
     if (!selectedAssistantId) return;
     // For demo, use assistantId as both assistantId and profileId
-    chatHistory.createChatMutation.mutate({
-      assistantId: selectedAssistantId,
-      profileId: selectedAssistantId,
-    });
+    chatHistory.createChatMutation
+      .mutateAsync({
+        assistantId: selectedAssistantId,
+        profileId: selectedAssistantId,
+      })
+      .then((newChat) => {
+        chatStore.setCurrentChatId(newChat.id);
+      });
   };
 
   const formatDate = (date: string) => {

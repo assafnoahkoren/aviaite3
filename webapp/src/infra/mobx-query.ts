@@ -58,6 +58,13 @@ export class MobxMutation<TData = unknown, TError = unknown, TVariables = void, 
   }
 
   mutate(variables: TVariables) {
+    // Prevent unhandled promise rejection for fire-and-forget mutations
+    this.observer.mutate(variables).catch((error) => {
+      console.error('Unhandled promise rejection in mutation', error);
+    });
+  }
+
+  mutateAsync(variables: TVariables) {
     return this.observer.mutate(variables);
   }
 }
