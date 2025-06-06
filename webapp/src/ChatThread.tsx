@@ -9,6 +9,7 @@ import { EmptyThreadPlaceholder } from './EmptyThreadPlaceholder';
 const actionButtons = [
   'תרחיב',
   'תמקד',
+  'תקצר',
   'רכז לי בטבלה',
   'תתרגם לאנגלית',
   'תבדוק שוב את התשובה',
