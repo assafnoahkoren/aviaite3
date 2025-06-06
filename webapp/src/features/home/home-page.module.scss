@@ -10,8 +10,10 @@
   top: 16px;
   left: 16px;
   z-index: 200;
+}
 
-  @media (min-width: 769px) {
+@media (min-width: 769px) {
+  .burger {
     display: none;
   }
 }
@@ -21,8 +23,10 @@
   width: clamp(180px, 22vw, 320px);
   min-width: 300px;
   border-right: 1px solid #e0e0e0;
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  .mainSidebar {
     display: none;
   }
 }
