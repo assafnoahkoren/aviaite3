@@ -9,7 +9,7 @@ import { VerifyPage } from './features/auth/verify-page';
 import { RequestResetPasswordPage } from './features/auth/request-reset-password-page';
 import { ResetPasswordPage } from './features/auth/reset-password-page';
 import { useStore_Auth } from './features/auth/auth-store';
-import HomePage from './features/home/home-page';
+import { HomeV2 } from './features/home-v2/HomeV2';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -29,7 +29,7 @@ export const router = createBrowserRouter([
   {
     element: <PrivateRoute />,
     children: [
-      { path: '/', element: <HomePage /> },
+      { path: '/', element: <HomeV2 /> },
     ],
   },
 ]); 
