@@ -13,6 +13,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore_Auth } from './auth-store';
 import { Link } from 'react-router-dom';
 import classes from './login-page.module.scss';
+import { IconAt } from '@tabler/icons-react';
 
 export const RequestResetPasswordPage = observer(() => {
   const auth = useStore_Auth();
@@ -42,6 +43,7 @@ export const RequestResetPasswordPage = observer(() => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                leftSection={<IconAt size={16} />}
               />
               {auth.createResetPasswordTokenMutation.isError && (
                 <Alert color="red">{String(auth.createResetPasswordTokenMutation.error)}</Alert>

@@ -14,6 +14,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore_Auth } from './auth-store';
 import { Link } from 'react-router-dom';
 import classes from './login-page.module.scss';
+import { IconUser, IconAt, IconLock } from '@tabler/icons-react';
 
 export const RegisterPage = observer(() => {
   const auth = useStore_Auth();
@@ -49,6 +50,7 @@ export const RegisterPage = observer(() => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
+                  leftSection={<IconUser size={16} />}
                 />
                 <TextInput
                   label="Email"
@@ -56,12 +58,14 @@ export const RegisterPage = observer(() => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  leftSection={<IconAt size={16} />}
                 />
                 <PasswordInput
                   label="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  leftSection={<IconLock size={16} />}
                 />
                 {auth.registerMutation.isError && (
                   <Alert color="red">{String(auth.registerMutation.error)}</Alert>
