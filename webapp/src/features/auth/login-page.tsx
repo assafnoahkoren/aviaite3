@@ -55,6 +55,7 @@ export const LoginPage = observer(() => {
                 <TextInput
                   label="Email"
                   type="email"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -62,6 +63,7 @@ export const LoginPage = observer(() => {
                 />
                 <PasswordInput
                   label="Password"
+                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

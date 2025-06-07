@@ -16,7 +16,10 @@ export function HomeHeader({ opened, toggle }: HomeHeaderProps) {
     <Group h="100%" px="md" justify="space-between" style={{ position: 'relative' }}>
       <Group wrap="nowrap" gap={6}>
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <Image src="/logos/ace-dark.png" h={28} visibleFrom="sm" />
+        <Group gap="xs" wrap="nowrap" align="end" visibleFrom="sm">
+          <img src="/logos/ace-dark.png" height={28}  />
+          <Text fw={600} size="xs" w="max-content">by aviate</Text>
+        </Group>
       </Group>
 
       <Image
@@ -25,6 +28,7 @@ export function HomeHeader({ opened, toggle }: HomeHeaderProps) {
         hiddenFrom="sm"
         style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', objectFit: 'contain', pointerEvents: 'none' }}
       />
+
 
       <Menu
         width={260}

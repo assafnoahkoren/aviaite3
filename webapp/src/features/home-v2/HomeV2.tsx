@@ -16,7 +16,7 @@ export function HomeV2() {
       <AppShell.Header bg="cream.0" styles={{header: {borderColor: 'var(--mantine-color-cream-2)'}}}>
         <HomeHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
-      <AppShell.Navbar p="md" bg="cream.0" styles={{navbar: {borderColor: 'var(--mantine-color-cream-2)'}}}>
+      <AppShell.Navbar p="0" bg="cream.0" styles={{navbar: {borderColor: 'var(--mantine-color-cream-2)'}}}>
         <HomeSidebar />
       </AppShell.Navbar>
       <AppShell.Main>

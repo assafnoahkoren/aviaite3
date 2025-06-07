@@ -1,6 +1,7 @@
 import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
+  primaryColor: 'cream',
   colors: {
     cream: [
       '#fffdfa',
@@ -9,10 +10,19 @@ export const theme = createTheme({
       '#efe8dd',
       '#eae1d3',
       '#e4dac9',
-      '#dfd3bf',
-      '#d9ccb5',
-      '#d3c5ab',
       '#cebe9f',
+      '#b9ab8f',
+      '#a5987f',
+      '#90856f',
     ],
+  },
+  components: {
+	Button: {
+		styles: {
+			root: {
+				borderRadius: '0',
+			},
+		},
+	},
   },
 }); 

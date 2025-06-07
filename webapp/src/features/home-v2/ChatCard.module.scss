@@ -1,0 +1,14 @@
+.card {
+  cursor: pointer;
+  border-radius: var(--mantine-radius-sm);
+  padding: var(--mantine-spacing-sm);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--mantine-color-cream-2);
+  }
+}
+
+.active {
+  background-color: var(--mantine-color-cream-3);
+} 

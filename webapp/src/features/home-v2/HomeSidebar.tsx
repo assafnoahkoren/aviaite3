@@ -1,5 +1,5 @@
-import { Text } from '@mantine/core';
+import { ChatHistoryList } from './ChatHistoryList';
 
 export function HomeSidebar() {
-  return <Text>Sidebar Content</Text>;
+  return <ChatHistoryList />;
 } 

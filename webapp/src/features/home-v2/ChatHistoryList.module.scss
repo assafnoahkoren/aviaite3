@@ -1,0 +1,18 @@
+.scrollable {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mantine-color-cream-4);
+    border-radius: 0px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+} 
