@@ -1,0 +1,45 @@
+---
+description: 
+globs: webapp/**
+alwaysApply: false
+---
+# Frontend Task Guidelines
+
+When creating UI components, please adhere to the following guidelines to ensure consistency, maintainability, and a high-quality user experience.
+
+## Component Library
+
+- **Always use Mantine components:** Whenever possible, use components from the [Mantine UI library](mdc:https:/mantine.dev). This helps maintain a consistent look and feel across the application.
+- **Layout:** For layout and spacing, prefer using Mantine's `Stack` and `Group` components over custom CSS flexbox/grid implementations.
+- **Icons:** If icons are needed, use icons from the `@tabler/icons-react` package, which is integrated with Mantine.
+
+## File Structure & Naming Conventions
+
+- **Component Naming:** Component files should be named in `PascalCase.tsx` (e.g., `UserProfile.tsx`).
+- **Style File Naming:** The corresponding style file should be named `PascalCase.module.scss` (e.g., `UserProfile.module.scss`).
+
+## Styling
+
+- **SCSS Modules:** All styles for a component should be placed in a `.module.scss` file located in the same directory as the component file.
+- **Consistent Class Names:** Create and use module classes for all components, even if they don't have specific styles yet. This promotes a structured and clean codebase. For example, a `MyComponent.tsx` should have a corresponding `MyComponent.module.scss` and the root element should have a class from the module.
+- **Colors:** When using colors in your SCSS files, always use Mantine's CSS variables. This ensures that colors are consistent with the theme and support light/dark mode automatically.
+  - **Example:** `color: var(--mantine-color-red-5);`
+- **Responsiveness:** For responsive styles, prefer using Mantine's responsive style props, or the `hiddenFrom`/`visibleFrom` props, over writing custom media queries in SCSS files. This keeps responsive logic co-located with the component.
+
+## Typography
+
+- **Text Component:** For all text content, use the `Text` component from Mantine. This ensures that typography is handled systematically and consistently with the application's design system.
+
+## State Management & Data Fetching
+
+- **State Management:** For managing component or feature state, use MobX stores.
+- **Data Fetching:** For fetching data from the server, use the `MobxQuery` class.
+- **Data Mutation:** For creating, updating, or deleting data, use the `MobxMutation` class. This centralizes data logic and state management.
+
+## Forms
+
+- **Form Handling:** For all forms, use the `@mantine/form` hook. It provides a systematic way to handle form state, validation, and submissions.
+
+
+
+
