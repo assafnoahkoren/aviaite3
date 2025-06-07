@@ -16,6 +16,7 @@ import { useStore_Auth } from './auth-store';
 import { Link, useNavigate } from 'react-router-dom';
 import classes from './login-page.module.scss';
 import { IconAt, IconLock } from '@tabler/icons-react';
+import { AuthHero } from './AuthHero';
 
 export const LoginPage = observer(() => {
   const auth = useStore_Auth();
@@ -38,17 +39,7 @@ export const LoginPage = observer(() => {
 
   return (
     <Grid className={classes.grid} gutter={0} align="stretch">
-      <Grid.Col span={6} className={classes.heroCol} visibleFrom="md">
-        <Stack align="center" gap="xl">
-          <Image src="/logos/ace-by-aviaite-light.png" alt="Ace by Aviaite logo" w={200} />
-          <Stack gap="xs">
-            <Title order={3}>Empowering. &nbsp; Productive. &nbsp; Personalized.</Title>
-            <Text size='lg'>
-              Fly through the literature with your copilot, Ace.
-            </Text>
-          </Stack>
-        </Stack>
-      </Grid.Col>
+      <AuthHero />
       <Grid.Col span={{ base: 12, md: 6 }} className={classes.formCol}>
         <Stack align="center" w="100%">
           <Image
@@ -85,13 +76,25 @@ export const LoginPage = observer(() => {
                 <Button component={Link} to="/register" variant="subtle" fullWidth>
                   Register
                 </Button>
-                <Button component={Link} to="/request-reset-password" variant="subtle" fullWidth>
-                  Forgot Password?
+                <Button color='dark' size='xs' opacity={0.5} component={Link} to="/request-reset-password" variant="subtle" fullWidth>
+                  Forgot Password
                 </Button>
               </Stack>
             </form>
           </Paper>
         </Stack>
+        <Text
+          size="xs"
+          c="dimmed"
+          style={{
+            position: 'absolute',
+            bottom: 'var(--mantine-spacing-md)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          &copy; {new Date().getFullYear()} Aviaite. All rights reserved.
+        </Text>
       </Grid.Col>
     </Grid>
   );
