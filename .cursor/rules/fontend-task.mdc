@@ -50,4 +50,12 @@ If new npm packages needed to be installed install them in the webapp folder bec
 
 After the tusk is done run in webpapp folder "npm run tsc" to make sure there are no typescript errors. If there are errors fix them.
 
+### Visual and Functional Testing with Puppeteer
+
+For a comprehensive testing approach, use the Puppeteer MCP to visually inspect and interact with your components. This ensures that the UI not only looks correct but also functions as expected.
+
+- **Take Screenshots:** Use the Puppeteer MCP to take screenshots of your components in different states or on various devices to verify the visual layout.
+- **Simulate User Interactions:** Automate interactions like clicks, form submissions, and navigation to test the functionality of your components.
+
+
 

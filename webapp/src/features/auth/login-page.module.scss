@@ -1,0 +1,28 @@
+.grid {
+  height: 100vh;
+  margin: 0;
+
+  :global(.mantine-Grid-inner) {
+    height: 100%;
+    gap: 0;
+  }
+}
+
+.heroCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: var(--mantine-spacing-xl);
+  background-color: var(--mantine-color-blue-6);
+  min-height: 30vh;
+}
+
+.formCol {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--mantine-spacing-xl);
+} 
