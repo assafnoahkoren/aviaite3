@@ -44,7 +44,7 @@ export const LoginPage = observer(() => {
           <Stack gap="xs">
             <Title order={3}>Empowering. &nbsp; Productive. &nbsp; Personalized.</Title>
             <Text size='lg'>
-              Your AI Copilot with smart suggestion that are based on aviation literature.
+              Fly through the literature with your copilot, Ace.
             </Text>
           </Stack>
         </Stack>
