@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PasswordInput, Button, Paper, Title, Stack, Alert } from '@mantine/core';
+import { PasswordInput, Button, Paper, Title, Stack, Alert, Box } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Auth } from './auth-store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -42,38 +42,40 @@ export const ResetPasswordPage = observer(() => {
   }
 
   return (
-    <Paper radius="md" p="xl" withBorder maw={400} mx="auto" mt={80}>
-      <Title order={2} mb="md" ta="center">Reset Password</Title>
-      <form onSubmit={handleSubmit}>
-        <Stack>
-          <PasswordInput
-            label="New Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <PasswordInput
-            label="Confirm Password"
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            required
-          />
-          {password !== confirmPassword && (
-            <Alert color="red">Passwords do not match</Alert>
-          )}
-          {auth.resetPasswordMutation.isError && (
-            <Alert color="red">{String(auth.resetPasswordMutation.error)}</Alert>
-          )}
-          <Button 
-            type="submit" 
-            loading={auth.resetPasswordMutation.isLoading} 
-            fullWidth
-            disabled={password !== confirmPassword}
-          >
-            Reset Password
-          </Button>
-        </Stack>
-      </form>
-    </Paper>
+    <Box pt={80}>
+      <Paper radius="md" p="xl" withBorder maw={400} mx="auto">
+        <Title order={2} mb="md" ta="center">Reset Password</Title>
+        <form onSubmit={handleSubmit}>
+          <Stack>
+            <PasswordInput
+              label="New Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+            <PasswordInput
+              label="Confirm Password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required
+            />
+            {password !== confirmPassword && (
+              <Alert color="red">Passwords do not match</Alert>
+            )}
+            {auth.resetPasswordMutation.isError && (
+              <Alert color="red">{String(auth.resetPasswordMutation.error)}</Alert>
+            )}
+            <Button 
+              type="submit" 
+              loading={auth.resetPasswordMutation.isLoading} 
+              fullWidth
+              disabled={password !== confirmPassword}
+            >
+              Reset Password
+            </Button>
+          </Stack>
+        </form>
+      </Paper>
+    </Box>
   );
 }); 

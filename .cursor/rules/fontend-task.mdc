@@ -41,5 +41,13 @@ When creating UI components, please adhere to the following guidelines to ensure
 - **Form Handling:** For all forms, use the `@mantine/form` hook. It provides a systematic way to handle form state, validation, and submissions.
 
 
+## NPM packages
+
+If new npm packages needed to be installed install them in the webapp folder because its a workspace with its own package.json.
+
+
+## Testing
+
+After the tusk is done run in webpapp folder "npm run tsc" to make sure there are no typescript errors. If there are errors fix them.
 
 
