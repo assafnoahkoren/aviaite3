@@ -13,10 +13,10 @@ export function HomeV2() {
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
       padding="md"
     >
-      <AppShell.Header>
+      <AppShell.Header bg="cream.0" styles={{header: {borderColor: 'var(--mantine-color-cream-2)'}}}>
         <HomeHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
-      <AppShell.Navbar p="md">
+      <AppShell.Navbar p="md" bg="cream.0" styles={{navbar: {borderColor: 'var(--mantine-color-cream-2)'}}}>
         <HomeSidebar />
       </AppShell.Navbar>
       <AppShell.Main>

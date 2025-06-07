@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useCreateStore_Auth } from './features/auth/auth-store';
 import "./App.css"
+import { theme } from './theme';
 const queryClient = new QueryClient();
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
     <React.StrictMode>
       <ClickToComponent editor="cursor" />
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>
+        <MantineProvider theme={theme}>
           <authStore.context>
             <RouterProvider future={{v7_startTransition: true}} router={router} />
           </authStore.context>
