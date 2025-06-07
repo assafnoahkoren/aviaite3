@@ -1,5 +1,5 @@
 import { Burger, Group, Image, Avatar, Menu, UnstyledButton, rem, Text } from '@mantine/core';
-import { IconChevronDown, IconHeart, IconLogout, IconSettings } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconSettings } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 
@@ -9,7 +9,7 @@ interface HomeHeaderProps {
 }
 
 export function HomeHeader({ opened, toggle }: HomeHeaderProps) {
-  const [userMenuOpened, setUserMenuOpened] = useState(false);
+  const [_userMenuOpened, setUserMenuOpened] = useState(false);
   const auth = useStore_Auth();
 
   return (

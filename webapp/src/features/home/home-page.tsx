@@ -1,7 +1,6 @@
 import { useDisclosure } from '@mantine/hooks';
 import { useCreateStore_ChatHistory } from '../chat-history/chat-history-store';
 import { observer } from 'mobx-react-lite';
-import Sidebar from './sidebar';
 import ChatArea from './chat-area';
 import styles from './home-page.module.scss';
 import { useCreateStore_Chat } from '../chat/chat-store';
@@ -24,10 +23,10 @@ const HomePage = observer(() => {
             className={styles.burger}
           />
           <Drawer opened={opened} onClose={close} withCloseButton={false} size="auto">
-            <Sidebar onClose={close} />
+            {/* <Sidebar onClose={close} /> */}
           </Drawer>
 
-          <Sidebar className={styles.mainSidebar} />
+          {/* <Sidebar className={styles.mainSidebar} /> */}
           <ChatArea />
         </div>
       </chatStore.context>

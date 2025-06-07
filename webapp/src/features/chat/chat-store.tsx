@@ -46,10 +46,6 @@ export class ChatStore {
     this.currentThread = thread;
   }
 
-  currentChat() {
-    return this.messagesQuery?.data?.find((m) => m.id === this.currentThread?.id);
-  }
-
   sendMessage(content: string) {
     if (!this.currentThread) return;
     this.createMessageMutation.mutate({

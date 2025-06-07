@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { ChatThread } from '../../ChatThread';
 function ChatArea() {
   const chatStore = useStore_Chat();
-  const currentChatId = chatStore.currentChatId;
+  const currentChatId = chatStore.currentThread?.id;
   
   return (
     <div className={styles.chatArea}>
