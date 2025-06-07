@@ -1,0 +1,12 @@
+.root {
+	width: 100%;
+}
+
+.messageBox {
+	background-color: var(--mantine-color-dark-6);
+	color: var(--mantine-color-white);
+	padding: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
+	border-radius: var(--mantine-radius-md);
+	border-top-right-radius: 0;
+	max-width: 80%;
+} 

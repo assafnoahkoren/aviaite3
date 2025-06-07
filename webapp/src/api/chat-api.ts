@@ -34,6 +34,7 @@ export interface Message {
   userId: string;
   content: string;
   createdAt: string;
+  role: 'user' | 'assistant';
 }
 
 // List all assistants

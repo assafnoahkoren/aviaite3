@@ -16,7 +16,7 @@ export const Composer = observer(() => {
 
 	return (
 		<Group gap="sm" wrap="nowrap" align="center">
-			<ActionIcon color="black" size="lg" radius="xl">
+			<ActionIcon color="dark.6" size="lg" radius="xl">
 				<IconPencilPlus size={20} style={{
 					position: 'relative',
 					bottom: '1px',
@@ -44,9 +44,10 @@ export const Composer = observer(() => {
 						handleSend();
 					}
 				}}
+				disabled={chatStore.createMessageMutation.isLoading}
 			/>
 			<ActionIcon
-				color="black"
+				color="dark.6"
 				size="lg"
 				radius="xl"
 				onClick={handleSend}

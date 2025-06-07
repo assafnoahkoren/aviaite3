@@ -32,6 +32,10 @@ export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends read
   refetch() {
     return this.observer.refetch();
   }
+
+  updateQuery(updater: (prev: TData | undefined) => TData) {
+    queryClient.setQueryData(this.observer.options.queryKey, updater as any);
+  }
 }
 
 export class MobxMutation<TData = unknown, TError = unknown, TVariables = void, TContext = unknown> {

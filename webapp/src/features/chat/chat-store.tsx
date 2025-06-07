@@ -8,11 +8,13 @@ import {
   type Thread,
 } from '../../api/chat-api';
 import { createContext, useContext, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export class ChatStore {
   currentThread: Thread | null = null;
   messagesQuery: MobxQuery<Message[], unknown, [string, string]> | null = null;
   createMessageMutation: MobxMutation<Message, unknown, CreateMessageDto>;
+  private tempMessageId: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -48,6 +50,19 @@ export class ChatStore {
 
   sendMessage(content: string) {
     if (!this.currentThread) return;
+
+    this.tempMessageId = uuidv4();
+    const tempMessage: Message = {
+      id: this.tempMessageId,
+      threadId: this.currentThread.openaiThreadId,
+      userId: 'temp-user', // This will be updated from the server response
+      content,
+      createdAt: new Date().toISOString(),
+      role: 'user',
+    };
+
+    this.messagesQuery?.updateQuery((prev) => [...(prev ?? []), tempMessage]);
+
     this.createMessageMutation.mutate({
       threadId: this.currentThread.openaiThreadId,
       content,
