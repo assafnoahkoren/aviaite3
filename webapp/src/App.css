@@ -1,4 +1,10 @@
 /* GFM Markdown styles for .markdown-body */
+* {
+  font-family: Heebo !important;
+}
+.markdown-body {
+  zoom: 0.9;
+}
 .markdown-body table {
   border-collapse: separate;
   border-spacing: 0;
