@@ -57,7 +57,7 @@ export const LoginPage = observer(() => {
             w={200}
             hiddenFrom="md"
           />
-          <Text fw={600}> Empowering. &nbsp; Productive. &nbsp; Personalized. </Text>
+          <Text hiddenFrom='md' fw={600}> Empowering. &nbsp; Productive. &nbsp; Personalized. </Text>
           <Paper radius="md" p="xl" maw={400} w="100%" bg="transparent">
             <form onSubmit={handleSubmit}>
               <Stack>
