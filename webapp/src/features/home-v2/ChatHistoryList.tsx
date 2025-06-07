@@ -8,7 +8,7 @@ export const ChatHistoryList = observer(() => {
   const chatHistoryStore = useStore_ChatHistory();
 
   if (chatHistoryStore.chatsQuery.isLoading) {
-    return <Text>Loading chats...</Text>;
+    return null;
   }
 
   if (chatHistoryStore.chatsQuery.isError) {
