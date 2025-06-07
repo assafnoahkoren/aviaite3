@@ -1,5 +1,5 @@
-import { Text } from '@mantine/core';
+import { ChatV2 } from '../chat-v2/ChatV2';
 
 export function HomeMain() {
-  return <Text>Main Content Area</Text>;
+  return <ChatV2 />;
 } 

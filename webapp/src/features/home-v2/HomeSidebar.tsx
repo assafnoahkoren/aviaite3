@@ -35,7 +35,7 @@ export const HomeSidebar = observer(() => {
     <Stack style={{ height: '100%', position: 'relative' }} gap="0">
       <LoadingOverlay
         visible={
-          chatHistoryStore.createChatMutation.isLoading || chatHistoryStore.chatsQuery.isLoading
+          !chatHistoryStore.chatsQuery.data?.length && (chatHistoryStore.createChatMutation.isLoading || chatHistoryStore.chatsQuery.isLoading)
         }
       />
       <Box p="md" pb="0">

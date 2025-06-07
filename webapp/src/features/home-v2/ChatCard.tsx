@@ -4,12 +4,13 @@ import { timeAgo } from '../../utils/time-ago';
 import { useStore_Chat } from '../chat/chat-store';
 import classes from './ChatCard.module.scss';
 import cx from 'clsx';
+import { observer } from 'mobx-react-lite';
 
 interface ChatCardProps {
 	chat: Thread;
 }
 
-export function ChatCard({ chat }: ChatCardProps) {
+export const ChatCard = observer(({ chat }: ChatCardProps) => {
 	const chatStore = useStore_Chat();
 	const isActive = chatStore.currentChatId === chat.id;
 
@@ -27,4 +28,4 @@ export function ChatCard({ chat }: ChatCardProps) {
 			</Group>
 		</UnstyledButton>
 	);
-} 
+}); 
