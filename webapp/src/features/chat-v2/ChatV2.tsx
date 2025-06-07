@@ -1,9 +1,17 @@
-import { Text } from '@mantine/core';
-import { observer } from 'mobx-react-lite';
-import { useStore_Chat } from '../chat/chat-store';
+import { Stack, Text } from '@mantine/core';
+import { MessagesContainer } from './MessagesContainer';
+import { Composer } from './Composer';
 
-export const ChatV2 = observer(() => {
-  const chatStore = useStore_Chat();
-
-  return <Text>Current Chat ID: {chatStore.currentChatId}</Text>;
-}); 
+export function ChatV2() {
+	return (
+		<Stack style={{ minHeight: 'calc(100vh - 50px)' }} p="md">
+			<MessagesContainer />
+			<Stack gap="xs">
+				<Composer />
+				<Text size="xs" ta="center" opacity={0.3}>
+					Information provided by this platform may not be accurate or up-to-date. Always verify any information from original sources before making decisions.
+				</Text>
+			</Stack>
+		</Stack>
+	);
+} 

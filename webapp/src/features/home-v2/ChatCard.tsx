@@ -12,12 +12,12 @@ interface ChatCardProps {
 
 export const ChatCard = observer(({ chat }: ChatCardProps) => {
 	const chatStore = useStore_Chat();
-	const isActive = chatStore.currentChatId === chat.id;
+	const isActive = chatStore.currentThread?.id === chat.id;
 
 	return (
 		<UnstyledButton
 			className={cx(classes.card, { [classes.active]: isActive })}
-			onClick={() => chatStore.setCurrentChatId(chat.id)}
+			onClick={() => chatStore.setCurrentChat(chat)}
 			p="xs"
 		>
 			<Group gap="xs">

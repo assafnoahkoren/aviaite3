@@ -27,7 +27,7 @@ export const HomeSidebar = observer(() => {
         profileId: auth.user.id,
       })
       .then((newChat) => {
-        chatStore.setCurrentChatId(newChat.id);
+        chatStore.setCurrentChat(newChat);
       });
   };
 

@@ -1,22 +1,36 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
-import { MobxQuery } from '../../infra/mobx-query';
-import { getChatMessages, type Message } from '../../api/chat-api';
+import { MobxQuery, MobxMutation } from '../../infra/mobx-query';
+import {
+  getChatMessages,
+  type Message,
+  createMessage,
+  type CreateMessageDto,
+  type Thread,
+} from '../../api/chat-api';
 import { createContext, useContext, useMemo } from 'react';
 
 export class ChatStore {
-  currentChatId: string | null = null;
+  currentThread: Thread | null = null;
   messagesQuery: MobxQuery<Message[], unknown, [string, string]> | null = null;
+  createMessageMutation: MobxMutation<Message, unknown, CreateMessageDto>;
 
   constructor() {
     makeAutoObservable(this);
+    this.createMessageMutation = new MobxMutation({
+      mutationFn: createMessage,
+      onSuccess: () => {
+        this.messagesQuery?.refetch();
+      },
+    });
+
     reaction(
-      () => this.currentChatId,
-      (chatId) => {
+      () => this.currentThread,
+      (thread) => {
         runInAction(() => {
-          if (chatId) {
+          if (thread) {
             this.messagesQuery = new MobxQuery<Message[], unknown, [string, string]>({
-              queryKey: ['messages', chatId],
-              queryFn: () => getChatMessages(chatId),
+              queryKey: ['messages', thread.id],
+              queryFn: () => getChatMessages(thread.id),
               enabled: true,
             });
           } else {
@@ -28,8 +42,20 @@ export class ChatStore {
     );
   }
 
-  setCurrentChatId(id: string | null) {
-    this.currentChatId = id;
+  setCurrentChat(thread: Thread | null) {
+    this.currentThread = thread;
+  }
+
+  currentChat() {
+    return this.messagesQuery?.data?.find((m) => m.id === this.currentThread?.id);
+  }
+
+  sendMessage(content: string) {
+    if (!this.currentThread) return;
+    this.createMessageMutation.mutate({
+      threadId: this.currentThread.openaiThreadId,
+      content,
+    });
   }
 }
 
