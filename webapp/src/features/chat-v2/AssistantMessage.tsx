@@ -25,7 +25,7 @@ export const AssistantMessage = observer(({ message }: AssistantMessageProps) =>
 	return (
 		<Stack className={classes.root} align="flex-start" gap={4}>
 			<Box
-				className={classes.messageBox}
+				className={`${classes.messageBox} markdown-body`}
 				dir={isRtl ? 'rtl' : 'auto'}
 				style={{ overflowX: 'auto' }}
 			>

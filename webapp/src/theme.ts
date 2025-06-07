@@ -20,7 +20,7 @@ export const theme = createTheme({
 	Button: {
 		styles: {
 			root: {
-				borderRadius: '0',
+				borderRadius: '9999px',
 			},
 		},
 	},

@@ -23,7 +23,7 @@ export const MessagesContainer = observer(() => {
 
 	if (messages.length === 0) {
 		return (
-			<Box className={classes.root} style={{ flex: 1 }}>
+			<Box className={classes.root} style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 				<EmptyChatPlaceholder />
 			</Box>
 		);

@@ -1,4 +1,4 @@
-import { Stack, Text, Button, Image, Center, SimpleGrid, useMantineColorScheme } from '@mantine/core';
+import { Stack, Text, Button, Image } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Chat } from '../chat/chat-store';
 
@@ -16,24 +16,26 @@ export const EmptyChatPlaceholder = observer(() => {
 		chatStore.sendMessage(question);
 	};
 
-
 	return (
-		<Stack align="center" gap="xl" justify="center" h="100%">
+		<Stack align="center" gap="xl" justify="center" h="100%" w="100%">
 			<Image src="/logos/ace-fav-dark.png" alt="Ace by Aviate" w={80} />
-			<Text c="dimmed">Ask me anything, or start with one of these examples:</Text>
-			<SimpleGrid cols={2} spacing="md">
+			<Text c="dimmed" ta="center">Ask me anything, or start with one of these examples:</Text>
+			<Stack align="center">
 				{exampleQuestions.map((question) => (
 					<Button
 						key={question}
-						variant="outline"
+						variant="light"
 						color="gray"
 						onClick={() => handleQuestionClick(question)}
-						style={{ height: 'auto', whiteSpace: 'normal', textAlign: 'left' }}
+						styles={{
+							root: { height: 'auto', padding: 'var(--mantine-spacing-md)' },
+							label: { whiteSpace: 'normal', textAlign: 'center' },
+						}}
 					>
-						<Text size="sm">{question}</Text>
+						{question}
 					</Button>
 				))}
-			</SimpleGrid>
+			</Stack>
 		</Stack>
 	);
 }); 
