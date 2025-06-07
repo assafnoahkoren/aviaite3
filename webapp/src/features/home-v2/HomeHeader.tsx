@@ -17,14 +17,14 @@ export function HomeHeader({ opened, toggle }: HomeHeaderProps) {
       <Group wrap="nowrap" gap={6}>
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
         <Group gap="xs" wrap="nowrap" align="end" visibleFrom="sm">
-          <img src="/logos/ace-dark.png" height={28}  />
-          <Text fw={600} size="xs" w="max-content">by aviate</Text>
+          <img src="/logos/ace-dark.png" height={24}  />
+          <Text fw={600} size="xs" opacity={0.5} style={{ lineHeight: '1' }}>by aviate</Text>
         </Group>
       </Group>
 
       <Image
         src="/logos/ace-fav-dark.png"
-        h={32}
+        h={24}
         hiddenFrom="sm"
         style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', objectFit: 'contain', pointerEvents: 'none' }}
       />

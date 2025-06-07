@@ -9,9 +9,9 @@ export function HomeV2() {
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 50 }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-      padding="md"
+      padding="0"
     >
       <AppShell.Header bg="cream.0" styles={{header: {borderColor: 'var(--mantine-color-cream-2)'}}}>
         <HomeHeader opened={opened} toggle={toggle} />
