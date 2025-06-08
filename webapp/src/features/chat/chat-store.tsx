@@ -6,6 +6,7 @@ import {
   createMessage,
   type CreateMessageDto,
   type Thread,
+  streamChat,
 } from '../../api/chat-api';
 import { createContext, useContext, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,6 +16,9 @@ export class ChatStore {
   messagesQuery: MobxQuery<Message[], unknown, [string, string]> | null = null;
   createMessageMutation: MobxMutation<Message, unknown, CreateMessageDto>;
   private tempMessageId: string | null = null;
+  isStreaming = false;
+  streamingMessageId: string | null = null;
+  isStreamLoading = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -49,13 +53,13 @@ export class ChatStore {
   }
 
   sendMessage(content: string) {
-    if (!this.currentThread) return;
+    if (!this.currentThread || this.isStreaming) return;
 
     this.tempMessageId = uuidv4();
     const tempMessage: Message = {
       id: this.tempMessageId,
       threadId: this.currentThread.openaiThreadId,
-      userId: 'temp-user', // This will be updated from the server response
+      userId: 'temp-user',
       content,
       createdAt: new Date().toISOString(),
       role: 'user',
@@ -66,6 +70,78 @@ export class ChatStore {
     this.createMessageMutation.mutate({
       threadId: this.currentThread.openaiThreadId,
       content,
+    });
+
+    this.streamThread();
+    
+  }
+
+  streamThread() {
+    if (!this.currentThread) return;
+
+    this.isStreaming = true;
+    runInAction(() => {
+      this.isStreamLoading = true;
+    });
+    this.streamingMessageId = uuidv4();
+    const tempAssistantMessage: Message = {
+      id: this.streamingMessageId,
+      threadId: this.currentThread.openaiThreadId,
+      userId: 'assistant',
+      content: '',
+      createdAt: new Date().toISOString(),
+      role: 'assistant',
+    };
+    // this.messagesQuery?.updateQuery((prev) => [...(prev ?? []), tempAssistantMessage]);
+
+    streamChat(this.currentThread.openaiThreadId, {
+      onTextDelta: (value: string) => {
+        if (this.isStreamLoading) {
+          runInAction(() => {
+            this.isStreamLoading = false;
+          });
+        }
+        this.messagesQuery?.updateQuery((prev) => {
+          const messages = prev ?? [];
+          const streamingMessage = messages.find((m) => m.id === this.streamingMessageId);
+
+          if (streamingMessage) {
+            return messages.map((m) =>
+              m.id === this.streamingMessageId ? { ...m, content: m.content + value } : m
+            );
+          } else {
+            if (!this.currentThread || !this.streamingMessageId) {
+              return messages;
+            }
+            const newAssistantMessage: Message = {
+              id: this.streamingMessageId,
+              threadId: this.currentThread.openaiThreadId,
+              userId: 'assistant',
+              content: value,
+              createdAt: new Date().toISOString(),
+              role: 'assistant',
+            };
+            return [...messages, newAssistantMessage];
+          }
+        });
+      },
+      onEnd: () => {
+        runInAction(() => {
+          this.isStreaming = false;
+          this.streamingMessageId = null;
+          this.isStreamLoading = false;
+          // Optionally refetch to get the final message from the server
+          // this.messagesQuery?.refetch();
+        });
+      },
+      onError: (error: any) => {
+        console.error('Stream error:', error);
+        runInAction(() => {
+          this.isStreaming = false;
+          this.streamingMessageId = null;
+          this.isStreamLoading = false;
+        });
+      },
     });
   }
 }

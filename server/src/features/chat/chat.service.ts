@@ -116,7 +116,6 @@ export class ChatService {
     if (!thread) {
       throw new Error('Thread not found');
     }
-    const assistantId = thread.assistantId;
     const openaiThreadId = thread.openaiThreadId;
 
     // Create the user message in the OpenAI thread
@@ -128,45 +127,38 @@ export class ChatService {
       }
     );
 
-    // Run the assistant and poll for completion
-    let run = await this.openai.beta.threads.runs.createAndPoll(
+    // Return the newly created message without starting a run
+    return {
+      id: message.id,
+      threadId,
+      userId,
+      content,
+      createdAt: message.created_at ? new Date(message.created_at * 1000).toISOString() : new Date().toISOString(),
+      role: 'user',
+    };
+  }
+
+  /**
+   * Creates a stream for a thread.
+   * @param threadId - The ID of the thread
+   */
+  async createStream(threadId: string) {
+    const thread = await prisma.thread.findFirst({
+      where: { openaiThreadId: threadId },
+    });
+    if (!thread) {
+      throw new Error('Thread not found');
+    }
+    const assistantId = thread.assistantId;
+    const openaiThreadId = thread.openaiThreadId;
+
+    const stream = this.openai.beta.threads.runs.stream(
       openaiThreadId,
       {
         assistant_id: assistantId,
       }
     );
 
-    if (run.status === 'completed') {
-      const messages = await this.openai.beta.threads.messages.list(
-        run.thread_id
-      );
-      // Find the latest assistant message
-      const assistantMessage = messages.data.find(m => m.role === 'assistant');
-      let assistantResponse = null;
-      if (assistantMessage && Array.isArray(assistantMessage.content)) {
-        const textBlock = assistantMessage.content.find(
-          (block: any) => block.type === 'text'
-        );
-        assistantResponse = textBlock && 'text' in textBlock ? textBlock.text.value : null;
-      }
-      return {
-        id: message.id,
-        threadId,
-        userId,
-        content,
-        createdAt: message.created_at ? new Date(message.created_at * 1000).toISOString() : new Date().toISOString(),
-        assistantResponse,
-      };
-    } else {
-      return {
-        id: message.id,
-        threadId,
-        userId,
-        content,
-        createdAt: message.created_at ? new Date(message.created_at * 1000).toISOString() : new Date().toISOString(),
-        assistantResponse: null,
-        runStatus: run.status,
-      };
-    }
+    return stream;
   }
 } 

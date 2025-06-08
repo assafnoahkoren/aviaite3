@@ -1,5 +1,6 @@
 import { api } from './index';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {EventSource} from 'eventsource'
 
 // Types
 export interface Assistant {
@@ -65,6 +66,57 @@ export async function createMessage(dto: CreateMessageDto): Promise<Message> {
 export async function getChatMessages(threadId: string): Promise<Message[]> {
   const res = await api.get(`/api/chat/thread/${threadId}/messages`);
   return res.data;
+}
+
+// Stream chat with Server-Sent Events
+export function streamChat(threadId: string, eventHandlers: any) {
+    const token = localStorage.getItem('auth_token');
+    const baseURL = import.meta.env.VITE_SERVER_URL;
+    const eventSource = new EventSource(`${baseURL}/api/chat/stream/${threadId}`, {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          headers: {
+            ...init.headers,
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+    });
+
+    eventSource.onmessage = (event: MessageEvent) => {
+        const parsedData = JSON.parse(event.data);
+        const { type, value } = parsedData;
+
+        switch (type) {
+            case 'textCreated':
+                eventHandlers.onTextCreated?.(value);
+                break;
+            case 'textDelta':
+                eventHandlers.onTextDelta?.(value);
+                break;
+            case 'toolCallCreated':
+                eventHandlers.onToolCallCreated?.(value);
+                break;
+            case 'toolCallDelta':
+                eventHandlers.onToolCallDelta?.(value);
+                break;
+            case 'end':
+                eventHandlers.onEnd?.(value);
+                eventSource.close();
+                break;
+            default:
+                console.warn('Unhandled event type:', type);
+        }
+    };
+
+    eventSource.onerror = (error: Event) => {
+        eventHandlers.onError?.(error);
+        eventSource.close();
+    };
+
+    return () => {
+        eventSource.close();
+    };
 }
 
 // React Query hooks

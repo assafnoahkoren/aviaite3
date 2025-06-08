@@ -10,6 +10,7 @@ export const MessagesContainer = observer(() => {
 	const chatStore = useStore_Chat();
 	const messages = chatStore.messagesQuery?.data ?? [];
 	const isLoading = chatStore.messagesQuery?.isLoading ?? false;
+	const isStreamLoading = chatStore.isStreamLoading;
 
 	if (isLoading) {
 		return (
@@ -42,6 +43,11 @@ export const MessagesContainer = observer(() => {
 						}
 						return null;
 					})}
+					{isStreamLoading && (
+						<Center p="md">
+							<Loader size="sm" />
+						</Center>
+					)}
 				</Stack>
 			</ScrollArea>
 		</Box>

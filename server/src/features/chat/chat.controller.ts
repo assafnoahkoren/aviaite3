@@ -1,11 +1,12 @@
 // chat.controller.ts
 // Controller for handling chat-related HTTP requests
 
-import { Controller, Get, Post, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, UseGuards, Sse } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { AuthGuard, AuthedRequest } from '../users/auth.guard';
+import { Observable } from 'rxjs';
 
 @Controller()
 export class ChatController {
@@ -40,6 +41,36 @@ export class ChatController {
   ) {
     const { threadId, content } = body;
     return await this.chatService.createMessage(threadId, req.user.id, content);
+  }
+
+  @UseGuards(AuthGuard)
+  @Sse('api/chat/stream/:threadId')
+  stream(@Param('threadId') threadId: string): Observable<any> {
+    const stream = this.chatService.createStream(threadId);
+
+    return new Observable((observer) => {
+      stream.then(s => {
+        s.on('textCreated', (text) => {
+          observer.next({ data: { type: 'textCreated', value: text } });
+        });
+        s.on('textDelta', (delta) => {
+          observer.next({ data: { type: 'textDelta', value: delta.value } });
+        });
+        s.on('toolCallCreated', (toolCall) => {
+          observer.next({ data: { type: 'toolCallCreated', value: toolCall } });
+        });
+        s.on('toolCallDelta', (toolCallDelta) => {
+          observer.next({ data: { type: 'toolCallDelta', value: toolCallDelta } });
+        });
+        s.on('end', () => {
+          observer.next({ data: { type: 'end' } });
+          observer.complete();
+        });
+        s.on('error', (error) => {
+          observer.error(error);
+        });
+      })
+    });
   }
 
   @Get('api/chat/thread/:threadId/messages')
