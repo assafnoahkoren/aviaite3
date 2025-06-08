@@ -2,7 +2,6 @@ import { Box, Stack, Text } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import classes from './UserMessage.module.scss';
 import type { Message } from '../../api/chat-api';
-import { Timestamp } from './Timestamp';
 import { useIsRtl } from '../../utils/useIsRtl';
 
 interface UserMessageProps {
