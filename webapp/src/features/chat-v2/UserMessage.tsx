@@ -17,7 +17,6 @@ export const UserMessage = observer(({ message }: UserMessageProps) => {
 			<Box className={classes.messageBox}>
 				<Text dir={isRtl ? 'rtl' : 'auto'}>{message.content}</Text>
 			</Box>
-			<Timestamp createdAt={message.createdAt} />
 		</Stack>
 	);
 }); 

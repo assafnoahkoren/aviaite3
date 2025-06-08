@@ -3,10 +3,8 @@
 }
 
 .messageBox {
-	background-color: var(--mantine-color-dark-6);
-	color: var(--mantine-color-white);
+	background-color: var(--mantine-color-gray-1);
+	color: var(--mantine-color-dark);
 	padding: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
 	border-radius: var(--mantine-radius-md);
-	border-top-right-radius: 0;
-	max-width: 80%;
 } 

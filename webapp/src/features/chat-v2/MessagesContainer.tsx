@@ -1,4 +1,4 @@
-import { Box, ScrollArea, Stack, Center, Loader } from '@mantine/core';
+import { Box, ScrollArea, Stack, Center, Loader, Space } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Chat } from '../chat/chat-store';
 import classes from './MessagesContainer.module.scss';
@@ -48,6 +48,7 @@ export const MessagesContainer = observer(() => {
 							<Loader size="sm" />
 						</Center>
 					)}
+					<Space h="md" />
 				</Stack>
 			</ScrollArea>
 		</Box>

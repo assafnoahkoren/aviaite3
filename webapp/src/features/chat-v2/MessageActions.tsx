@@ -69,7 +69,8 @@ export function MessageActions({ messageContent, onClick }: MessageActionsProps)
 					const actionText = isRtl ? he : en;
 					return (
 						<React.Fragment key={actionText}>
-							<Button
+							<Button 
+								style={{ borderRadius: 0 }}
 								variant="subtle"
 								size="xs"
 								color="dark"

@@ -1,10 +1,11 @@
-import { Stack, Text, LoadingOverlay } from '@mantine/core';
+import { Stack, Text, LoadingOverlay, Box } from '@mantine/core';
 import { MessagesContainer } from './MessagesContainer';
 import { Composer } from './Composer';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
 import { useSelectInitialChat } from './useSelectInitialChat';
 import { useStore_ChatHistory } from '../chat-history/chat-history-store';
+import classes from './ChatV2.module.scss';
 
 export const ChatV2 = observer(() => {
 	const chatStore = useStore_Chat();
@@ -12,9 +13,11 @@ export const ChatV2 = observer(() => {
 	useSelectInitialChat(chatStore, chatHistoryStore);
 
 	return (
-		<Stack style={{ minHeight: 'calc(100vh - 50px)', position: 'relative' }} p="md">
+		<Stack gap="0" style={{ height: 'calc(100vh - 50px)', position: 'relative' , maxWidth: '960px', margin: '0 auto'}} p="md">
 			<LoadingOverlay visible={!chatStore.currentThread} />
-			<MessagesContainer />
+			<Box className={classes.scrollContainer}>
+				<MessagesContainer />
+			</Box>
 			<Stack gap="xs">
 				<Composer />
 				<Text size="xs" ta="center" opacity={0.3}>

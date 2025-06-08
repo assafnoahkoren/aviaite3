@@ -32,8 +32,7 @@ export const AssistantMessage = observer(({ message }: AssistantMessageProps) =>
 				{/* @ts-ignore */}
 				<ReactMarkdown remarkPlugins={[remarkGfm]}>{removeBracketLinks(message.content)}</ReactMarkdown>
 			</Box>
-			<Group justify="space-between" align="flex-start" wrap="nowrap" w="100%">
-				<Timestamp createdAt={message.createdAt} />
+			<Group justify={isRtl ? 'flex-end' : 'flex-start'} wrap="nowrap" w="100%">
 				<MessageActions messageContent={message.content} onClick={handleActionClick} />
 			</Group>
 		</Stack>
