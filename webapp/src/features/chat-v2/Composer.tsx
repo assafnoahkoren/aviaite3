@@ -1,5 +1,5 @@
-import { Textarea, Group, ActionIcon } from '@mantine/core';
-import { IconPencilPlus, IconSend } from '@tabler/icons-react';
+import { Textarea, Group, ActionIcon, Tooltip } from '@mantine/core';
+import { IconPhoto, IconPaperclip, IconSend } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
@@ -16,12 +16,16 @@ export const Composer = observer(() => {
 
 	return (
 		<Group gap="sm" wrap="nowrap" align="center">
-			<ActionIcon color="dark.6" size="lg" radius="xl">
-				<IconPencilPlus size={20} style={{
-					position: 'relative',
-					bottom: '1px',
-				}}/>
-			</ActionIcon>
+			<Tooltip label="Coming soon" withArrow>
+				<ActionIcon color="dark.6" size="lg" radius="xl" style={{ opacity: 0.5 }}>
+					<IconPhoto size={20} />
+				</ActionIcon>
+			</Tooltip>
+			<Tooltip label="Coming soon" withArrow>
+				<ActionIcon color="dark.6" size="lg" radius="xl" style={{ opacity: 0.5 }}>
+					<IconPaperclip size={20} />
+				</ActionIcon>
+			</Tooltip>
 			<Textarea
 				value={value}
 				onChange={(event) => setValue(event.currentTarget.value)}
