@@ -1,29 +1,26 @@
-import { Box, Button, LoadingOverlay, Select, Stack, Text } from '@mantine/core';
+import { Box, Button, Group, LoadingOverlay, Stack, Text, Badge, ActionIcon } from '@mantine/core';
 import { ChatHistoryList } from './ChatHistoryList';
-import { IconPencilPlus } from '@tabler/icons-react';
+import { IconPencilPlus, IconRobot, IconSettings } from '@tabler/icons-react';
 import { observer } from 'mobx-react-lite';
 import { useStore_ChatHistory } from '../chat-history/chat-history-store';
 import { useStore_Chat } from '../chat/chat-store';
-import { useQ_listAssistants } from '../../api/chat-api';
-import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
+import { useStore_Settings } from '../settings/settings-store';
 
 export const HomeSidebar = observer(() => {
   const chatHistoryStore = useStore_ChatHistory();
   const chatStore = useStore_Chat();
   const auth = useStore_Auth();
-  const { data: assistants = [], isLoading: loadingAssistants } = useQ_listAssistants();
-  const [selectedAssistantId, setSelectedAssistantId] = useState<string | null>(null);
+  const settingsStore = useStore_Settings();
 
-  if (!selectedAssistantId && assistants.length > 0) {
-    setSelectedAssistantId(assistants[0].id);
-  }
+  const currentAssistant = settingsStore.currentAssistant;
 
   const handleNewChat = () => {
-    if (!selectedAssistantId || !auth.user) return;
+    if (!currentAssistant || !auth.user) return;
     chatHistoryStore.createChatMutation
       .mutateAsync({
-        assistantId: selectedAssistantId,
+        assistantId: currentAssistant.id,
+        // TODO: This should be the profile id
         profileId: auth.user.id,
       })
       .then((newChat) => {
@@ -35,7 +32,9 @@ export const HomeSidebar = observer(() => {
     <Stack style={{ height: '100%', position: 'relative' }} gap="0">
       <LoadingOverlay
         visible={
-          !chatHistoryStore.chatsQuery.data?.length && (chatHistoryStore.createChatMutation.isLoading || chatHistoryStore.chatsQuery.isLoading)
+          !chatHistoryStore.chatsQuery.data?.length &&
+          (chatHistoryStore.createChatMutation.isLoading ||
+            chatHistoryStore.chatsQuery.isLoading)
         }
       />
       <Box p="md" pb="0">
@@ -45,21 +44,29 @@ export const HomeSidebar = observer(() => {
           rightSection={<IconPencilPlus size={16} />}
           onClick={handleNewChat}
           loading={chatHistoryStore.createChatMutation.isLoading}
-          disabled={!selectedAssistantId || chatHistoryStore.createChatMutation.isLoading}
+          disabled={!currentAssistant || chatHistoryStore.createChatMutation.isLoading}
         >
           New Chat
         </Button>
       </Box>
-      <Box p="md" pb="0">
-        <Select
-          data={assistants.map((a) => ({ value: a.id, label: a.label || a.name }))}
-          value={selectedAssistantId}
-          onChange={setSelectedAssistantId}
-          placeholder={loadingAssistants ? 'Loading assistants...' : 'Pick an assistant'}
-          disabled={loadingAssistants || assistants.length === 0}
-        />
-      </Box>
-      <Text c="dark" size="xs" ps="lg" pt="md" pb="xs">Chats history</Text>
+      <Group p="md" justify="center">
+        <Group gap="xs" align="center" justify='center' w="max-content">
+          <Badge variant="light" size="lg" style={{ flexGrow: 1 }}>
+            <Group gap="xs">
+              <IconRobot size={16} />
+              <Text inherit component="span" size="sm" fw={500}>
+                {currentAssistant?.label || currentAssistant?.name || '...'}
+              </Text>
+            </Group>
+          </Badge>
+          <ActionIcon variant="subtle" onClick={settingsStore.openSwitchAssistantModal}>
+            <IconSettings size={18} />
+          </ActionIcon>
+        </Group>
+      </Group>
+      <Text c="dark" size="xs" ps="lg" pt="md" pb="xs">
+        Chats history
+      </Text>
       <ChatHistoryList />
     </Stack>
   );

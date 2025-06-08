@@ -1,6 +1,7 @@
 import { api } from './index';
 import { useMutation } from '@tanstack/react-query';
 import type { User } from './models';
+import type { UserSettings } from '../features/settings/settings';
 
 export interface AuthResponse {
   message: string;
@@ -64,6 +65,20 @@ export async function resetPassword(dto: ResetPasswordDto): Promise<ResetPasswor
   return res.data;
 }
 
+export async function getSettings(): Promise<UserSettings | null> {
+  const res = await api.get('/api/users/settings');
+  return res.data as UserSettings | null;
+}
+
+export async function updateSettings(settings: UserSettings): Promise<UserSettings> {
+  const res = await api.patch('/api/users/settings', settings);
+  return res.data as UserSettings;
+}
+
+export async function deleteSettings(): Promise<void> {
+  await api.delete('/api/users/settings');
+}
+
 export function useM_register() {
   return useMutation({
     mutationFn: register,
@@ -91,5 +106,23 @@ export function useM_resetPassword() {
 export function useM_createResetPasswordToken() {
   return useMutation({
     mutationFn: createResetPasswordToken,
+  });
+}
+
+export function useM_getSettings() {
+  return useMutation({
+    mutationFn: getSettings,
+  });
+}
+
+export function useM_updateSettings() {
+  return useMutation({
+    mutationFn: updateSettings,
+  });
+}
+
+export function useM_deleteSettings() {
+  return useMutation({
+    mutationFn: deleteSettings,
   });
 } 

@@ -36,6 +36,10 @@ export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends read
   updateQuery(updater: (prev: TData | undefined) => TData) {
     queryClient.setQueryData(this.observer.options.queryKey, updater as any);
   }
+
+  setQueryData(data: TData) {
+    queryClient.setQueryData(this.observer.options.queryKey, data as any);
+  }
 }
 
 export class MobxMutation<TData = unknown, TError = unknown, TVariables = void, TContext = unknown> {

@@ -7,6 +7,7 @@ export interface Assistant {
   id: string;
   name: string;
   label: string;
+  devAssistant: boolean;
 }
 
 export interface Thread {

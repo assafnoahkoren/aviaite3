@@ -7,7 +7,10 @@ export interface User {
   isActive: boolean;
   verified: boolean;
   organizationId?: string | null;
+  roles: UserRole[];
 }
+
+export type UserRole = 'ADMIN' | 'USER';
 
 export interface AuthResponse {
   message: string;
