@@ -84,15 +84,6 @@ export class ChatStore {
       this.isStreamLoading = true;
     });
     this.streamingMessageId = uuidv4();
-    const tempAssistantMessage: Message = {
-      id: this.streamingMessageId,
-      threadId: this.currentThread.openaiThreadId,
-      userId: 'assistant',
-      content: '',
-      createdAt: new Date().toISOString(),
-      role: 'assistant',
-    };
-    // this.messagesQuery?.updateQuery((prev) => [...(prev ?? []), tempAssistantMessage]);
 
     streamChat(this.currentThread.openaiThreadId, {
       onTextDelta: (value: string) => {
