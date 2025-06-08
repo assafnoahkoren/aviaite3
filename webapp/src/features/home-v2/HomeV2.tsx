@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { HomeHeader } from './HomeHeader';
 import { HomeSidebar } from './HomeSidebar';
 import { HomeMain } from './HomeMain';
-import { IconArrowLeft, IconArrowRight, IconMenu, IconMenu2 } from '@tabler/icons-react';
+import { IconArrowLeft, IconMenu2 } from '@tabler/icons-react';
 
 export function HomeV2() {
   const [opened, { toggle }] = useDisclosure();
