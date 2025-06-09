@@ -10,6 +10,7 @@ import {
   Modal,
   Stack,
   Button,
+  Badge,
 } from '@mantine/core';
 import { IconChevronDown, IconLogout, IconRobot } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -90,14 +91,19 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
         >
           {/* @ts-ignore */}
           <Menu.Target>
-            <UnstyledButton c="dark">
-              <Group gap={7}>
-                <Avatar alt={auth.user?.fullName ?? ''} radius="xl" size={28}>
-                  {auth.user?.fullName?.[0]}
-                </Avatar>
-                <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
-              </Group>
-            </UnstyledButton>
+            <Group>
+              <Badge c="blue" variant="light" bg="blue.1" size="sm" style={{ flexGrow: 1 }} >
+                Beta
+              </Badge>
+              <UnstyledButton c="dark">
+                <Group gap={7}>
+                  <Avatar alt={auth.user?.fullName ?? ''} radius="xl" size={28}>
+                    {auth.user?.fullName?.[0]}
+                  </Avatar>
+                  <IconChevronDown style={{ width: rem(12), height: rem(12) }} stroke={1.5} />
+                </Group>
+              </UnstyledButton>
+            </Group>
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item disabled>
