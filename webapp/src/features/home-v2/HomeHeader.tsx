@@ -48,7 +48,7 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
                 settingsStore.settings?.currentAssistantId === assistant.id ? 'filled' : 'outline'
               }
             >
-              {assistant.name}
+              {assistant.label}
             </Button>
           ))}
         </Stack>

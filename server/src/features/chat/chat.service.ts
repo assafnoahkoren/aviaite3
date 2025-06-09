@@ -45,7 +45,7 @@ const assistants = [
   {
 		id: 'asst_9cw3eNl5AIUH1YAsyDmKgK85',
 		name: 'elal-7787',
-		label: 'ACE 7787',
+		label: 'ACE 787',
     exampleQuestions: [
       'When is NADP1 preferable over NADP2 at LLBG?',
       'ENG FAIL after takeoff: What’s the correct response?',
