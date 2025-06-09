@@ -19,7 +19,6 @@ export const EmptyChatPlaceholder = observer(() => {
 			<Stack align="center">
 				{chatStore.currentAssistant()?.exampleQuestions.map((question) => {
 					const isRTL = useIsRtl(question);
-					console.log(isRTL, question[0]);
 					return (
 						<Button
 							key={question}
