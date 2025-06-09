@@ -45,7 +45,66 @@ export class UsersService {
 		await smtpService.sendMail({
 			to: [{ email: user.email, name: user.fullName || undefined }],
 			subject: 'Verify your account',
-			html: `<p>Click <a href="${verifyUrl}">here</a> to verify your account.</p>`
+			html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td>
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin: 20px auto; border: 1px solid #dddddd; background-color: #ffffff;">
+                    <tr>
+                        <td align="center" style="padding: 20px 0 20px 0; background-color: #ffffff;">
+                             <img src="https://ace.aviaite.com/logos/ace-dark.png" alt="Aviaite" width="150" style="display: block;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 30px 30px 30px 30px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <h1 style="font-size: 24px; margin: 0 0 20px 0; font-family: Arial, sans-serif;">Verify Your Email Address</h1>
+                                        <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">Hi ${user.fullName || 'there'},</p>
+                                        <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">Thank you for registering. Please click the button below to verify your email address. This link is valid for 24 hours.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 20px 0 30px 0;">
+                                        <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td align="center" style="border-radius: 5px;" bgcolor="#1a73e8">
+                                                    <a href="${verifyUrl}" target="_blank" style="font-size: 16px; font-family: sans-serif; color: #ffffff; text-decoration: none; border-radius: 5px; padding: 12px 25px; border: 1px solid #1a73e8;display: inline-block;">Verify Email Address</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">If you did not request this, please ignore this email.</p>
+                                    <hr style="border: 0; border-top: 1px solid #eeeeee;">
+                                    <p style="margin: 20px 0 12px 0; font-size: 14px; font-family: Arial, sans-serif; color: #999999;">If you're having trouble clicking the button, copy and paste this URL into your browser:</p>
+                                    <p style="margin: 0; font-size: 14px; font-family: Arial, sans-serif; word-break: break-all;"><a href="${verifyUrl}" style="color: #1a73e8;">${verifyUrl}</a></p>
+                                  </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #eaeaea; padding: 30px 30px 30px 30px;">
+                            <p style="margin: 0; color: #555555; font-size: 12px; text-align: center;">&copy; ${new Date().getFullYear()} Aviaite. All Rights Reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
 		});
 	}
 
@@ -110,7 +169,66 @@ export class UsersService {
 		await smtpService.sendMail({
 			to: [{ email: user.email, name: user.fullName || undefined }],
 			subject: 'Reset your password',
-			html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`
+			html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Your Password</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td>
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin: 20px auto; border: 1px solid #dddddd; background-color: #ffffff;">
+                    <tr>
+                        <td align="center" style="padding: 20px 0 20px 0; background-color: #ffffff;">
+                             <img src="https://ace.aviaite.com/logos/ace-dark.png" alt="Aviaite" width="150" style="display: block;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 30px 30px 30px 30px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <h1 style="font-size: 24px; margin: 0 0 20px 0; font-family: Arial, sans-serif;">Reset Your Password</h1>
+                                        <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">Hi ${user.fullName || 'there'},</p>
+                                        <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">We received a request to reset your password. Please click the button below to reset it. This link is valid for 1 hour.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 20px 0 30px 0;">
+                                        <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td align="center" style="border-radius: 5px;" bgcolor="#1a73e8">
+                                                    <a href="${resetUrl}" target="_blank" style="font-size: 16px; font-family: sans-serif; color: #ffffff; text-decoration: none; border-radius: 5px; padding: 12px 25px; border: 1px solid #1a73e8;display: inline-block;">Reset Password</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <p style="margin: 0 0 12px 0; font-size: 16px; font-family: Arial, sans-serif;">If you did not request this, please ignore this email.</p>
+                                    <hr style="border: 0; border-top: 1px solid #eeeeee;">
+                                    <p style="margin: 20px 0 12px 0; font-size: 14px; font-family: Arial, sans-serif; color: #999999;">If you're having trouble clicking the button, copy and paste this URL into your browser:</p>
+                                    <p style="margin: 0; font-size: 14px; font-family: Arial, sans-serif; word-break: break-all;"><a href="${resetUrl}" style="color: #1a73e8;">${resetUrl}</a></p>
+                                  </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #eaeaea; padding: 30px 30px 30px 30px;">
+                            <p style="margin: 0; color: #555555; font-size: 12px; text-align: center;">&copy; ${new Date().getFullYear()} Aviaite. All Rights Reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
 		});
 
 		return { success: true, message: 'If an account exists, a password reset link has been sent.' };
