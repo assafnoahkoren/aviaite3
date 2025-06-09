@@ -16,6 +16,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import classes from './login-page.module.scss';
 import { IconAt, IconLock } from '@tabler/icons-react';
 import { AuthHero } from './AuthHero';
+import type { AxiosError } from 'axios';
+
+
+const getErrorMessage = (error: AxiosError | null) => {
+  if (!error) {
+    return 'An unexpected error occurred';
+  }
+  if (error.response?.status === 401) {
+    return 'Invalid email or password';
+  }
+  if (error.response?.status === 404) {
+    return 'User not found';
+  }
+  return 'An unexpected error occurred';
+};
 
 export const LoginPage = observer(() => {
   const auth = useStore_Auth();
@@ -35,6 +50,7 @@ export const LoginPage = observer(() => {
     e.preventDefault();
     auth.loginMutation.mutate({ email, password });
   };
+  
 
   return (
     <Grid className={classes.grid} gutter={0} align="stretch">
@@ -69,7 +85,7 @@ export const LoginPage = observer(() => {
                   leftSection={<IconLock size={16} />}
                 />
                 {auth.loginMutation.isError && (
-                  <Alert color="red">{String(auth.loginMutation.error)}</Alert>
+                  <Alert color="red">{getErrorMessage(auth.loginMutation.error)}</Alert>
                 )}
                 <Button type="submit" loading={auth.loginMutation.isLoading} fullWidth>
                   Login

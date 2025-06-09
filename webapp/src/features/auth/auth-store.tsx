@@ -3,9 +3,10 @@ import { makeAutoObservable } from 'mobx';
 import { MobxMutation } from '../../infra/mobx-query';
 import { login, register, verify, createResetPasswordToken, resetPassword } from '../../api/user-api';
 import type { User } from '../../api/models';
+import type { AxiosError } from 'axios';
 
 export class AuthStore {
-  loginMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { email: string; password: string }>;
+  loginMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, AxiosError, { email: string; password: string }>;
   registerMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { fullName: string; email: string; password: string }>;
   verifyMutation: MobxMutation<{ success: boolean; message: string; token: string; user?: User }, unknown, { userId: string; token: string }>;
   createResetPasswordTokenMutation: MobxMutation<{ success: boolean; message: string }, unknown, string>;
