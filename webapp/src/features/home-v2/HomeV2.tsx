@@ -4,10 +4,13 @@ import { HomeHeader } from './HomeHeader';
 import { HomeSidebar } from './HomeSidebar';
 import { HomeMain } from './HomeMain';
 import { IconArrowLeft, IconMenu2 } from '@tabler/icons-react';
+import { useFirstTimeExperience } from './useFirstTimeExperience';
+import { observer } from 'mobx-react-lite';
 
-export function HomeV2() {
+export const HomeV2 = observer(() => {
   const [opened, { toggle }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  useFirstTimeExperience();
 
   return (
     <AppShell
@@ -50,4 +53,4 @@ export function HomeV2() {
       </AppShell.Main>
     </AppShell>
   );
-} 
+}); 

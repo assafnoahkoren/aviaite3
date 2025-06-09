@@ -66,7 +66,7 @@ export class SettingsStore {
     return this.assistantsQuery.data?.filter(a => !a.devAssistant || roles.includes('ADMIN')) ?? [];
   }
 
-  setCurrentAssistantId(assistantId: string) {
+  setCurrentAssistantId(assistantId?: string) {
     let newSettings: UserSettings = {}
 	newSettings = {
 		...(this.settings ?? {}),

@@ -48,9 +48,14 @@ export const RegisterPage = observer(() => {
               Register
             </Title>
             {auth.registerMutation.isSuccess ? (
-              <Text ta="center" c="green">
-                We sent a verification email to your address. Please check your inbox.
-              </Text>
+              <Stack align="center" gap="md">
+                <Text ta="center" c="dimmed">
+                  We sent a verification email to your address. Please check your inbox.
+                </Text>
+                <Button component={Link} to="/login" variant="subtle">
+                  Back to Login
+                </Button>
+              </Stack>
             ) : (
               <form onSubmit={handleSubmit}>
                 <Stack>
