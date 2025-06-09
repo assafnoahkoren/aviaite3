@@ -1,4 +1,4 @@
-import { Stack, Text, Button, Image, Group, Chip, Badge } from '@mantine/core';
+import { Stack, Text, Button, Image, Group, Badge } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Chat } from '../chat/chat-store';
 import { useIsRtl } from '../../utils/useIsRtl';
