@@ -22,6 +22,7 @@ enum EntityType {
 enum VerificationKind {
   email_verification
   password_reset
+  registration_permit
 }
 
 enum Role {
@@ -30,20 +31,22 @@ enum Role {
 }
 
 model User {
-  id             String        @id @default(cuid())
+  id             String           @id @default(cuid())
   fullName       String?
-  email          String        @unique
+  email          String           @unique
   password       String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   Threads        Thread[]
   organizationId String?
-  Organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: NoAction)
-  isActive       Boolean       @default(true)
+  Organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  isActive       Boolean          @default(true)
   AccessControls AccessControl[]
-  verified       Boolean       @default(false)
+  verified       Boolean          @default(false)
   settings       Json?
-  role           Role          @default(USER)
+  role           Role             @default(USER)
+  Subscriptions  Subscription[]
+  UserTokenUsages UserTokenUsage[]
 
   @@index([organizationId])
 }
@@ -100,4 +103,87 @@ model VerificationToken {
 
   @@index([entityId, entityType])
   @@index([expiresAt])
+}
+
+enum BillingInterval {
+  monthly
+  yearly
+}
+
+model Product {
+  id                  String                @id @default(cuid())
+  name                String
+  description         String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  prices              ProductPrice[]
+  SubscriptionProducts SubscriptionProduct[]
+  UserTokenUsages      UserTokenUsage[]
+}
+
+model ProductPrice {
+  id                  String                @id @default(cuid())
+  Product             Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId           String
+  interval            BillingInterval
+  priceCents          Int // E.g., 9900 = $99.00
+  currency            String // e.g., "USD"
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  SubscriptionProducts SubscriptionProduct[]
+
+  @@unique([productId, interval])
+}
+
+model Subscription {
+  id                   String                @id @default(cuid())
+  User                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String
+  status               String // e.g., "active", "cancelled"
+  startedAt            DateTime              @default(now())
+  endsAt               DateTime?
+  interval             BillingInterval
+  subscriptionProducts SubscriptionProduct[]
+
+  // Future-proofing for B2B2C:
+  entityType EntityType @default(user)
+  entityId   String     @default("") // Points to `User.id` for now
+
+  @@index([userId])
+}
+
+model SubscriptionProduct {
+  id             String        @id @default(cuid())
+  Subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  Product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId      String
+  ProductPrice   ProductPrice? @relation(fields: [productPriceId], references: [id], onDelete: SetNull)
+  productPriceId String?
+
+  @@unique([subscriptionId, productId])
+}
+
+model UserTokenUsage {
+  id String @id @default(cuid())
+
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  modelUsed   String // e.g. "gpt-4", "embedding-ada-002"
+  tokensUsed  Int
+  costInCents Int // Total cost for this usage event in cents
+
+  date      DateTime @default(now()) // Use the start of day UTC for daily grouping
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@index([productId, date])
+  @@index([userId, productId, date])
+  @@index([date])
+  @@index([modelUsed])
 }

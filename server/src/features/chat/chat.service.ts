@@ -155,6 +155,10 @@ export class ChatService {
       {
         role: 'user',
         content,
+        metadata: {
+          userId,
+          assistantId: thread.assistantId,
+        },
       },
     );
 

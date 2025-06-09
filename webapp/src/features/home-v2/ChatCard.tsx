@@ -21,7 +21,7 @@ export const ChatCard = observer(({ chat }: ChatCardProps) => {
 			p="xs"
 		>
 			<Tooltip dir={isRtl ? 'rtl' : 'ltr'} label={chat.name || 'New chat'} withArrow>
-				<Text dir={isRtl ? 'rtl' : 'ltr'} truncate="end">{chat.name || 'New chat'}</Text>
+				<Text size='sm' dir={isRtl ? 'rtl' : 'ltr'} truncate="end">{chat.name || 'New chat'}</Text>
 			</Tooltip>
 		</UnstyledButton>
 	);
