@@ -34,6 +34,7 @@ export const MessagesContainer = observer(() => {
 		<Box className={classes.root} style={{ flex: 1 }}>
 			<ScrollArea style={{ height: '100%' }}>
 				<Stack gap="lg" p="0">
+					<Space h="md" />
 					{messages.map((message) => {
 						if (message.role === 'user') {
 							return <UserMessage key={message.id} message={message} />;
