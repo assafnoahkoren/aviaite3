@@ -15,7 +15,7 @@ export const EmptyChatPlaceholder = observer(() => {
 	return (
 		<Stack align="center" gap="xl" justify="center" h="100%" w="100%">
 			<Image src="/logos/ace-fav-dark.png" alt="Ace by Aviate" w={80} />
-			<Group gap="xs">
+			<Group gap="xs" justify="center">
 				<Text c="dimmed" ta="center">My model is</Text>
 				<Badge variant='light' size='lg' fw={500}>{chatStore.currentAssistant()?.label}</Badge>
 				<Text c="dimmed" ta="center">ask me anything, or start with one of these examples:</Text>
