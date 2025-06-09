@@ -21,7 +21,7 @@ export const EmptyChatPlaceholder = observer(() => {
 				<Text c="dimmed" ta="center">ask me anything, or start with one of these examples:</Text>
 			</Group>
 			<Group align="center" gap="xs" justify="center">
-				{chatStore.currentAssistant()?.exampleQuestions.map((question) => {
+				{chatStore.currentAssistant()?.exampleQuestions?.map((question) => {
 					const isRTL = useIsRtl(question);
 					return (
 						<Button
