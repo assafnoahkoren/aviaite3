@@ -15,7 +15,7 @@ export const MessagesContainer = observer(() => {
 	if (isLoading) {
 		return (
 			<Box className={classes.root} style={{ flex: 1 }}>
-				<Center style={{ flex: 1 }}>
+				<Center style={{ flex: 1, paddingTop: '100px' }}>
 					<Loader />
 				</Center>
 			</Box>

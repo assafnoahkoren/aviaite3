@@ -3,13 +3,14 @@ import { IconPhoto, IconPaperclip, IconSend } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
-
+import { BiEvents } from '../../mixpanel';
 export const Composer = observer(() => {
 	const [value, setValue] = useState('');
 	const chatStore = useStore_Chat();
 
 	const handleSend = () => {
 		if (!value.trim() || !chatStore.currentThread) return;
+		BiEvents.sendMessage(value);
 		chatStore.sendMessage(value);
 		setValue('');
 	};

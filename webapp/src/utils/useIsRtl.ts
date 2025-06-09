@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 // Regex to check for RTL characters (e.g., Hebrew, Arabic)
-const rtlCharsRegex = /[\u0590-\u05FF\u0600-\u06FF]/;
+export const rtlCharsRegex = /[\u0590-\u05FF\u0600-\u06FF]/;
 
 /**
  * A hook to determine if a string contains RTL characters.

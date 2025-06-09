@@ -13,6 +13,7 @@ import { HomeV2 } from './features/home-v2/HomeV2';
 import { useCreateStore_Settings } from './features/settings/settings-store';
 import { useCreateStore_ChatHistory } from './features/chat-history/chat-history-store';
 import { useCreateStore_Chat } from './features/chat/chat-store';
+import { initMixpanelInstance } from './mixpanel';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -21,6 +22,13 @@ function PrivateRoute() {
   const chatHistoryStore = useCreateStore_ChatHistory();
   const chatStore = useCreateStore_Chat(settingsStore.store);
   const isAuthenticated = !!auth.user && !!auth.token;
+  if (isAuthenticated && auth.user) {
+    initMixpanelInstance(auth.user.id, {
+      email: auth.user.email,
+      name: auth.user.fullName,
+      organizationId: auth.user.organizationId,
+    });
+  }
   return isAuthenticated ? (
     <settingsStore.context>
       <chatHistoryStore.context>

@@ -1,6 +1,7 @@
 import { api } from './index';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {EventSource} from 'eventsource'
+import { BiEvents } from '../mixpanel';
 
 // Types
 export interface Assistant {
@@ -49,6 +50,7 @@ export async function listAssistants(): Promise<Assistant[]> {
 
 // Create a new chat (thread)
 export async function createChat(dto: CreateChatDto): Promise<Thread> {
+  BiEvents.createChat(dto.assistantId);
   const res = await api.post('/api/chat', dto);
   return res.data;
 }

@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
 import { observer } from 'mobx-react-lite';
+import { BiEvents } from '../../mixpanel';
 
 interface HomeHeaderProps {
   opened: boolean;
@@ -28,6 +29,7 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
   const settingsStore = useStore_Settings();
 
   const handleAssistantSelect = (assistantId: string) => {
+    BiEvents.switchAssistant(assistantId);
     settingsStore.setCurrentAssistantId(assistantId);
     settingsStore.closeSwitchAssistantModal();
   };
