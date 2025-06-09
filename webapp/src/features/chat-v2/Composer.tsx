@@ -37,6 +37,7 @@ export const Composer = observer(() => {
 					input: {
 						padding: '10px 20px',
 						border: 'none',
+						fontSize: '16px',
 						backgroundColor: 'var(--mantine-color-gray-0)',
 						borderRadius: 'var(--mantine-radius-lg)',
 					},
