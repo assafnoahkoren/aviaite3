@@ -1,5 +1,5 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
-import { MobxQuery, MobxMutation } from '../../infra/mobx-query';
+import { MobxQuery, MobxMutation, queryClient } from '../../infra/mobx-query';
 import {
   getChatMessages,
   type Message,
@@ -8,6 +8,7 @@ import {
   type Thread,
   streamChat,
   type Assistant,
+  generateChatName,
 } from '../../api/chat-api';
 import { createContext, useContext, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,6 +18,7 @@ export class ChatStore {
   currentThread: Thread | null = null;
   messagesQuery: MobxQuery<Message[], unknown, [string, string]> | null = null;
   createMessageMutation: MobxMutation<Message, unknown, CreateMessageDto>;
+  generateChatNameMutation: MobxMutation<{ name: string }, unknown, string>;
   private tempMessageId: string | null = null;
   isStreaming = false;
   streamingMessageId: string | null = null;
@@ -30,6 +32,20 @@ export class ChatStore {
       mutationFn: createMessage,
       onSuccess: () => {
         this.messagesQuery?.refetch();
+      },
+    });
+
+    this.generateChatNameMutation = new MobxMutation({
+      mutationFn: generateChatName,
+      onSuccess: (data) => {
+        if (this.currentThread) {
+          runInAction(() => {
+            if (this.currentThread) {
+              this.currentThread.name = data.name;
+            }
+          });
+        }
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
       },
     });
 
@@ -125,12 +141,19 @@ export class ChatStore {
         });
       },
       onEnd: () => {
+        if (
+          this.currentThread &&
+          !this.currentThread.name &&
+          (this.messagesQuery?.data?.length ?? 0) <= 3
+        ) {
+          this.generateChatNameMutation.mutate(
+            this.currentThread.openaiThreadId,
+          );
+        }
         runInAction(() => {
           this.isStreaming = false;
           this.streamingMessageId = null;
           this.isStreamLoading = false;
-          // Optionally refetch to get the final message from the server
-          // this.messagesQuery?.refetch();
         });
       },
       onError: (error: any) => {

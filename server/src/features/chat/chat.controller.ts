@@ -77,4 +77,13 @@ export class ChatController {
   async getChatMessages(@Param('threadId') threadId: string) {
     return await this.chatService.getChatMessages(threadId);
   }
+
+  @UseGuards(AuthGuard)
+  @Post('api/chat/thread/:threadId/generate-name')
+  async generateChatName(
+    @Param('threadId') threadId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return await this.chatService.generateChatName(threadId, req.user.id);
+  }
 }

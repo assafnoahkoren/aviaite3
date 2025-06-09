@@ -13,7 +13,7 @@ export const ChatV2 = observer(() => {
 	useSelectInitialChat(chatStore, chatHistoryStore);
 
 	return (
-		<Stack gap="0" style={{ height: 'calc(100vh - 50px)', position: 'relative' , maxWidth: '960px', margin: '0 auto'}} p="md">
+		<Stack gap="0" style={{ height: 'calc(100vh - 50px)', position: 'relative' , maxWidth: '960px', margin: '0 auto'}} p="md" pt={0}>
 			<LoadingOverlay visible={!chatStore.currentThread} />
 			<Box className={classes.scrollContainer}>
 				<MessagesContainer />

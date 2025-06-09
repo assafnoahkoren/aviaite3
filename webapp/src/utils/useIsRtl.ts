@@ -8,8 +8,8 @@ const rtlCharsRegex = /[\u0590-\u05FF\u0600-\u06FF]/;
  * @param text The text to check.
  * @returns `true` if the text contains RTL characters, otherwise `false`.
  */
-export function useIsRtl(_text: string): boolean {
-	const text = _text.trim();
+export function useIsRtl(_text: string | null): boolean {
+	const text = _text?.trim() ?? '';
 	return useMemo(() => {
 		if (!text) {
 			return false;

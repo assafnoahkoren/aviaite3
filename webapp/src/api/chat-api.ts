@@ -13,6 +13,7 @@ export interface Assistant {
 
 export interface Thread {
   id: string;
+  name: string | null;
   userId: string;
   assistantId: string;
   openaiThreadId: string;
@@ -67,6 +68,14 @@ export async function createMessage(dto: CreateMessageDto): Promise<Message> {
 // Get messages for a thread
 export async function getChatMessages(threadId: string): Promise<Message[]> {
   const res = await api.get(`/api/chat/thread/${threadId}/messages`);
+  return res.data;
+}
+
+// Generate a name for a chat
+export async function generateChatName(
+  threadId: string,
+): Promise<{ name:string }> {
+  const res = await api.post(`/api/chat/thread/${threadId}/generate-name`);
   return res.data;
 }
 
@@ -163,5 +172,16 @@ export function useQ_getChatMessages(threadId: string) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+  });
+}
+
+export function useM_generateChatName() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: generateChatName,
+    onSuccess: () => {
+      // Invalidate the user's chat list to refetch with the new name
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    },
   });
 }

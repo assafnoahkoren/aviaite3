@@ -1,10 +1,10 @@
-import { Group, Text, UnstyledButton } from '@mantine/core';
+import { Text, UnstyledButton, Tooltip } from '@mantine/core';
 import type { Thread } from '../../api/chat-api';
-import { timeAgo } from '../../utils/time-ago';
 import { useStore_Chat } from '../chat/chat-store';
 import classes from './ChatCard.module.scss';
 import cx from 'clsx';
 import { observer } from 'mobx-react-lite';
+import { useIsRtl } from '../../utils/useIsRtl';
 
 interface ChatCardProps {
 	chat: Thread;
@@ -13,19 +13,16 @@ interface ChatCardProps {
 export const ChatCard = observer(({ chat }: ChatCardProps) => {
 	const chatStore = useStore_Chat();
 	const isActive = chatStore.currentThread?.id === chat.id;
-
+	const isRtl = useIsRtl(chat.name);
 	return (
 		<UnstyledButton
 			className={cx(classes.card, { [classes.active]: isActive })}
 			onClick={() => chatStore.setCurrentChat(chat)}
 			p="xs"
 		>
-			<Group gap="xs">
-				<Text>New chat</Text>
-				<Text size="xs" opacity={0.5}>
-					{timeAgo(chat.createdAt)}
-				</Text>
-			</Group>
+			<Tooltip dir={isRtl ? 'rtl' : 'ltr'} label={chat.name || 'New chat'} withArrow>
+				<Text dir={isRtl ? 'rtl' : 'ltr'} truncate="end">{chat.name || 'New chat'}</Text>
+			</Tooltip>
 		</UnstyledButton>
 	);
 }); 

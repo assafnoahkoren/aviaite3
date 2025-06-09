@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { QueryClient, QueryObserver, MutationObserver } from '@tanstack/react-query';
 import type { QueryObserverOptions, MutationObserverOptions } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends readonly unknown[] = readonly unknown[]> {
   data: TData | undefined = undefined;
