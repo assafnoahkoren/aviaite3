@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore_ChatHistory } from '../chat-history/chat-history-store';
 import { useStore_Settings } from '../settings/settings-store';
 import { useStore_Chat } from '../chat/chat-store';
@@ -8,13 +8,15 @@ export function useFirstTimeExperience() {
 	const chatHistoryStore = useStore_ChatHistory();
 	const settingsStore = useStore_Settings();
 	const chatStore = useStore_Chat();
+	const [alreadyRun, setAlreadyRun] = useState(false);
 
 	useEffect(() => {
 		const hasChats = chatHistoryStore.chatsQuery.data && chatHistoryStore.chatsQuery.data.length > 0;
 		const isChatsLoading = chatHistoryStore.chatsQuery.isLoading;
 		const currentAssistant = settingsStore.assistants.find(a => a.id === settingsStore.assistants[0].id);
 
-		if (!isChatsLoading && !hasChats && currentAssistant) {
+		if (!isChatsLoading && !hasChats && currentAssistant && !alreadyRun) {
+			setAlreadyRun(true);
 			settingsStore.setCurrentAssistantId(currentAssistant?.id);
 			chatHistoryStore.createChatMutation.mutateAsync({ assistantId: currentAssistant.id, profileId: currentAssistant.id })
 				.then((newChat: Thread) => {
