@@ -12,23 +12,48 @@ const assistants = [
 		name: 'Co-Pilot-737-V2',
 		label: 'Co-Pilot 737 V2',
     devAssistant: true,
+    exampleQuestions: [
+      'TAF shows TEMPO 2000 +TSRA — do I need an alternate?',
+      'What happens in flight if PACK is off?',
+      'מה קורה אם יש כשל במערכת TR1 באוויר?',
+      'Can you walk me through how to get the most out of you?',
+    ],
 	},
   {
 		id: 'asst_fZC1wK2LvYo8a93nqMVgGrnf',
 		name: '787-NEW',
 		label: '787 NEW',
     devAssistant: true,
+    exampleQuestions: [
+      'When is NADP1 preferable over NADP2 at LLBG?',
+      'ENG FAIL after takeoff: What’s the correct response?',
+      'מה משמעות METAR עם VV001 ו־RVR נמוך?',
+      'What’s the best way to work with you?',
+    ],
 	},
   {
 		id: 'asst_StHM7qcEs2TkCFvc89KGBETy',
 		name: 'elal-737',
 		label: 'ACE 737',
+    exampleQuestions: [
+      'TAF shows TEMPO 2000 +TSRA — do I need an alternate?',
+      'What happens in flight if PACK is off?',
+      'מה קורה אם יש כשל במערכת TR1 באוויר?',
+      'Can you walk me through how to get the most out of you?',
+    ],
 	},
   {
 		id: 'asst_9cw3eNl5AIUH1YAsyDmKgK85',
 		name: 'elal-7787',
 		label: 'ACE 7787',
+    exampleQuestions: [
+      'When is NADP1 preferable over NADP2 at LLBG?',
+      'ENG FAIL after takeoff: What’s the correct response?',
+      ' מה משמעות METAR עם VV001 ו־RVR נמוך?',
+      'What’s the best way to work with you?',
+    ],
 	},
+  
 ]
 
 @Injectable()

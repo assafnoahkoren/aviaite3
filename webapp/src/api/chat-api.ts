@@ -8,6 +8,7 @@ export interface Assistant {
   name: string;
   label: string;
   devAssistant: boolean;
+  exampleQuestions: string[];
 }
 
 export interface Thread {

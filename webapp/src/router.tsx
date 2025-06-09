@@ -19,7 +19,7 @@ function PrivateRoute() {
   const auth = useStore_Auth();
   const settingsStore = useCreateStore_Settings(auth);
   const chatHistoryStore = useCreateStore_ChatHistory();
-  const chatStore = useCreateStore_Chat();
+  const chatStore = useCreateStore_Chat(settingsStore.store);
   const isAuthenticated = !!auth.user && !!auth.token;
   return isAuthenticated ? (
     <settingsStore.context>

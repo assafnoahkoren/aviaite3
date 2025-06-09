@@ -7,9 +7,11 @@ import {
   type CreateMessageDto,
   type Thread,
   streamChat,
+  type Assistant,
 } from '../../api/chat-api';
 import { createContext, useContext, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { SettingsStore } from '../settings/settings-store';
 
 export class ChatStore {
   currentThread: Thread | null = null;
@@ -19,9 +21,11 @@ export class ChatStore {
   isStreaming = false;
   streamingMessageId: string | null = null;
   isStreamLoading = false;
+  settingsStore: SettingsStore;
 
-  constructor() {
+  constructor(settingsStore: SettingsStore) {
     makeAutoObservable(this);
+    this.settingsStore = settingsStore;
     this.createMessageMutation = new MobxMutation({
       mutationFn: createMessage,
       onSuccess: () => {
@@ -74,6 +78,10 @@ export class ChatStore {
 
     this.streamThread();
     
+  }
+
+  currentAssistant(): Assistant | undefined {
+    return this.settingsStore.assistants.find((a) => a.id === this.currentThread?.assistantId);
   }
 
   streamThread() {
@@ -139,8 +147,8 @@ export class ChatStore {
 
 export const ChatStoreContext = createContext<ChatStore | null>(null);
 
-export function useCreateStore_Chat() {
-  const store = useMemo(() => new ChatStore(), []);
+export function useCreateStore_Chat(settingsStore: SettingsStore) {
+  const store = useMemo(() => new ChatStore(settingsStore), [settingsStore]);
 
   const ContextProvider = useMemo(
     () => (props: any) => (
