@@ -33,6 +33,11 @@ export const BiEvents = {
 			length: message.trim().length,
 		});
 	},
+	sendPresetMessage: (presetMessage: string) => {
+		mixpanelInstance.track("Send Preset Message", {
+			presetMessage,
+		});
+	},
 	createChat: (assistantId: string) => {
 		mixpanelInstance.track("Create Chat", {
 			assistantId,

@@ -10,6 +10,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeCustomLinks from '../../utils/rehype-custom-links';
 import { CustomLink } from './CustomLink';
+import { BiEvents } from '../../mixpanel';
 
 interface AssistantMessageProps {
 	message: Message;
@@ -20,6 +21,7 @@ export const AssistantMessage = observer(({ message }: AssistantMessageProps) =>
 	const chatStore = useStore_Chat();
 
 	const handleActionClick = (content: string) => {
+		BiEvents.sendPresetMessage(content);
 		chatStore.sendMessage(content);
 	};
 	
