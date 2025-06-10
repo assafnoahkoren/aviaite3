@@ -1,11 +1,12 @@
 import { createContext, useContext, useMemo } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { MobxQuery, MobxMutation } from '../../infra/mobx-query';
-import { listChatsByUserId, createChat, type Thread, type CreateChatDto } from '../../api/chat-api';
+import { listChatsByUserId, createChat, deleteChat, type Thread, type CreateChatDto } from '../../api/chat-api';
 
 export class ChatHistoryStore {
   chatsQuery: MobxQuery<Thread[], unknown, [string]>;
   createChatMutation: MobxMutation<Thread, unknown, CreateChatDto>;
+  deleteChatMutation: MobxMutation<Thread, unknown, string>;
 
   constructor() {
     makeAutoObservable(this);
@@ -16,6 +17,12 @@ export class ChatHistoryStore {
     });
     this.createChatMutation = new MobxMutation({
       mutationFn: createChat,
+      onSuccess: () => {
+        this.chatsQuery.refetch();
+      },
+    });
+    this.deleteChatMutation = new MobxMutation({
+      mutationFn: deleteChat,
       onSuccess: () => {
         this.chatsQuery.refetch();
       },

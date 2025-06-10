@@ -67,6 +67,12 @@ export async function createMessage(dto: CreateMessageDto): Promise<Message> {
   return res.data;
 }
 
+// Delete a chat
+export async function deleteChat(threadId: string): Promise<Thread> {
+  const res = await api.delete(`/api/chat/${threadId}`);
+  return res.data;
+}
+
 // Get messages for a thread
 export async function getChatMessages(threadId: string): Promise<Message[]> {
   const res = await api.get(`/api/chat/thread/${threadId}/messages`);
@@ -161,6 +167,16 @@ export function useM_createChat() {
 export function useM_createMessage() {
   return useMutation({
     mutationFn: createMessage,
+  });
+}
+
+export function useM_deleteChat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteChat,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    },
   });
 }
 
