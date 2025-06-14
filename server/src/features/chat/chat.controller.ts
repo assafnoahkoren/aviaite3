@@ -1,7 +1,7 @@
 // chat.controller.ts
 // Controller for handling chat-related HTTP requests
 
-import { Controller, Get, Post, Body, Param, Req, UseGuards, Sse } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, UseGuards, Sse, Delete } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -31,6 +31,15 @@ export class ChatController {
   @Get('api/chat/user')
   async listChatsByUserId(@Req() req: AuthedRequest) {
     return await this.chatService.listChatsByUserId(req.user.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('api/chat/:threadId')
+  async softDeleteChat(
+    @Param('threadId') threadId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    return await this.chatService.softDeleteChat(threadId, req.user.id);
   }
 
   @UseGuards(AuthGuard)

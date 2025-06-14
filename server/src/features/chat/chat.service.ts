@@ -93,8 +93,20 @@ export class ChatService {
    */
   async listChatsByUserId(userId: string) {
     return prisma.thread.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async softDeleteChat(threadId: string, userId: string) {
+    const thread = await prisma.thread.findFirst({
+      where: { id: threadId, userId },
+    });
+    if (!thread) {
+      throw new Error('Thread not found or user does not have permission');
+    }
+    return prisma.thread.delete({
+      where: { id: threadId },
     });
   }
 
