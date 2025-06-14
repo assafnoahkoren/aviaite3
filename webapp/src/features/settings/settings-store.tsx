@@ -62,8 +62,8 @@ export class SettingsStore {
   }
 
   get assistants(): Assistant[] {
-	const roles = this.authStore.user?.roles ?? [];
-    return this.assistantsQuery.data?.filter(a => !a.devAssistant || roles.includes('ADMIN')) ?? [];
+	const role = this.authStore.user?.role;
+    return this.assistantsQuery.data?.filter(a => !a.devAssistant || role === 'ADMIN') ?? [];
   }
 
   setCurrentAssistantId(assistantId?: string) {

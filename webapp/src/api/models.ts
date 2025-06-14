@@ -7,7 +7,7 @@ export interface User {
   isActive: boolean;
   verified: boolean;
   organizationId?: string | null;
-  roles: UserRole[];
+  role: UserRole;
 }
 
 export type UserRole = 'ADMIN' | 'USER';

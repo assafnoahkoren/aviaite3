@@ -12,7 +12,7 @@ import {
   Button,
   Badge,
 } from '@mantine/core';
-import { IconChevronDown, IconLogout, IconRobot } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconRobot, IconSettings } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
@@ -119,6 +119,15 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
             >
               Switch assistant
             </Menu.Item>
+            {auth.user?.role === 'ADMIN' && (
+              <Menu.Item
+                leftSection={<IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                component="a"
+                href="/admin"
+              >
+                Admin Panel
+              </Menu.Item>
+            )}
             <Menu.Item
               leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
               onClick={() => auth.logout()}

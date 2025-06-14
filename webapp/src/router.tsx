@@ -14,6 +14,13 @@ import { useCreateStore_Settings } from './features/settings/settings-store';
 import { useCreateStore_ChatHistory } from './features/chat-history/chat-history-store';
 import { useCreateStore_Chat } from './features/chat/chat-store';
 import { initMixpanelInstance } from './mixpanel';
+import { AdminRoute } from './features/admin/AdminRoute';
+import { AdminLayout } from './features/admin/AdminLayout';
+import { AdminDashboard } from './features/admin/pages/AdminDashboard';
+import { AdminUsers } from './features/admin/pages/AdminUsers';
+import { AdminOrganizations } from './features/admin/pages/AdminOrganizations';
+import { AdminProducts } from './features/admin/pages/AdminProducts';
+import { AdminSubscriptions } from './features/admin/pages/AdminSubscriptions';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -54,6 +61,24 @@ export const router = createBrowserRouter([
     element: <PrivateRoute />,
     children: [
       { path: '/', element: <HomeV2 /> },
+    ],
+  },
+  // Admin routes
+  {
+    path: '/admin',
+    element: <AdminRoute />,
+    children: [
+      {
+        path: '',
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+          { path: 'users', element: <AdminUsers /> },
+          { path: 'organizations', element: <AdminOrganizations /> },
+          { path: 'products', element: <AdminProducts /> },
+          { path: 'subscriptions', element: <AdminSubscriptions /> },
+        ],
+      },
     ],
   },
 ]); 
