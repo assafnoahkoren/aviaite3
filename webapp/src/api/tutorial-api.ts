@@ -1,4 +1,5 @@
 import { api } from './index';
+import type { AxiosRequestConfig } from 'axios';
 
 export interface TutorialStatus {
   id: string;
@@ -16,8 +17,8 @@ export interface UpdateTutorialProgressDto {
 }
 
 export const tutorialApi = {
-  getTutorialStatus: async (tutorialId: string): Promise<TutorialStatus> => {
-    const response = await api.get<TutorialStatus>(`/api/users/tutorial-status/${tutorialId}`);
+  getTutorialStatus: async (tutorialId: string, config?: AxiosRequestConfig): Promise<TutorialStatus> => {
+    const response = await api.get<TutorialStatus>(`/api/users/tutorial-status/${tutorialId}`, config);
     return response.data;
   },
 

@@ -7,14 +7,17 @@ import './tours/shepherd-theme.scss';
 export const useFirstTimeOnboarding = () => {
   useEffect(() => {
     let tour: any = null;
+    const abortController = new AbortController();
 
     const initializeTour = async () => {
       try {
         // Check if user has already completed or skipped the tour
-        const status = await tutorialApi.getTutorialStatus(MAIN_TOUR_ID);
+        const status = await tutorialApi.getTutorialStatus(MAIN_TOUR_ID, {
+          signal: abortController.signal
+        });
         
-        if (status.completedAt || status.skippedAt) {
-          return; // Don't show tour if already completed or skipped
+        if (abortController.signal.aborted || status.completedAt || status.skippedAt) {
+          return; // Don't show tour if already completed, skipped, or request was aborted
         }
 
         // Create and configure the tour
@@ -52,18 +55,22 @@ export const useFirstTimeOnboarding = () => {
 
         // Start the tour after a short delay to ensure DOM is ready
         setTimeout(() => {
-          tour.start();
-          
-          // Resume from saved step if needed
-          if (status.currentStep > 0) {
-            for (let i = 0; i < status.currentStep; i++) {
-              tour.next();
+          if (!abortController.signal.aborted && tour) {
+            tour.start();
+            
+            // Resume from saved step if needed
+            if (status.currentStep > 0) {
+              for (let i = 0; i < status.currentStep; i++) {
+                tour.next();
+              }
             }
           }
         }, 1000);
 
-      } catch (error) {
-        console.error('Failed to initialize onboarding tour:', error);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to initialize onboarding tour:', error);
+        }
       }
     };
 
@@ -71,6 +78,7 @@ export const useFirstTimeOnboarding = () => {
 
     // Cleanup
     return () => {
+      abortController.abort();
       if (tour) {
         tour.complete();
       }

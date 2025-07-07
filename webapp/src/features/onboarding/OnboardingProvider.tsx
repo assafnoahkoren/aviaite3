@@ -60,7 +60,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     const newTour = createMainTour();
 
     // Track progress
-    newTour.on('show', async (event) => {
+    newTour.on('show', async () => {
       const stepIndex = newTour.getCurrentStep()?.id ? 
         newTour.steps.findIndex(step => step.id === newTour.getCurrentStep()?.id) : 0;
       
