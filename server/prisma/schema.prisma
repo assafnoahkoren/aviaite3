@@ -31,24 +31,25 @@ enum Role {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  fullName           String?
-  email              String              @unique
-  password           String
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  Threads            Thread[]
-  organizationId     String?
-  Organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: NoAction)
-  isActive           Boolean             @default(true)
-  AccessControls     AccessControl[]
-  verified           Boolean             @default(false)
-  settings           Json?
-  role               Role                @default(USER)
-  Subscriptions      Subscription[]
-  UserTokenUsages    UserTokenUsage[]
-  VerificationTokens VerificationToken[] // Tokens used by this user
-  deletedAt          DateTime?
+  id                   String                @id @default(cuid())
+  fullName             String?
+  email                String                @unique
+  password             String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  Threads              Thread[]
+  organizationId       String?
+  Organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  isActive             Boolean               @default(true)
+  AccessControls       AccessControl[]
+  verified             Boolean               @default(false)
+  settings             Json?
+  role                 Role                  @default(USER)
+  Subscriptions        Subscription[]
+  UserTokenUsages      UserTokenUsage[]
+  VerificationTokens   VerificationToken[]   // Tokens used by this user
+  UserTutorialStatuses UserTutorialStatus[]
+  deletedAt            DateTime?
 
   @@index([organizationId])
   @@index([deletedAt])
@@ -212,4 +213,19 @@ model UserTokenUsage {
   @@index([date])
   @@index([modelUsed])
   @@index([deletedAt])
+}
+
+model UserTutorialStatus {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tutorialId  String    // e.g., "main_tour_v1"
+  completedAt DateTime?
+  skippedAt   DateTime?
+  currentStep Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, tutorialId])
+  @@index([userId])
 }
