@@ -5,12 +5,14 @@ import { HomeSidebar } from './HomeSidebar';
 import { HomeMain } from './HomeMain';
 import { IconArrowLeft, IconMenu2 } from '@tabler/icons-react';
 import { useFirstTimeExperience } from './useFirstTimeExperience';
+import { useFirstTimeOnboarding } from '../onboarding/useFirstTimeOnboarding';
 import { observer } from 'mobx-react-lite';
 
 export const HomeV2 = observer(() => {
   const [opened, { toggle }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   useFirstTimeExperience();
+  useFirstTimeOnboarding();
 
   return (
     <AppShell
