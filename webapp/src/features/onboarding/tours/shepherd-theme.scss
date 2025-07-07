@@ -1,0 +1,93 @@
+// Import Shepherd's base styles
+@import 'shepherd.js/dist/css/shepherd.css';
+
+// Custom theme for the tour
+.shepherd-theme-custom {
+  .shepherd-content {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .shepherd-header {
+    background: var(--mantine-color-blue-6);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .shepherd-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .shepherd-text {
+    padding: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--mantine-color-gray-8);
+  }
+
+  .shepherd-footer {
+    padding: 0 1rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .shepherd-button {
+    background: var(--mantine-color-blue-6);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: var(--mantine-color-blue-7);
+    }
+
+    &.shepherd-button-secondary {
+      background: var(--mantine-color-gray-4);
+      color: var(--mantine-color-gray-8);
+
+      &:hover {
+        background: var(--mantine-color-gray-5);
+      }
+    }
+  }
+
+  .shepherd-cancel-icon {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .shepherd-arrow {
+    fill: white;
+  }
+
+  &.shepherd-element-attached-bottom {
+    .shepherd-arrow {
+      fill: var(--mantine-color-blue-6);
+    }
+  }
+}
+
+// Modal overlay styling
+.shepherd-modal-overlay-container {
+  background: rgba(0, 0, 0, 0.5);
+}
