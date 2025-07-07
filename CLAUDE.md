@@ -73,30 +73,44 @@ VITE_SERVER_URL=http://localhost:3001
 ## Development Guidelines
 
 ### Frontend Development
-- Always use Mantine components and their Stack/Group for layout
-- Create `.module.scss` files for component styling
-- Use Mantine CSS variables for colors: `var(--mantine-color-red-5)`
-- Use `@mantine/form` hook for all forms
-- Use MobxQuery/MobxMutation for data fetching
-- Icons from `@tabler/icons-react`
+- **Always use Mantine components** and their Stack/Group for layout
+- **Component files**: Name in `PascalCase.tsx` (e.g., `UserProfile.tsx`)
+- **Style files**: Create `.module.scss` files with matching names (e.g., `UserProfile.module.scss`)
+- **Colors**: Use Mantine CSS variables: `var(--mantine-color-red-5)`
+- **Typography**: Use `Text` component from Mantine for all text content
+- **Forms**: Use `@mantine/form` hook for all forms
+- **Data fetching**: Use MobxQuery for queries, MobxMutation for mutations
+- **Icons**: Use `@tabler/icons-react` package
+- **Responsiveness**: Use Mantine's responsive props (`hiddenFrom`/`visibleFrom`) over custom media queries
+- **NPM packages**: Install in webapp folder (it's a workspace with its own package.json)
 
 ### Backend Development
 - Follow NestJS module pattern: module, controller, service
 - Use DTOs for request validation with class-validator
 - Implement guards for authentication (`@UseGuards(JwtAuthGuard)`)
 - Handle errors with proper HTTP exceptions
+- Use path aliases: `@services/`, `@features/`
 
 ### Fullstack Feature Development
-1. Update `server/prisma/schema.prisma` and run migrations
-2. Generate/update NestJS module, service, controller
-3. Register new modules in `app.module.ts`
-4. Create/update frontend API file in `webapp/src/api/`
-5. Create UI components using the API
+1. **Update schema**: Edit `server/prisma/schema.prisma` and run `npx prisma migrate dev`
+2. **Generate backend**: Create/update NestJS module, service, controller
+   ```bash
+   nest g module <entity>
+   nest g service <entity>
+   nest g controller <entity>
+   ```
+3. **Register module**: Add to imports array in `app.module.ts`
+4. **Create API layer**: Update/create file in `webapp/src/api/`
+   - Use shared `api` instance from `index.ts`
+   - Add TypeScript typings matching DTOs
+5. **Build UI**: Create components using the API functions
+6. **Test**: Run `npm run tsc` in webapp to check for TypeScript errors
 
 ### Code Quality Checks
-- Run `npm run tsc` in webapp after making changes
+- **Always run** `npm run tsc` in webapp after making changes
 - Run `npm run lint` in both server and webapp
 - Test API endpoints with the REPL: `npm run repl` in server
+- For visual testing, consider using Puppeteer MCP for screenshots and interaction testing
 
 ## Key Features & Patterns
 
