@@ -63,6 +63,7 @@ OPENAI_API_KEY=...
 SMTP2GO_API_KEY=...
 SMTP2GO_BASE_URL=https://api.smtp2go.com/v3/
 FRONTEND_URL=http://localhost:5173
+REQUIRE_REGISTRATION_TOKEN=true  # Set to false to disable token requirement
 ```
 
 For webapp, create `.env.local`:

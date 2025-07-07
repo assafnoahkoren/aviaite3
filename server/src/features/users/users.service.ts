@@ -7,25 +7,81 @@ import { smtpService } from '@services/smtp';
 import { randomBytes } from 'crypto';
 import { ENV } from '@services/env';
 import { JwtUtil } from '@services/jwt';
+import { VerificationToken } from '../../../generated/prisma';
 
 @Injectable()
 export class UsersService {
-// get(UsersService).register({ fullName: 'assaf', email: 'assafnoahkoren@gmail.com', password: '123123' })
+	private async validateRegistrationToken(token: string): Promise<VerificationToken> {
+		const registrationToken = await prisma.verificationToken.findFirst({
+			where: {
+				token,
+				kind: 'registration_permit',
+				deletedAt: null,
+			},
+		});
+
+		if (!registrationToken) {
+			throw new BadRequestException('Invalid registration token');
+		}
+
+		if (registrationToken.usedAt) {
+			throw new BadRequestException('This registration token has already been used');
+		}
+
+		if (registrationToken.expiresAt < new Date()) {
+			throw new BadRequestException('This registration token has expired');
+		}
+
+		return registrationToken;
+	}
+
+// get(UsersService).register({ fullName: 'assaf', email: 'assafnoahkoren@gmail.com', password: '123123', token: 'test-token' })
 	async register(dto: RegisterDto): Promise<any> {
+		let registrationToken: VerificationToken | null = null;
+
+		// Only validate token if required by environment
+		if (ENV.REQUIRE_REGISTRATION_TOKEN) {
+			if (!dto.token) {
+				throw new BadRequestException('Registration token is required');
+			}
+			registrationToken = await this.validateRegistrationToken(dto.token);
+		}
+
+		// Check if email already exists
 		const existing = await prisma.user.findFirst({ where: { email: dto.email } });
 		if (existing) {
 			throw new BadRequestException('Email already in use');
 		}
+
+		// Create user and optionally mark token as used in a transaction
 		const hashed = await bcrypt.hash(dto.password, 10);
-		const user = await prisma.user.create({
-			data: {
-				fullName: dto.fullName,
-				email: dto.email,
-				password: hashed,
-				verified: false,
-			},
+		
+		const result = await prisma.$transaction(async (tx) => {
+			// Create user
+			const user = await tx.user.create({
+				data: {
+					fullName: dto.fullName,
+					email: dto.email,
+					password: hashed,
+					verified: false,
+				},
+			});
+
+			// Mark token as used if we validated one
+			if (registrationToken) {
+				await tx.verificationToken.update({
+					where: { id: registrationToken.id },
+					data: {
+						usedAt: new Date(),
+						usedByUserId: user.id,
+					},
+				});
+			}
+
+			return user;
 		});
-		await this.sendVerificationEmail(user);
+
+		await this.sendVerificationEmail(result);
 		return { message: 'Registration successful. Please check your email to verify your account.' };
 	}
 
