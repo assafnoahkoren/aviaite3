@@ -32,6 +32,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "rxjs": "^7.8.2",
+    "shepherd.js": "^11.2.0",
     "unist-util-visit": "^5.0.0",
     "uuid": "^11.1.0"
   },
@@ -40,6 +41,7 @@
     "@types/hast": "^3.0.4",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "@types/shepherd.js": "^11.0.1",
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
