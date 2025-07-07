@@ -3,11 +3,13 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UserSettingsController } from './user-settings.controller';
 import { UserSettingsService } from './user-settings.service';
+import { TutorialController } from './tutorial.controller';
+import { TutorialService } from './tutorial.service';
 import { RolesGuard } from './guards/roles.guard';
 
 @Module({
-  controllers: [UsersController, UserSettingsController],
-  providers: [UsersService, UserSettingsService, RolesGuard],
+  controllers: [UsersController, UserSettingsController, TutorialController],
+  providers: [UsersService, UserSettingsService, TutorialService, RolesGuard],
   exports: [RolesGuard],
 })
 export class UsersModule {} 
