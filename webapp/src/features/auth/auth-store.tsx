@@ -7,7 +7,7 @@ import type { AxiosError } from 'axios';
 
 export class AuthStore {
   loginMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, AxiosError, { email: string; password: string }>;
-  registerMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { fullName: string; email: string; password: string }>;
+  registerMutation: MobxMutation<{ message: string; userId: string; token?: string; user?: User }, unknown, { fullName: string; email: string; password: string; token?: string }>;
   verifyMutation: MobxMutation<{ success: boolean; message: string; token: string; user?: User }, unknown, { userId: string; token: string }>;
   createResetPasswordTokenMutation: MobxMutation<{ success: boolean; message: string }, unknown, string>;
   resetPasswordMutation: MobxMutation<{ success: boolean; message: string; user?: User }, unknown, { userId: string; token: string; newPassword: string }>;

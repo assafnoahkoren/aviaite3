@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TextInput,
   PasswordInput,
@@ -13,20 +13,29 @@ import {
 } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useStore_Auth } from './auth-store';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import classes from './login-page.module.scss';
 import { IconUser, IconAt, IconLock } from '@tabler/icons-react';
 import { AuthHero } from './AuthHero';
 
 export const RegisterPage = observer(() => {
   const auth = useStore_Auth();
+  const [searchParams] = useSearchParams();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const tokenFromUrl = searchParams.get('token');
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    auth.registerMutation.mutate({ fullName, email, password });
+    auth.registerMutation.mutate({ fullName, email, password, token: token || undefined });
   };
 
   return (
@@ -47,7 +56,19 @@ export const RegisterPage = observer(() => {
             <Title order={2} mb="md" ta="center">
               Register
             </Title>
-            {auth.registerMutation.isSuccess ? (
+            {!token ? (
+              <Stack align="center" gap="md">
+                <Alert color="red" icon={<IconLock size={16} />}>
+                  Registration requires an invitation token.
+                </Alert>
+                <Text ta="center" c="dimmed">
+                  Please contact your administrator to receive a registration link.
+                </Text>
+                <Button component={Link} to="/login" variant="subtle">
+                  Back to Login
+                </Button>
+              </Stack>
+            ) : auth.registerMutation.isSuccess ? (
               <Stack align="center" gap="md">
                 <Text ta="center" c="dimmed">
                   We sent a verification email to your address. Please check your inbox.

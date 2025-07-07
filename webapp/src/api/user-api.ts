@@ -27,6 +27,7 @@ export interface RegisterDto {
   fullName: string;
   email: string;
   password: string;
+  token?: string;
 }
 
 export interface LoginDto {
