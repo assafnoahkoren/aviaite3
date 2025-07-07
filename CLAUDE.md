@@ -39,11 +39,12 @@ This is a monorepo with two main packages:
 - **webapp/**: React frontend with Vite, MobX state management, and Mantine UI
 
 ### Backend Architecture
-- **NestJS** modules in `server/src/features/` (chat, users)
+- **NestJS** modules in `server/src/features/` (chat, users, admin)
 - **Prisma** for PostgreSQL database access
 - **JWT** authentication with email verification and password reset
 - **Services** in `server/src/services/` for shared functionality
 - Path aliases: `@services/`, `@features/`
+- **Server-Sent Events** for real-time chat streaming
 
 ### Frontend Architecture
 - **React 18** with TypeScript and Vite
@@ -60,8 +61,13 @@ DATABASE_URL=postgresql://...
 JWT_SECRET=...
 OPENAI_API_KEY=...
 SMTP2GO_API_KEY=...
-SMTP2GO_BASE_URL=...
-FRONTEND_URL=...
+SMTP2GO_BASE_URL=https://api.smtp2go.com/v3/
+FRONTEND_URL=http://localhost:5173
+```
+
+For webapp, create `.env.local`:
+```
+VITE_SERVER_URL=http://localhost:3001
 ```
 
 ## Development Guidelines
@@ -74,6 +80,12 @@ FRONTEND_URL=...
 - Use MobxQuery/MobxMutation for data fetching
 - Icons from `@tabler/icons-react`
 
+### Backend Development
+- Follow NestJS module pattern: module, controller, service
+- Use DTOs for request validation with class-validator
+- Implement guards for authentication (`@UseGuards(JwtAuthGuard)`)
+- Handle errors with proper HTTP exceptions
+
 ### Fullstack Feature Development
 1. Update `server/prisma/schema.prisma` and run migrations
 2. Generate/update NestJS module, service, controller
@@ -85,3 +97,29 @@ FRONTEND_URL=...
 - Run `npm run tsc` in webapp after making changes
 - Run `npm run lint` in both server and webapp
 - Test API endpoints with the REPL: `npm run repl` in server
+
+## Key Features & Patterns
+
+### Authentication Flow
+- Login/register endpoints in `server/src/features/users/`
+- JWT tokens stored in localStorage on frontend
+- Auth state managed by `webapp/src/features/auth/auth-store.tsx`
+- Protected routes use `ProtectedRoute` component
+
+### Chat System
+- OpenAI integration in `server/src/features/chat/chat.service.ts`
+- Server-Sent Events for streaming responses
+- Thread-based conversations stored in database
+- Frontend chat UI in `webapp/src/features/chat-v2/`
+
+### API Communication
+- All API calls go through `webapp/src/api/`
+- Uses axios with interceptors for auth tokens
+- Type-safe API functions matching backend DTOs
+- Error handling with MobX mutations
+
+### Database Schema
+- User model with roles (USER, ADMIN)
+- Organization-based multi-tenancy
+- Chat threads and messages
+- Subscription and billing models
