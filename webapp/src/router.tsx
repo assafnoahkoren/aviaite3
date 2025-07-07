@@ -21,6 +21,7 @@ import { AdminUsers } from './features/admin/pages/AdminUsers';
 import { AdminOrganizations } from './features/admin/pages/AdminOrganizations';
 import { AdminProducts } from './features/admin/pages/AdminProducts';
 import { AdminSubscriptions } from './features/admin/pages/AdminSubscriptions';
+import { AdminRegistrationPermits } from './features/admin/pages/AdminRegistrationPermits';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -77,6 +78,7 @@ export const router = createBrowserRouter([
           { path: 'organizations', element: <AdminOrganizations /> },
           { path: 'products', element: <AdminProducts /> },
           { path: 'subscriptions', element: <AdminSubscriptions /> },
+          { path: 'registration-permits', element: <AdminRegistrationPermits /> },
         ],
       },
     ],

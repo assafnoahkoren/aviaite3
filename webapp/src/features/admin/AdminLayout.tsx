@@ -60,6 +60,12 @@ export function AdminLayout() {
           >
             Subscriptions
           </NavLink>
+          <NavLink 
+            to="/admin/registration-permits"
+            className={({ isActive }) => isActive ? styles.activeLink : styles.navLink}
+          >
+            Registration Permits
+          </NavLink>
         </nav>
 
         <div className={styles.sidebarFooter}>
