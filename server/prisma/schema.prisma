@@ -49,6 +49,8 @@ model User {
   UserTokenUsages      UserTokenUsage[]
   VerificationTokens   VerificationToken[]   // Tokens used by this user
   UserTutorialStatuses UserTutorialStatus[]
+  onboardingStatus     Json?                 // Stores current step and step data
+  onboardingCompletedAt DateTime?
   deletedAt            DateTime?
 
   @@index([organizationId])
