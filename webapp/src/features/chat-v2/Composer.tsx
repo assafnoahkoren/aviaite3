@@ -1,12 +1,24 @@
 import { Textarea, Group, ActionIcon, Tooltip } from '@mantine/core';
 import { IconPhoto, IconPaperclip, IconSend } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
 import { BiEvents } from '../../mixpanel';
+
+// Global reference for tour to access
+(window as any).__composerSetValue = null;
+
 export const Composer = observer(() => {
 	const [value, setValue] = useState('');
 	const chatStore = useStore_Chat();
+
+	// Expose setValue to window for tour access
+	useEffect(() => {
+		(window as any).__composerSetValue = setValue;
+		return () => {
+			(window as any).__composerSetValue = null;
+		};
+	}, []);
 
 	const handleSend = () => {
 		if (!value.trim() || !chatStore.currentThread) return;
@@ -34,6 +46,7 @@ export const Composer = observer(() => {
 				autosize
 				minRows={1}
 				maxRows={5}
+				data-tour="chat-composer"
 				styles={{
 					input: {
 						padding: '10px 20px',

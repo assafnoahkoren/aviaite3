@@ -12,12 +12,13 @@ import {
   Button,
   Badge,
 } from '@mantine/core';
-import { IconChevronDown, IconLogout, IconRobot, IconSettings } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconRobot, IconSettings, IconHelp } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
 import { observer } from 'mobx-react-lite';
 import { BiEvents } from '../../mixpanel';
+import { createMainTour } from '../onboarding/tours/mainTour';
 
 interface HomeHeaderProps {
   opened: boolean;
@@ -33,6 +34,11 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
     BiEvents.switchAssistant(assistantId);
     settingsStore.setCurrentAssistantId(assistantId);
     settingsStore.closeSwitchAssistantModal();
+  };
+
+  const handleStartTour = () => {
+    const tour = createMainTour();
+    tour.start();
   };
 
   return (
@@ -59,7 +65,7 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
       <Group h="100%" px="md" justify="space-between" style={{ position: 'relative' }}>
         <Group wrap="nowrap" gap={6}>
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Group gap="xs" wrap="nowrap" align="end" visibleFrom="sm">
+          <Group gap="xs" wrap="nowrap" align="end" visibleFrom="sm" data-tour="logo">
             <img src="/logos/ace-dark.png" height={24} />
             <Text fw={600} size="xs" opacity={0.5} style={{ lineHeight: '1' }}>
               by aviate
@@ -118,6 +124,12 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
               onClick={settingsStore.openSwitchAssistantModal}
             >
               Switch assistant
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconHelp style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+              onClick={handleStartTour}
+            >
+              Start tour
             </Menu.Item>
             {auth.user?.role === 'ADMIN' && (
               <Menu.Item

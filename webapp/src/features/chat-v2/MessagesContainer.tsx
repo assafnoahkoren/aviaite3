@@ -33,7 +33,7 @@ export const MessagesContainer = observer(() => {
 	return (
 		<Box className={classes.root} style={{ flex: 1 }}>
 			<ScrollArea style={{ height: '100%' }}>
-				<Stack gap="lg" p="0">
+				<Stack gap="lg" p="0" data-tour="messages-list">
 					<Space h="md" />
 					{messages.map((message) => {
 						if (message.role === 'user') {

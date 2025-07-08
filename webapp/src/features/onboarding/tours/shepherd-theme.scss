@@ -2,6 +2,25 @@
 
 // Custom theme for the tour
 .shepherd-theme-custom {
+  // Add offset based on tooltip position using Popper's data attribute
+  &.shepherd-element {
+    // Default offset for bottom placement
+    &[data-popper-placement^="bottom"] {
+      transform: translateY(32px);
+    }
+    
+    // Offset for top placement (opposite direction)
+    &[data-popper-placement^="top"] {
+      transform: translateY(-32px);
+    }
+    
+    // No offset for left/right placements
+    &[data-popper-placement^="left"],
+    &[data-popper-placement^="right"] {
+      transform: translateY(0);
+    }
+  }
+  
   .shepherd-content {
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
@@ -89,4 +108,35 @@
 // Modal overlay styling
 .shepherd-modal-overlay-container {
   background: rgba(0, 0, 0, 0.5);
+  
+  // Style the SVG cutout
+  svg {
+    rect, path {
+      // Add stroke for the border effect
+      stroke: var(--mantine-color-blue-6);
+      stroke-width: 2;
+    }
+  }
+}
+
+// Additional highlight effect for the modal opening
+.shepherd-modal-overlay-opening {
+  box-shadow: 0 0 30px 10px rgba(59, 130, 246, 0.5);
+  animation: shepherd-glow 2s ease-in-out infinite;
+}
+
+@keyframes shepherd-glow {
+  0%, 100% {
+    box-shadow: 0 0 30px 10px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px 15px rgba(59, 130, 246, 0.7);
+  }
+}
+
+// Highlight placeholder during tour
+.shepherd-enabled [data-tour="chat-composer"] textarea::placeholder {
+  color: var(--mantine-color-blue-6);
+  opacity: 0.8;
+  font-weight: 500;
 }
