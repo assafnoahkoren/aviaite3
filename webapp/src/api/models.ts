@@ -8,6 +8,26 @@ export interface User {
   verified: boolean;
   organizationId?: string | null;
   role: UserRole;
+  onboardingStatus?: OnboardingStatus | null;
+  onboardingCompletedAt?: string | null;
+}
+
+export interface OnboardingStatus {
+  currentStep: number;
+  totalSteps: number;
+  stepData?: OnboardingStepData;
+}
+
+export interface OnboardingStepData {
+  preferences?: {
+    aiModel?: string;
+    theme?: string;
+    notifications?: boolean;
+    completed?: boolean;
+  };
+  welcome?: {
+    completed?: boolean;
+  };
 }
 
 export type UserRole = 'ADMIN' | 'USER';
