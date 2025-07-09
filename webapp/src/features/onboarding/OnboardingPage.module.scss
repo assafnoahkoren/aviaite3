@@ -1,0 +1,72 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mantine-color-gray-0);
+  padding: 0 1rem;
+}
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  min-height: 500px;
+}
+
+.slideContent {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.dots {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mantine-color-gray-4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &.active {
+    background: var(--mantine-color-blue-6);
+    transform: scale(1.2);
+  }
+}
+
+.fleetOption {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.exampleBox {
+  background: var(--mantine-color-gray-1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
