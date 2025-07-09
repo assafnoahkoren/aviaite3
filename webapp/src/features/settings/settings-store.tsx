@@ -32,17 +32,8 @@ export class SettingsStore {
       queryFn: listAssistants,
     });
 
-    reaction(
-      () => ({
-        settings: this.settings,
-        assistants: this.assistantsQuery.data,
-      }),
-      ({ settings, assistants }) => {
-        if (settings && !settings.currentAssistantId && assistants && assistants.length > 0) {
-          this.setCurrentAssistantId(assistants[0].id);
-        }
-      },
-    );
+    // Removed automatic assistant selection to avoid race conditions
+    // Assistant selection should only happen through onboarding or manual selection
   }
 
   openSwitchAssistantModal = () => {

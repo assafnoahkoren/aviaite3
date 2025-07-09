@@ -13,12 +13,21 @@ export function useFirstTimeExperience() {
 	useEffect(() => {
 		const hasChats = chatHistoryStore.chatsQuery.data && chatHistoryStore.chatsQuery.data.length > 0;
 		const isChatsLoading = chatHistoryStore.chatsQuery.isLoading;
-		const currentAssistant = settingsStore.assistants.find(a => a.id === settingsStore.assistants[0].id);
+		const isSettingsLoading = settingsStore.isLoading;
+		
+		// Use the user's selected assistant or fall back to first available
+		const assistantToUse = settingsStore.settings?.currentAssistantId 
+			? settingsStore.assistants.find(a => a.id === settingsStore.settings?.currentAssistantId)
+			: settingsStore.assistants[0];
 
-		if (!isChatsLoading && !hasChats && currentAssistant && !alreadyRun) {
+		if (!isChatsLoading && !isSettingsLoading && !hasChats && assistantToUse && !alreadyRun) {
 			setAlreadyRun(true);
-			settingsStore.setCurrentAssistantId(currentAssistant?.id);
-			chatHistoryStore.createChatMutation.mutateAsync({ assistantId: currentAssistant.id, profileId: currentAssistant.id })
+			// Don't set the assistant ID - let onboarding handle that
+			// Just create a chat with the appropriate assistant
+			chatHistoryStore.createChatMutation.mutateAsync({ 
+				assistantId: assistantToUse.id, 
+				profileId: assistantToUse.id 
+			})
 				.then((newChat: Thread) => {
 					chatStore.setCurrentChat(newChat);
 				});
@@ -26,8 +35,11 @@ export function useFirstTimeExperience() {
 	}, [
 		chatHistoryStore.chatsQuery.data,
 		chatHistoryStore.chatsQuery.isLoading,
-		settingsStore.currentAssistant,
+		settingsStore.isLoading,
+		settingsStore.settings?.currentAssistantId,
+		settingsStore.assistants,
 		chatHistoryStore.createChatMutation,
 		chatStore,
+		alreadyRun,
 	]);
 } 
