@@ -1,31 +1,41 @@
 import { Textarea, Group, ActionIcon, Tooltip } from '@mantine/core';
 import { IconPhoto, IconPaperclip, IconSend } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore_Chat } from '../chat/chat-store';
 import { observer } from 'mobx-react-lite';
 import { BiEvents } from '../../mixpanel';
 
 // Global reference for tour to access
 (window as any).__composerSetValue = null;
+(window as any).__composerHandleSend = null;
 
 export const Composer = observer(() => {
 	const [value, setValue] = useState('');
 	const chatStore = useStore_Chat();
+	const valueRef = useRef(value);
 
-	// Expose setValue to window for tour access
+	// Keep ref in sync with state
 	useEffect(() => {
-		(window as any).__composerSetValue = setValue;
-		return () => {
-			(window as any).__composerSetValue = null;
-		};
-	}, []);
+		valueRef.current = value;
+	}, [value]);
 
 	const handleSend = () => {
-		if (!value.trim() || !chatStore.currentThread) return;
-		BiEvents.sendMessage(value);
-		chatStore.sendMessage(value);
+		const currentValue = valueRef.current;
+		if (!currentValue.trim() || !chatStore.currentThread) return;
+		BiEvents.sendMessage(currentValue);
+		chatStore.sendMessage(currentValue);
 		setValue('');
 	};
+
+	// Expose setValue and handleSend to window for tour access
+	useEffect(() => {
+		(window as any).__composerSetValue = setValue;
+		(window as any).__composerHandleSend = handleSend;
+		return () => {
+			(window as any).__composerSetValue = null;
+			(window as any).__composerHandleSend = null;
+		};
+	}, []);
 
 	return (
 		<Group gap="sm" wrap="nowrap" align="center">

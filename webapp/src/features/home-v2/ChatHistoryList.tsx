@@ -18,7 +18,7 @@ export const ChatHistoryList = observer(() => {
   const chats = chatHistoryStore.chatsQuery.data ?? [];
 
   return (
-    <Stack gap="0" p="sm" pt="0" className={classes.scrollable} style={{ flex: 1, overflowY: 'auto' }}>
+    <Stack gap="0" p="sm" pt="0" className={classes.scrollable} style={{ flex: 1, overflowY: 'auto' }} data-tour="chat-history">
       {chats.map((chat) => (
         <ChatCard key={chat.id} chat={chat} />
       ))}

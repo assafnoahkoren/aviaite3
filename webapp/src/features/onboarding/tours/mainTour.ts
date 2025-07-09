@@ -7,32 +7,32 @@ export function createMainTour(): Shepherd.Tour {
     useModalOverlay: true,
     defaultStepOptions: {
       cancelIcon: {
-        enabled: true
+        enabled: false
       },
+      arrow: false,
       scrollTo: true,
       classes: 'shepherd-theme-custom',
-      modalOverlayOpeningPadding: 12,
-      modalOverlayOpeningRadius: 12
+      modalOverlayOpeningPadding: 16,
+      modalOverlayOpeningRadius: 16
     }
   });
 
   // Step 1: Logo Introduction
   tour.addStep({
     id: 'logo-intro',
-    title: 'Welcome to Ace by Aviate!',
-    text: 'Hello! We\'re Ace, your AI-powered assistant designed to help you work smarter and faster. Ace combines cutting-edge AI technology with an intuitive interface to streamline your workflow.',
+    text: '👋 Welcome to ACE - your AI co-pilot for procedures and policies',
     attachTo: {
-      element: '[data-tour="ace-logo"]',
+      element: '[data-tour="logo"]',
       on: 'bottom'
     },
     buttons: [
       {
-        text: 'Skip Tour',
+        text: 'Skip',
         action: tour.cancel,
         classes: 'shepherd-button-secondary'
       },
       {
-        text: 'Nice to meet you!',
+        text: 'Next',
         action: tour.next
       }
     ]
@@ -41,8 +41,7 @@ export function createMainTour(): Shepherd.Tour {
   // Step 2: Chat Composer
   tour.addStep({
     id: 'chat-composer',
-    title: 'Start Chatting with Ace',
-    text: 'Type your question or request here and press Enter to send. You can ask Ace anything - from coding questions to general assistance.',
+    text: '💬 Ask anything about procedures, MELs, or SOPs',
     attachTo: {
       element: '[data-tour="chat-composer"]',
       on: 'top'
@@ -59,7 +58,7 @@ export function createMainTour(): Shepherd.Tour {
           // Use the exposed setValue function
           const setValue = (window as any).__composerSetValue;
           if (setValue) {
-            const message = "What can you help me with today?";
+            const message = "What is the CABIN ALTITUDE procedure?";
             let currentText = '';
             let charIndex = 0;
             
@@ -74,7 +73,7 @@ export function createMainTour(): Shepherd.Tour {
                 charIndex++;
                 
                 // Continue typing
-                (tour as any).__typeTimeout = setTimeout(simulateTyping, 30);
+                (tour as any).__typeTimeout = setTimeout(simulateTyping, 40);
               }
             };
             
@@ -103,23 +102,17 @@ export function createMainTour(): Shepherd.Tour {
         classes: 'shepherd-button-secondary'
       },
       {
-        text: 'Send & Continue',
+        text: 'Next',
         action: () => {
-          // Find the send button (ActionIcon with IconSend)
-          const composerContainer = document.querySelector('[data-tour="chat-composer"]')?.closest('.mantine-Group-root');
-          const sendButton = composerContainer?.querySelector('button:last-child') as HTMLButtonElement;
-          
-          if (sendButton && !sendButton.disabled) {
-            sendButton.click();
-            
-            // Wait for the message to be sent and response to start
-            setTimeout(() => {
-              tour.next();
-            }, 2000);
-          } else {
-            // If can't send, just proceed
-            tour.next();
+          // Send the message before moving to next step
+          const handleSend = (window as any).__composerHandleSend;
+          if (handleSend) {
+            handleSend();
           }
+          // Wait a bit for the message to be sent before moving to next step
+          setTimeout(() => {
+            tour.next();
+          }, 500);
         }
       }
     ]
@@ -128,8 +121,7 @@ export function createMainTour(): Shepherd.Tour {
   // Step 3: Messages List
   tour.addStep({
     id: 'messages-list',
-    title: 'Your Conversation',
-    text: 'Here you can see your messages and Ace\'s responses. Watch as Ace processes your question and provides helpful answers in real-time!',
+    text: '📎 Every answer includes manual references - trust the source',
     attachTo: {
       element: '[data-tour="messages-list"]',
       on: 'bottom'
@@ -150,8 +142,7 @@ export function createMainTour(): Shepherd.Tour {
   // Step 4: Create New Chat
   tour.addStep({
     id: 'new-chat',
-    title: 'Start a New Conversation',
-    text: 'Click the "New Chat" button to begin a fresh conversation with the AI assistant.',
+    text: '✨ Start fresh conversations anytime',
     attachTo: {
       element: '[data-tour="new-chat-button"]',
       on: 'bottom'
@@ -169,35 +160,12 @@ export function createMainTour(): Shepherd.Tour {
     ]
   });
 
-  // Step 5: Chat History
+  // Step 5: Assistant Selector
   tour.addStep({
-    id: 'chat-history',
-    title: 'Your Chat History',
-    text: 'All your previous conversations are saved here. Click on any chat to continue where you left off.',
+    id: 'assistant-selector',
+    text: '🤖 Switch between different aircraft models here',
     attachTo: {
-      element: '[data-tour="chat-history"]',
-      on: 'right'
-    },
-    buttons: [
-      {
-        text: 'Back',
-        action: tour.back,
-        classes: 'shepherd-button-secondary'
-      },
-      {
-        text: 'Next',
-        action: tour.next
-      }
-    ]
-  });
-
-  // Step 6: Settings
-  tour.addStep({
-    id: 'settings',
-    title: 'Settings',
-    text: 'Access your account settings and preferences here.',
-    attachTo: {
-      element: '[data-tour="settings-button"]',
+      element: '[data-tour="assistant-selector"]',
       on: 'bottom'
     },
     buttons: [

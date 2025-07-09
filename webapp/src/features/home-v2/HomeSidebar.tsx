@@ -45,12 +45,13 @@ export const HomeSidebar = observer(() => {
           onClick={handleNewChat}
           loading={chatHistoryStore.createChatMutation.isLoading}
           disabled={!currentAssistant || chatHistoryStore.createChatMutation.isLoading}
+          data-tour="new-chat-button"
         >
           New Chat
         </Button>
       </Box>
       <Group p="md" justify="center">
-        <Group gap="xs" align="center" justify='center' w="max-content">
+        <Group gap="xs" align="center" justify='center' w="max-content" data-tour="assistant-selector">
           <Badge variant="light" size="lg" style={{ flexGrow: 1 }}>
             <Group gap="xs">
               <IconRobot size={16} />

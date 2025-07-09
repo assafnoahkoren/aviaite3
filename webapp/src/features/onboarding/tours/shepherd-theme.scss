@@ -2,141 +2,108 @@
 
 // Custom theme for the tour
 .shepherd-theme-custom {
-  // Add offset based on tooltip position using Popper's data attribute
+  // Add offset based on tooltip position
   &.shepherd-element {
-    // Default offset for bottom placement
     &[data-popper-placement^="bottom"] {
-      transform: translateY(32px);
+      transform: translateY(24px);
     }
     
-    // Offset for top placement (opposite direction)
     &[data-popper-placement^="top"] {
-      transform: translateY(-32px);
+      transform: translateY(-24px);
     }
     
-    // No offset for left/right placements
-    &[data-popper-placement^="left"],
+    &[data-popper-placement^="left"] {
+      transform: translateX(-24px);
+    }
+    
     &[data-popper-placement^="right"] {
-      transform: translateY(0);
+      transform: translateX(24px);
     }
   }
   
   .shepherd-content {
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    background: white;
+    border: 1px solid var(--mantine-color-gray-2);
+    overflow: hidden;
   }
 
+  // Hide header completely
   .shepherd-header {
-    background: var(--mantine-color-blue-6);
-    color: white;
-    padding: 1rem;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .shepherd-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 0;
+    display: none;
   }
 
   .shepherd-text {
-    padding: 1rem;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: var(--mantine-color-gray-8);
+    padding: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--mantine-color-gray-7);
+    text-align: center;
+    font-weight: 500;
   }
 
   .shepherd-footer {
-    padding: 0 1rem 1rem;
+    padding: 0 1.5rem 1.5rem;
     display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.75rem;
   }
 
   .shepherd-button {
     background: var(--mantine-color-blue-6);
     border: none;
     color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
     font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    min-width: 80px;
 
     &:hover {
       background: var(--mantine-color-blue-7);
+      transform: translateY(-1px);
     }
 
     &.shepherd-button-secondary {
-      background: var(--mantine-color-gray-4);
-      color: var(--mantine-color-gray-8);
+      background: transparent;
+      color: var(--mantine-color-gray-6);
+      border: 1px solid var(--mantine-color-gray-3);
 
       &:hover {
-        background: var(--mantine-color-gray-5);
+        background: var(--mantine-color-gray-0);
+        border-color: var(--mantine-color-gray-4);
       }
     }
   }
 
-  .shepherd-cancel-icon {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 1.2rem;
-    position: absolute;
-    right: 0.5rem;
-    top: 0.5rem;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
+  // Hide cancel icon and arrow completely
+  .shepherd-cancel-icon,
   .shepherd-arrow {
-    fill: white;
-  }
-
-  &.shepherd-element-attached-bottom {
-    .shepherd-arrow {
-      fill: var(--mantine-color-blue-6);
-    }
+    display: none;
   }
 }
 
 // Modal overlay styling
 .shepherd-modal-overlay-container {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   
-  // Style the SVG cutout
+  // Remove border from SVG cutout
   svg {
     rect, path {
-      // Add stroke for the border effect
-      stroke: var(--mantine-color-blue-6);
-      stroke-width: 2;
+      stroke: none;
     }
   }
 }
 
-// Additional highlight effect for the modal opening
+// Remove highlight effect completely
 .shepherd-modal-overlay-opening {
-  box-shadow: 0 0 30px 10px rgba(59, 130, 246, 0.5);
-  animation: shepherd-glow 2s ease-in-out infinite;
+  box-shadow: none;
 }
 
-@keyframes shepherd-glow {
-  0%, 100% {
-    box-shadow: 0 0 30px 10px rgba(59, 130, 246, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px 15px rgba(59, 130, 246, 0.7);
-  }
-}
-
-// Highlight placeholder during tour
+// Remove blue placeholder highlighting
 .shepherd-enabled [data-tour="chat-composer"] textarea::placeholder {
-  color: var(--mantine-color-blue-6);
-  opacity: 0.8;
-  font-weight: 500;
+  // Keep default placeholder style
 }
