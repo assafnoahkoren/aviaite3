@@ -94,15 +94,15 @@ export function FleetSelectionSlide({ selectedFleet, onFleetSelect }: FleetSelec
                 withBorder
                 className={styles.fleetOption}
                 style={{
-                  borderColor: selectedFleet === 'B787' ? 'var(--mantine-color-blue-6)' : undefined,
-                  borderWidth: selectedFleet === 'B787' ? 2 : 1,
+                  borderColor: selectedFleet === '787' ? 'var(--mantine-color-blue-6)' : undefined,
+                  borderWidth: selectedFleet === '787' ? 2 : 1,
                   cursor: 'pointer',
                 }}
-                onClick={() => onFleetSelect('B787')}
+                onClick={() => onFleetSelect('787')}
               >
                 <Group justify="space-between" align="center">
                   <Text fw={500}>Boeing 787 Dreamliner</Text>
-                  {selectedFleet === 'B787' && (
+                  {selectedFleet === '787' && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -129,15 +129,15 @@ export function FleetSelectionSlide({ selectedFleet, onFleetSelect }: FleetSelec
                 withBorder
                 className={styles.fleetOption}
                 style={{
-                  borderColor: selectedFleet === 'B737' ? 'var(--mantine-color-blue-6)' : undefined,
-                  borderWidth: selectedFleet === 'B737' ? 2 : 1,
+                  borderColor: selectedFleet === '737' ? 'var(--mantine-color-blue-6)' : undefined,
+                  borderWidth: selectedFleet === '737' ? 2 : 1,
                   cursor: 'pointer',
                 }}
-                onClick={() => onFleetSelect('B737')}
+                onClick={() => onFleetSelect('737')}
               >
                 <Group justify="space-between" align="center">
                   <Text fw={500}>Boeing 737</Text>
-                  {selectedFleet === 'B737' && (
+                  {selectedFleet === '737' && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}

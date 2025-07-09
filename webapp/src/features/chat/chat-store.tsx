@@ -1,5 +1,5 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
-import { MobxQuery, MobxMutation, queryClient } from '../../infra/mobx-query';
+import { MobxQuery, MobxMutation, getQueryClient } from '../../infra/mobx-query';
 import {
   getChatMessages,
   type Message,

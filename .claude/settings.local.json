@@ -11,7 +11,8 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

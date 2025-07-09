@@ -5,10 +5,13 @@ import { MantineProvider } from '@mantine/core';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { useCreateStore_Auth } from './features/auth/auth-store';
+import { setQueryClient } from './infra/mobx-query';
 import './App.css';
 import { theme } from './theme';
 
 const queryClient = new QueryClient();
+// Set the query client for MobX queries to use the same instance
+setQueryClient(queryClient);
 
 function App() {
   const authStore = useCreateStore_Auth();

@@ -1,8 +1,20 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { QueryClient, QueryObserver, MutationObserver } from '@tanstack/react-query';
-import type { QueryObserverOptions, MutationObserverOptions } from '@tanstack/react-query';
+import { QueryObserver, MutationObserver } from '@tanstack/react-query';
+import type { QueryObserverOptions, MutationObserverOptions, QueryClient } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient();
+// This will be set by App.tsx to ensure we use the same QueryClient instance
+let queryClient: QueryClient;
+
+export function setQueryClient(client: QueryClient) {
+  queryClient = client;
+}
+
+export function getQueryClient() {
+  if (!queryClient) {
+    throw new Error('QueryClient not initialized. Call setQueryClient first.');
+  }
+  return queryClient;
+}
 
 export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends readonly unknown[] = readonly unknown[]> {
   data: TData | undefined = undefined;
@@ -15,7 +27,7 @@ export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends read
 
   constructor(options: QueryObserverOptions<TData, TError, TData, TData, TQueryKey>) {
     makeAutoObservable(this);
-    this.observer = new QueryObserver<TData, TError, TData, TData, TQueryKey>(queryClient, options);
+    this.observer = new QueryObserver<TData, TError, TData, TData, TQueryKey>(getQueryClient(), options);
     this.isLoading = true;
     this.observer.subscribe(result => {
       runInAction(() => {
@@ -34,11 +46,11 @@ export class MobxQuery<TData = unknown, TError = unknown, TQueryKey extends read
   }
 
   updateQuery(updater: (prev: TData | undefined) => TData) {
-    queryClient.setQueryData(this.observer.options.queryKey, updater as any);
+    getQueryClient().setQueryData(this.observer.options.queryKey, updater as any);
   }
 
   setQueryData(data: TData) {
-    queryClient.setQueryData(this.observer.options.queryKey, data as any);
+    getQueryClient().setQueryData(this.observer.options.queryKey, data as any);
   }
 }
 
@@ -53,7 +65,7 @@ export class MobxMutation<TData = unknown, TError = unknown, TVariables = void, 
 
   constructor(options: MutationObserverOptions<TData, TError, TVariables, TContext>) {
     makeAutoObservable(this);
-    this.observer = new MutationObserver(queryClient, options);
+    this.observer = new MutationObserver(getQueryClient(), options);
     this.observer.subscribe(result => {
       runInAction(() => {
         this.data = result.data;

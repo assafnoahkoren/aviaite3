@@ -12,13 +12,15 @@ import {
   Button,
   Badge,
 } from '@mantine/core';
-import { IconChevronDown, IconLogout, IconRobot, IconSettings, IconHelp } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconRobot, IconSettings, IconHelp, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
 import { observer } from 'mobx-react-lite';
 import { BiEvents } from '../../mixpanel';
 import { createMainTour } from '../onboarding/tours/mainTour';
+import { useResetOnboarding } from '../../api/onboarding-api';
+import { useNavigate } from 'react-router-dom';
 
 interface HomeHeaderProps {
   opened: boolean;
@@ -29,6 +31,8 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
   const [_userMenuOpened, setUserMenuOpened] = useState(false);
   const auth = useStore_Auth();
   const settingsStore = useStore_Settings();
+  const resetOnboarding = useResetOnboarding();
+  const navigate = useNavigate();
 
   const handleAssistantSelect = (assistantId: string) => {
     BiEvents.switchAssistant(assistantId);
@@ -39,6 +43,12 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
   const handleStartTour = () => {
     const tour = createMainTour();
     tour.start();
+  };
+
+  const handleResetOnboarding = async () => {
+    await resetOnboarding.mutateAsync();
+    // Navigate to onboarding page after reset
+    navigate('/onboarding');
   };
 
   return (
@@ -132,13 +142,22 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
               Start tour
             </Menu.Item>
             {auth.user?.role === 'ADMIN' && (
-              <Menu.Item
-                leftSection={<IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                component="a"
-                href="/admin"
-              >
-                Admin Panel
-              </Menu.Item>
+              <>
+                <Menu.Item
+                  leftSection={<IconRefresh style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                  onClick={handleResetOnboarding}
+                  disabled={resetOnboarding.isPending}
+                >
+                  Reset onboarding
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconSettings style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                  component="a"
+                  href="/admin"
+                >
+                  Admin Panel
+                </Menu.Item>
+              </>
             )}
             <Menu.Item
               leftSection={<IconLogout style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}

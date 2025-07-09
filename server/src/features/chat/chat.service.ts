@@ -6,7 +6,7 @@ import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
 
-const assistants = [
+export const assistants = [
   {
     id: 'asst_GiwIP1vySr6XctY9w7NvunLw',
     name: 'Co-Pilot-737-V2',
@@ -22,7 +22,7 @@ const assistants = [
   {
     id: 'asst_fZC1wK2LvYo8a93nqMVgGrnf',
     name: '787-NEW',
-    label: '787 NEW',
+    label: 'ACE 787 NEW',
     devAssistant: true,
     exampleQuestions: [
       'When is NADP1 preferable over NADP2 at LLBG?',

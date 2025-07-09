@@ -19,7 +19,7 @@ const TOTAL_SLIDES = 5;
 
 export function OnboardingPage() {
   const navigate = useNavigate();
-  const { data, isLoading } = useOnboardingStatus();
+  const { isLoading } = useOnboardingStatus();
   const updateProgress = useUpdateOnboardingProgress();
   const completeMutation = useCompleteOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -36,7 +36,7 @@ export function OnboardingPage() {
         totalSteps: TOTAL_SLIDES,
         stepData: {
           preferences: {
-            fleet: selectedFleet,
+            fleet: selectedFleet ? `elal-${selectedFleet.toLowerCase()}` : undefined,
             completed: nextSlide === 1,
           },
         },

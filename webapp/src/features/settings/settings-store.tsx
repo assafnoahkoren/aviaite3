@@ -84,6 +84,10 @@ export class SettingsStore {
     }
     return assistants.find((a) => a.id === currentAssistantId);
   }
+
+  refetchSettings() {
+    return this.settingsQuery.refetch();
+  }
 }
 
 export function useCreateStore_Settings(authStore: AuthStore) {

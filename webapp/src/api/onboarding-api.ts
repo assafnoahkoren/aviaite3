@@ -1,5 +1,5 @@
 import { api } from './index';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { OnboardingStatus, OnboardingStepData } from './models';
 
 export interface OnboardingResponse {
@@ -32,6 +32,11 @@ export const onboardingApi = {
     const response = await api.post<OnboardingResponse>('/api/users/onboarding/complete');
     return response.data;
   },
+
+  resetOnboarding: async (): Promise<OnboardingResponse> => {
+    const response = await api.post<OnboardingResponse>('/api/users/onboarding/reset');
+    return response.data;
+  },
 };
 
 // React Query hooks
@@ -43,14 +48,46 @@ export const useOnboardingStatus = () => {
 };
 
 export const useUpdateOnboardingProgress = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: onboardingApi.updateProgress,
+    onSuccess: () => {
+      // Invalidate settings query to refresh the assistant selection
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      // Also invalidate onboarding status
+      queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
+      // Force refetch all queries immediately
+      queryClient.refetchQueries({ queryKey: ['settings'] });
+    },
   });
 };
 
 export const useCompleteOnboarding = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: onboardingApi.completeOnboarding,
+    onSuccess: () => {
+      // Invalidate queries to ensure UI is up to date
+      queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+};
+
+export const useResetOnboarding = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: onboardingApi.resetOnboarding,
+    onSuccess: () => {
+      // Invalidate relevant queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
   });
 };
 

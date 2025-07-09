@@ -25,4 +25,9 @@ export class OnboardingController {
   async completeOnboarding(@Request() req: AuthedRequest) {
     return this.onboardingService.completeOnboarding(req.user.id);
   }
+
+  @Post('reset')
+  async resetOnboarding(@Request() req: AuthedRequest) {
+    return this.onboardingService.resetOnboarding(req.user.id);
+  }
 }
