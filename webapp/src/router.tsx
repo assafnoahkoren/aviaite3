@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   Navigate,
   Outlet,
+  useLocation,
 } from 'react-router-dom';
 import { LoginPage } from './features/auth/login-page';
 import { RegisterPage } from './features/auth/register-page';
@@ -22,21 +23,55 @@ import { AdminOrganizations } from './features/admin/pages/AdminOrganizations';
 import { AdminProducts } from './features/admin/pages/AdminProducts';
 import { AdminSubscriptions } from './features/admin/pages/AdminSubscriptions';
 import { AdminRegistrationPermits } from './features/admin/pages/AdminRegistrationPermits';
+import { useIsOnboardingRequired } from './api/onboarding-api';
+import { OnboardingPage } from './features/onboarding/OnboardingPage';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
   const auth = useStore_Auth();
+  const location = useLocation();
   const settingsStore = useCreateStore_Settings(auth);
   const chatHistoryStore = useCreateStore_ChatHistory();
   const chatStore = useCreateStore_Chat(settingsStore.store);
+  const { isRequired: isOnboardingRequired, currentStep, isLoading: isOnboardingLoading } = useIsOnboardingRequired();
+  
   const isAuthenticated = !!auth.user && !!auth.token;
+  const isOnboardingRoute = location.pathname.startsWith('/onboarding');
+  
+  // Show loading state while checking onboarding status
+  if (isAuthenticated && isOnboardingLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+  
   if (isAuthenticated && auth.user) {
     initMixpanelInstance(auth.user.id, {
       email: auth.user.email,
       name: auth.user.fullName,
       organizationId: auth.user.organizationId,
     });
+    
+    // If onboarding is required and user is not on onboarding page, redirect
+    if (isOnboardingRequired && !isOnboardingRoute) {
+      return <Navigate to={`/onboarding?step=${currentStep}`} replace />;
+    }
+    
+    // If onboarding is complete and user is on onboarding page, redirect to home
+    if (!isOnboardingRequired && isOnboardingRoute) {
+      return <Navigate to="/" replace />;
+    }
   }
+  
   return isAuthenticated ? (
     <settingsStore.context>
       <chatHistoryStore.context>
@@ -62,6 +97,7 @@ export const router = createBrowserRouter([
     element: <PrivateRoute />,
     children: [
       { path: '/', element: <HomeV2 /> },
+      { path: '/onboarding', element: <OnboardingPage /> },
     ],
   },
   // Admin routes
