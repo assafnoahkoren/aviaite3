@@ -4,15 +4,7 @@ import { Type } from 'class-transformer';
 export class PreferencesStepDto {
   @IsOptional()
   @IsString()
-  aiModel?: string;
-
-  @IsOptional()
-  @IsString()
-  theme?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  notifications?: boolean;
+  fleet?: string;
 
   @IsOptional()
   @IsBoolean()

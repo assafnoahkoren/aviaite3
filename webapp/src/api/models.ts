@@ -20,9 +20,7 @@ export interface OnboardingStatus {
 
 export interface OnboardingStepData {
   preferences?: {
-    aiModel?: string;
-    theme?: string;
-    notifications?: boolean;
+    fleet?: string;
     completed?: boolean;
   };
   welcome?: {
