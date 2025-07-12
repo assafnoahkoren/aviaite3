@@ -13,8 +13,8 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get('api/chat/assistants')
-  async listAssistants() {
-    return await this.chatService.listAllAssistants();
+  listAssistants() {
+    return this.chatService.listAllAssistants();
   }
 
   @UseGuards(AuthGuard)
@@ -54,8 +54,8 @@ export class ChatController {
 
   @UseGuards(AuthGuard)
   @Sse('api/chat/stream/:threadId')
-  stream(@Param('threadId') threadId: string): Observable<any> {
-    const stream = this.chatService.createStream(threadId);
+  stream(@Param('threadId') threadId: string, @Req() req: AuthedRequest): Observable<any> {
+    const stream = this.chatService.createStream(threadId, req.user.id);
 
     return new Observable((observer) => {
       stream.then(s => {

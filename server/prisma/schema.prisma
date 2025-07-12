@@ -130,6 +130,11 @@ enum BillingInterval {
   yearly
 }
 
+enum TokenType {
+  input
+  output
+}
+
 model Product {
   id                   String                @id @default(cuid())
   name                 String
@@ -206,10 +211,11 @@ model UserTokenUsage {
 
   organizationId String? // Denormalized from User for faster aggregation
 
-  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String?
 
   modelUsed   String // e.g. "gpt-4", "embedding-ada-002"
+  tokenType   TokenType // input or output tokens
   tokensUsed  Int
   costInCents Int // Total cost for this usage event in cents
 
@@ -226,6 +232,7 @@ model UserTokenUsage {
   @@index([deletedAt])
   @@index([organizationId, date])
   @@index([organizationId, productId, date])
+  @@index([tokenType])
 }
 
 model UserTutorialStatus {

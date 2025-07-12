@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
+import { TokenType } from '../../../generated/prisma';
 
 export const assistants = [
   {
@@ -63,7 +64,61 @@ export class ChatService {
     this.openai = new OpenAI({ apiKey: ENV.OPENAI_API_KEY });
   }
 
-  async listAllAssistants() {
+
+  /**
+   * Helper method to track token usage
+   */
+  private async trackTokenUsage(
+    userId: string,
+    organizationId: string | null,
+    modelUsed: string,
+    inputTokens: number,
+    outputTokens: number,
+  ) {
+    // Model pricing in cents per 1M tokens
+    const pricing: Record<string, { input: number; output: number }> = {
+      'gpt-3.5-turbo': { input: 50, output: 150 }, // $0.50/$1.50 per 1M tokens
+      'gpt-4': { input: 3000, output: 6000 }, // $30/$60 per 1M tokens
+      'gpt-4-turbo': { input: 1000, output: 3000 }, // $10/$30 per 1M tokens
+      'gpt-4o': { input: 500, output: 1500 }, // $5/$15 per 1M tokens
+    };
+
+    const modelPricing = pricing[modelUsed] || pricing['gpt-4'];
+    
+    // Calculate costs in cents
+    const inputCostCents = Math.ceil((inputTokens * modelPricing.input) / 1_000_000);
+    const outputCostCents = Math.ceil((outputTokens * modelPricing.output) / 1_000_000);
+
+    // Create usage records
+    const usageData = [
+      {
+        userId,
+        organizationId,
+        productId: null,
+        modelUsed,
+        tokenType: TokenType.input,
+        tokensUsed: inputTokens,
+        costInCents: inputCostCents,
+        date: new Date(),
+      },
+      {
+        userId,
+        organizationId,
+        productId: null,
+        modelUsed,
+        tokenType: TokenType.output,
+        tokensUsed: outputTokens,
+        costInCents: outputCostCents,
+        date: new Date(),
+      },
+    ];
+
+    await prisma.userTokenUsage.createMany({
+      data: usageData,
+    });
+  }
+
+  listAllAssistants() {
     // Returns a list of all assistants
     return assistants;
   }
@@ -190,10 +245,19 @@ export class ChatService {
   /**
    * Creates a stream for a thread.
    * @param threadId - The ID of the thread
+   * @param userId - The ID of the user (for token tracking)
    */
-  async createStream(threadId: string) {
+  async createStream(threadId: string, userId?: string) {
     const thread = await prisma.thread.findFirst({
       where: { openaiThreadId: threadId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            organizationId: true,
+          },
+        },
+      },
     });
     if (!thread) {
       throw new Error('Thread not found');
@@ -205,13 +269,46 @@ export class ChatService {
       assistant_id: assistantId,
     });
 
+    // Track token usage when the run completes
+    stream.on('end', async () => {
+      try {
+        // Get the final run from the stream
+        const run = stream.currentRun();
+        
+        // Check if usage data is available
+        if (run && run.usage) {
+          const effectiveUserId = userId || thread.userId;
+          // Assistants API model - check run details
+          const modelUsed = run.model || 'gpt-4';
+          
+          await this.trackTokenUsage(
+            effectiveUserId,
+            thread.User.organizationId,
+            modelUsed,
+            run.usage.prompt_tokens,
+            run.usage.completion_tokens,
+          );
+        }
+      } catch (error) {
+        console.error('Error tracking token usage for stream:', error);
+      }
+    });
+
     return stream;
   }
 
   async generateChatName(threadId: string, userId: string) {
-    // 1. get the thread from our DB
+    // 1. get the thread from our DB with user info
     const thread = await prisma.thread.findFirst({
       where: { openaiThreadId: threadId, userId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            organizationId: true,
+          },
+        },
+      },
     });
     if (!thread) {
       throw new Error('Thread not found or user does not have access');
@@ -254,6 +351,17 @@ export class ChatService {
     const chatName = response.choices[0].message.content
       ?.trim()
       .replace(/"/g, '');
+
+    // Track token usage
+    if (response.usage) {
+      await this.trackTokenUsage(
+        userId,
+        thread.User.organizationId,
+        'gpt-3.5-turbo',
+        response.usage.prompt_tokens,
+        response.usage.completion_tokens,
+      );
+    }
 
     // 4. update the thread in our DB
     await prisma.thread.update({
