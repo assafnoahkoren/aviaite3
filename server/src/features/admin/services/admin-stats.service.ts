@@ -211,18 +211,21 @@ export class AdminStatsService {
           costInCents: true,
         },
       }),
-      prisma.$queryRaw<Array<{ date: Date; totalTokens: bigint; totalCost: number }>>`
-        SELECT 
-          DATE(date) as date,
-          SUM("tokensUsed") as "totalTokens",
-          SUM("costInCents") as "totalCost"
-        FROM "UserTokenUsage"
-        WHERE date >= ${thirtyDaysAgo}
-        AND "deletedAt" IS NULL
-        GROUP BY DATE(date)
-        ORDER BY date DESC
-        LIMIT 30
-      `,
+      prisma.userTokenUsage.groupBy({
+        by: ['date'],
+        where: {
+          date: { gte: thirtyDaysAgo },
+          deletedAt: null,
+        },
+        _sum: {
+          tokensUsed: true,
+          costInCents: true,
+        },
+        orderBy: {
+          date: 'desc',
+        },
+        take: 30,
+      }),
     ]);
 
     return {
@@ -237,8 +240,8 @@ export class AdminStatsService {
       })),
       dailyUsage: dailyUsage.map(day => ({
         date: day.date,
-        totalTokens: Number(day.totalTokens),
-        totalCostCents: day.totalCost,
+        totalTokens: day._sum.tokensUsed || 0,
+        totalCostCents: day._sum.costInCents || 0,
       })),
     };
   }
