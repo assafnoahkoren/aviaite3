@@ -16,6 +16,13 @@ import { AuthGuard, AuthedRequest } from '../users/auth.guard';
 import { RolesGuard } from '../users/guards/roles.guard';
 import { Roles } from '../users/decorators/roles.decorator';
 import { Role } from '../../../generated/prisma';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  CreateSubscriptionDto,
+  UpdateSubscriptionDto,
+  ValidateAccessDto,
+} from './dto';
 
 @Controller('api/products')
 @UseGuards(AuthGuard)
@@ -39,14 +46,14 @@ export class ProductsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  async createProduct(@Body() createProductDto: any) {
+  async createProduct(@Body() createProductDto: CreateProductDto) {
     // Implementation will be added
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  async updateProduct(@Param('id') id: string, @Body() updateProductDto: any) {
+  async updateProduct(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     // Implementation will be added
   }
 
@@ -69,14 +76,14 @@ export class ProductsController {
   }
 
   @Post('subscriptions')
-  async createSubscription(@Body() createSubscriptionDto: any, @Req() req: AuthedRequest) {
+  async createSubscription(@Body() createSubscriptionDto: CreateSubscriptionDto, @Req() req: AuthedRequest) {
     // Implementation will be added
   }
 
   @Patch('subscriptions/:id')
   async updateSubscription(
     @Param('id') id: string,
-    @Body() updateSubscriptionDto: any,
+    @Body() updateSubscriptionDto: UpdateSubscriptionDto,
     @Req() req: AuthedRequest,
   ) {
     // Implementation will be added
@@ -88,7 +95,7 @@ export class ProductsController {
   }
 
   @Post('subscriptions/validate-access')
-  async validateAccess(@Body() validateAccessDto: any, @Req() req: AuthedRequest) {
+  async validateAccess(@Body() validateAccessDto: ValidateAccessDto, @Req() req: AuthedRequest) {
     // Implementation will be added
   }
 
