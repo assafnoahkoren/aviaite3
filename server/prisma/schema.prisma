@@ -47,6 +47,8 @@ model User {
   role                 Role                  @default(USER)
   Subscriptions        Subscription[]
   UserTokenUsages      UserTokenUsage[]
+  TokenPurchases       TokenPurchase[]
+  TokenBalances        TokenBalance[]
   VerificationTokens   VerificationToken[]   // Tokens used by this user
   UserTutorialStatuses UserTutorialStatus[]
   onboardingStatus     Json?                 // Stores current step and step data
@@ -132,14 +134,19 @@ model Product {
   id                   String                @id @default(cuid())
   name                 String
   description          String?
+  isRecurring          Boolean               @default(true) // true for subscriptions, false for one-time purchases
+  baseTokensPerMonth   Int?                  // Base tokens included with subscription (null for non-token products)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   prices               ProductPrice[]
   SubscriptionProducts SubscriptionProduct[]
   UserTokenUsages      UserTokenUsage[]
+  TokenPurchases       TokenPurchase[]
+  TokenBalances        TokenBalance[]
   deletedAt            DateTime?
 
   @@index([deletedAt])
+  @@index([isRecurring])
 }
 
 model ProductPrice {
@@ -197,6 +204,8 @@ model UserTokenUsage {
   User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
+  organizationId String? // Denormalized from User for faster aggregation
+
   Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 
@@ -215,6 +224,8 @@ model UserTokenUsage {
   @@index([date])
   @@index([modelUsed])
   @@index([deletedAt])
+  @@index([organizationId, date])
+  @@index([organizationId, productId, date])
 }
 
 model UserTutorialStatus {
@@ -230,4 +241,41 @@ model UserTutorialStatus {
 
   @@unique([userId, tutorialId])
   @@index([userId])
+}
+
+model TokenPurchase {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tokenAmount Int       // Number of tokens purchased
+  priceCents  Int       // Price paid in cents
+  currency    String    // e.g., "USD"
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime? // Optional expiration for purchased tokens
+  deletedAt   DateTime?
+
+  @@index([userId])
+  @@index([productId])
+  @@index([expiresAt])
+  @@index([deletedAt])
+}
+
+model TokenBalance {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  availableTokens    Int       @default(0) // Current available tokens
+  monthlyResetTokens Int       @default(0) // Tokens that reset monthly from subscription
+  purchasedTokens    Int       @default(0) // One-time purchased tokens
+  lastResetAt        DateTime  @default(now()) // Last time monthly tokens were reset
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
 }
