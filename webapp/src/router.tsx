@@ -23,6 +23,7 @@ import { AdminOrganizations } from './features/admin/pages/AdminOrganizations';
 import { AdminProducts } from './features/admin/pages/AdminProducts';
 import { AdminSubscriptions } from './features/admin/pages/AdminSubscriptions';
 import { AdminRegistrationPermits } from './features/admin/pages/AdminRegistrationPermits';
+import { AdminTokenUsage } from './features/admin/pages/AdminTokenUsage';
 import { useIsOnboardingRequired } from './api/onboarding-api';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 
@@ -115,6 +116,7 @@ export const router = createBrowserRouter([
           { path: 'products', element: <AdminProducts /> },
           { path: 'subscriptions', element: <AdminSubscriptions /> },
           { path: 'registration-permits', element: <AdminRegistrationPermits /> },
+          { path: 'token-usage', element: <AdminTokenUsage /> },
         ],
       },
     ],

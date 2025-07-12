@@ -1,0 +1,61 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chartContainer {
+  height: 300px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  height: 250px;
+  gap: 8px;
+  min-width: max-content;
+  padding: 0 10px;
+}
+
+.barWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.barContainer {
+  height: 200px;
+  width: 30px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.bar {
+  width: 100%;
+  background: var(--mantine-color-blue-6);
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mantine-color-blue-7);
+    transform: scaleY(1.02);
+  }
+}
+
+.barLabel {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  margin-top: 8px;
+}

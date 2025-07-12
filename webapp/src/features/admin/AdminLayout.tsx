@@ -66,6 +66,12 @@ export function AdminLayout() {
           >
             Registration Permits
           </NavLink>
+          <NavLink 
+            to="/admin/token-usage"
+            className={({ isActive }) => isActive ? styles.activeLink : styles.navLink}
+          >
+            Token Usage
+          </NavLink>
         </nav>
 
         <div className={styles.sidebarFooter}>
