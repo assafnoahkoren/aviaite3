@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { prisma } from '@services/prisma';
 import { UpdateOnboardingDto } from './dto/onboarding.dto';
 import { Prisma } from '../../../generated/prisma';
@@ -93,6 +93,96 @@ export class OnboardingService {
     return updated;
   }
 
+  async createTrialSubscription(userId: string) {
+    // Get user's onboarding data to check fleet selection
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        onboardingStatus: true,
+        Subscriptions: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user already has any subscription (active, cancelled, or expired)
+    if (user.Subscriptions.length > 0) {
+      return {
+        success: true,
+        message: 'User already has a subscription',
+        subscriptionExists: true,
+      };
+    }
+
+    // Check if user selected a fleet during onboarding
+    const onboardingStatus = user.onboardingStatus as any;
+    const selectedFleet = onboardingStatus?.stepData?.preferences?.fleet;
+
+    if (!selectedFleet || (selectedFleet !== '737' && selectedFleet !== '787')) {
+      throw new BadRequestException('Fleet selection is required before creating trial subscription');
+    }
+
+    try {
+      // Find the product based on fleet selection
+      const product = await prisma.product.findFirst({
+        where: {
+          name: {
+            contains: selectedFleet,
+            mode: 'insensitive',
+          },
+          deletedAt: null,
+        },
+        include: {
+          prices: {
+            where: {
+              interval: 'monthly',
+              deletedAt: null,
+            },
+          },
+        },
+      });
+
+      if (!product || product.prices.length === 0) {
+        throw new NotFoundException(`Product not found for fleet ${selectedFleet}`);
+      }
+
+      // Create a 1-month free trial subscription
+      const oneMonthFromNow = new Date();
+      oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+      
+      const subscription = await this.subscriptionsService.createSubscription(userId, {
+        products: [{
+          productId: product.id,
+          productPriceId: product.prices[0].id,
+        }],
+        interval: 'monthly',
+        userId,
+        // Set the subscription to expire after 1 month (free trial period)
+        endsAt: oneMonthFromNow.toISOString(),
+      });
+
+      console.log(`Created ${selectedFleet} subscription with 1 month free trial (expires ${oneMonthFromNow.toISOString()}) for user ${userId}`);
+      
+      return {
+        success: true,
+        message: 'Trial subscription created successfully',
+        subscription,
+      };
+    } catch (error) {
+      console.error('Failed to create trial subscription:', error);
+      throw new BadRequestException('Failed to create trial subscription');
+    }
+  }
+
   async completeOnboarding(userId: string) {
     // Get user's onboarding data to check fleet selection
     const user = await prisma.user.findUnique({
@@ -110,55 +200,8 @@ export class OnboardingService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if user selected a fleet during onboarding
-    const onboardingStatus = user.onboardingStatus as any;
-    const selectedFleet = onboardingStatus?.stepData?.preferences?.fleet;
-
-    // Create subscription based on fleet selection
-    if (selectedFleet && (selectedFleet === '737' || selectedFleet === '787')) {
-      try {
-        // Find the product based on fleet selection
-        const product = await prisma.product.findFirst({
-          where: {
-            name: {
-              contains: selectedFleet,
-              mode: 'insensitive',
-            },
-            deletedAt: null,
-          },
-          include: {
-            prices: {
-              where: {
-                interval: 'monthly',
-                deletedAt: null,
-              },
-            },
-          },
-        });
-
-        if (product && product.prices.length > 0) {
-          // Create a 1-month free trial subscription
-          const oneMonthFromNow = new Date();
-          oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
-          
-          await this.subscriptionsService.createSubscription(userId, {
-            products: [{
-              productId: product.id,
-              productPriceId: product.prices[0].id,
-            }],
-            interval: 'monthly',
-            userId,
-            // Set the subscription to expire after 1 month (free trial period)
-            endsAt: oneMonthFromNow.toISOString(),
-          });
-
-          console.log(`Created ${selectedFleet} subscription with 1 month free trial (expires ${oneMonthFromNow.toISOString()}) for user ${userId}`);
-        }
-      } catch (error) {
-        console.error('Failed to create subscription during onboarding:', error);
-        // Don't fail onboarding completion if subscription creation fails
-      }
-    }
+    // Note: Subscription creation has been moved to createTrialSubscription method
+    // which is called separately during the onboarding flow
 
     // Mark onboarding as completed
     const updated = await prisma.user.update({

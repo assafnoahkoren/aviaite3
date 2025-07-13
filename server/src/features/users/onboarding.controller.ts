@@ -21,6 +21,11 @@ export class OnboardingController {
     return this.onboardingService.updateOnboardingProgress(req.user.id, dto);
   }
 
+  @Post('trial-subscription')
+  async createTrialSubscription(@Request() req: AuthedRequest) {
+    return this.onboardingService.createTrialSubscription(req.user.id);
+  }
+
   @Post('complete')
   async completeOnboarding(@Request() req: AuthedRequest) {
     return this.onboardingService.completeOnboarding(req.user.id);

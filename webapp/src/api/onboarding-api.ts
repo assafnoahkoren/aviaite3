@@ -12,7 +12,6 @@ export interface OnboardingResponse {
 
 export interface UpdateOnboardingDto {
   currentStep: number;
-  totalSteps: number;
   stepData?: OnboardingStepData;
 }
 
@@ -25,6 +24,11 @@ export const onboardingApi = {
 
   updateProgress: async (data: UpdateOnboardingDto): Promise<OnboardingResponse> => {
     const response = await api.patch<OnboardingResponse>('/api/users/onboarding/progress', data);
+    return response.data;
+  },
+
+  createTrialSubscription: async (): Promise<{ success: boolean; message: string; subscriptionExists?: boolean; subscription?: any }> => {
+    const response = await api.post('/api/users/onboarding/trial-subscription');
     return response.data;
   },
 
@@ -59,6 +63,19 @@ export const useUpdateOnboardingProgress = () => {
       queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
       // Force refetch all queries immediately
       queryClient.refetchQueries({ queryKey: ['settings'] });
+    },
+  });
+};
+
+export const useCreateTrialSubscription = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: onboardingApi.createTrialSubscription,
+    onSuccess: () => {
+      // Invalidate subscription-related queries
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 };

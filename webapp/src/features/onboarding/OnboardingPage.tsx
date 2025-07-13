@@ -6,7 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { 
   useOnboardingStatus, 
   useUpdateOnboardingProgress,
-  useCompleteOnboarding 
+  useCompleteOnboarding,
+  useCreateTrialSubscription
 } from '../../api/onboarding-api';
 import { WelcomeSlide } from './slides/WelcomeSlide';
 import { FleetSelectionSlide } from './slides/FleetSelectionSlide';
@@ -23,13 +24,14 @@ export function OnboardingPage() {
   const { isLoading } = useOnboardingStatus();
   const updateProgress = useUpdateOnboardingProgress();
   const completeMutation = useCompleteOnboarding();
+  const createTrialMutation = useCreateTrialSubscription();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedFleet, setSelectedFleet] = useState<string>('');
+  const [trialSubscriptionCreated, setTrialSubscriptionCreated] = useState(false);
 
   const handleNext = async () => {
     if (currentSlide < TOTAL_SLIDES - 1) {
       const nextSlide = currentSlide + 1;
-      setCurrentSlide(nextSlide);
       
       // Save progress, including fleet selection after slide 1
       if (currentSlide === 1 && selectedFleet) {
@@ -42,11 +44,28 @@ export function OnboardingPage() {
             },
           },
         });
+      } else if (currentSlide === 2 && !trialSubscriptionCreated) {
+        // When leaving the subscription info slide, create the trial subscription
+        try {
+          const result = await createTrialMutation.mutateAsync();
+          if (result.success) {
+            setTrialSubscriptionCreated(true);
+            await updateProgress.mutateAsync({
+              currentStep: nextSlide,
+            });
+          }
+        } catch (error) {
+          console.error('Failed to create trial subscription:', error);
+          // Don't proceed if trial subscription creation fails
+          return;
+        }
       } else {
         await updateProgress.mutateAsync({
           currentStep: nextSlide,
         });
       }
+      
+      setCurrentSlide(nextSlide);
     }
   };
 
@@ -157,7 +176,7 @@ export function OnboardingPage() {
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                loading={updateProgress.isPending}
+                loading={updateProgress.isPending || createTrialMutation.isPending}
               >
                 Next
               </Button>
