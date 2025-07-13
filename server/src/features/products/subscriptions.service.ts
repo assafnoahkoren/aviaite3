@@ -14,8 +14,11 @@ export const ASSISTANT_PRODUCT_MAP: Record<string, string> = {
 
 @Injectable()
 export class SubscriptionsService {
-  async getUserSubscriptions(userId: string) {
-    return prisma.subscription.findMany({
+  async getUserSubscriptions(userId: string, includeOrganization = true) {
+    const subscriptions = [];
+    
+    // Get user's personal subscriptions
+    const userSubscriptions = await prisma.subscription.findMany({
       where: {
         userId,
         deletedAt: null,
@@ -31,12 +34,74 @@ export class SubscriptionsService {
       },
       orderBy: { startedAt: 'desc' },
     });
+    subscriptions.push(...userSubscriptions);
+
+    // Get organization subscriptions if requested
+    if (includeOrganization) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { organizationId: true },
+      });
+
+      if (user?.organizationId) {
+        const orgSubscriptions = await prisma.subscription.findMany({
+          where: {
+            organizationId: user.organizationId,
+            deletedAt: null,
+          },
+          include: {
+            subscriptionProducts: {
+              where: { deletedAt: null },
+              include: {
+                Product: true,
+                ProductPrice: true,
+              },
+            },
+            Organization: true,
+          },
+          orderBy: { startedAt: 'desc' },
+        });
+        subscriptions.push(...orgSubscriptions);
+      }
+    }
+
+    return subscriptions;
   }
 
   async getActiveSubscription(userId: string) {
-    const subscription = await prisma.subscription.findFirst({
+    // First check for personal subscription
+    let subscription = await this.findActiveSubscription(userId, null);
+    
+    // If no personal subscription, check organization
+    if (!subscription) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { organizationId: true },
+      });
+      
+      if (user?.organizationId) {
+        subscription = await this.findActiveSubscription(null, user.organizationId);
+      }
+    }
+
+    if (!subscription) {
+      return null;
+    }
+
+    // Add usage information
+    const usage = await this.getCurrentPeriodUsage(userId, subscription.id);
+    
+    return {
+      ...subscription,
+      usage,
+    };
+  }
+
+  private async findActiveSubscription(userId: string | null, organizationId: string | null) {
+    return prisma.subscription.findFirst({
       where: {
-        userId,
+        ...(userId && { userId }),
+        ...(organizationId && { organizationId }),
         status: 'active',
         deletedAt: null,
         OR: [
@@ -52,24 +117,18 @@ export class SubscriptionsService {
             ProductPrice: true,
           },
         },
+        Organization: true,
       },
     });
-
-    if (!subscription) {
-      return null;
-    }
-
-    // Add usage information
-    const usage = await this.getCurrentPeriodUsage(userId, subscription.id);
-    
-    return {
-      ...subscription,
-      usage,
-    };
   }
 
-  async createSubscription(userId: string, data: CreateSubscriptionDto) {
-    const { products, interval } = data;
+  async createSubscription(userIdOrOrgId: string, data: CreateSubscriptionDto) {
+    const { products, interval, userId, organizationId } = data;
+    
+    // Determine if this is a user or organization subscription
+    const isOrgSubscription = !!organizationId;
+    const targetUserId = isOrgSubscription ? null : (userId || userIdOrOrgId);
+    const targetOrgId = isOrgSubscription ? organizationId : null;
 
     // Validate products exist
     const productIds = products.map(p => p.productId);
@@ -84,26 +143,43 @@ export class SubscriptionsService {
       throw new BadRequestException('One or more products not found');
     }
 
-    // Cancel any existing active subscriptions
-    await prisma.subscription.updateMany({
-      where: {
-        userId,
-        status: 'active',
-        deletedAt: null,
-      },
-      data: {
-        status: 'cancelled',
-        endsAt: new Date(),
-      },
-    });
+    // Cancel any existing active subscriptions for the same entity
+    if (targetUserId) {
+      await prisma.subscription.updateMany({
+        where: {
+          userId: targetUserId,
+          status: 'active',
+          deletedAt: null,
+        },
+        data: {
+          status: 'cancelled',
+          endsAt: new Date(),
+        },
+      });
+    } else if (targetOrgId) {
+      await prisma.subscription.updateMany({
+        where: {
+          organizationId: targetOrgId,
+          status: 'active',
+          deletedAt: null,
+        },
+        data: {
+          status: 'cancelled',
+          endsAt: new Date(),
+        },
+      });
+    }
 
     // Create new subscription
     const subscription = await prisma.subscription.create({
       data: {
-        userId,
+        ...(targetUserId && { userId: targetUserId }),
+        ...(targetOrgId && { organizationId: targetOrgId }),
         status: 'active',
         interval,
         startedAt: new Date(),
+        entityType: isOrgSubscription ? 'organization' : 'user',
+        entityId: targetOrgId || targetUserId || '',
         subscriptionProducts: {
           create: products.map((p) => ({
             productId: p.productId,
@@ -118,6 +194,7 @@ export class SubscriptionsService {
             ProductPrice: true,
           },
         },
+        Organization: true,
       },
     });
 
@@ -183,26 +260,20 @@ export class SubscriptionsService {
     userId: string,
     params: { productId?: string; assistantId?: string },
   ): Promise<ValidationResponseDto> {
-    // Get active subscription
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        userId,
-        status: 'active',
-        deletedAt: null,
-        OR: [
-          { endsAt: null },
-          { endsAt: { gte: new Date() } },
-        ],
-      },
-      include: {
-        subscriptionProducts: {
-          where: { deletedAt: null },
-          include: {
-            Product: true,
-          },
-        },
-      },
-    });
+    // First check for personal subscription
+    let subscription = await this.findActiveSubscriptionForValidation(userId, null);
+    
+    // If no personal subscription, check organization
+    if (!subscription) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { organizationId: true },
+      });
+      
+      if (user?.organizationId) {
+        subscription = await this.findActiveSubscriptionForValidation(null, user.organizationId);
+      }
+    }
 
     // No active subscription
     if (!subscription) {
@@ -302,6 +373,7 @@ export class SubscriptionsService {
             Product: true,
           },
         },
+        Organization: true,
       },
     });
 
@@ -313,19 +385,37 @@ export class SubscriptionsService {
     const periodStart = startOfMonth(new Date());
     const periodEnd = endOfMonth(new Date());
 
-    // Get token usage for current period
-    const usage = await prisma.userTokenUsage.aggregate({
-      where: {
-        userId,
-        date: {
-          gte: periodStart,
-          lte: periodEnd,
+    // Get token usage based on subscription type
+    let usage;
+    if (subscription.organizationId) {
+      // For organization subscriptions, aggregate all organization users' usage
+      usage = await prisma.userTokenUsage.aggregate({
+        where: {
+          organizationId: subscription.organizationId,
+          date: {
+            gte: periodStart,
+            lte: periodEnd,
+          },
         },
-      },
-      _sum: {
-        tokensUsed: true,
-      },
-    });
+        _sum: {
+          tokensUsed: true,
+        },
+      });
+    } else {
+      // For personal subscriptions, only count the user's usage
+      usage = await prisma.userTokenUsage.aggregate({
+        where: {
+          userId,
+          date: {
+            gte: periodStart,
+            lte: periodEnd,
+          },
+        },
+        _sum: {
+          tokensUsed: true,
+        },
+      });
+    }
 
     const usedTokens = usage._sum.tokensUsed || 0;
 
@@ -335,18 +425,34 @@ export class SubscriptionsService {
     }, 0);
 
     // Check for additional token purchases
-    const tokenPurchases = await prisma.tokenPurchase.aggregate({
-      where: {
-        userId,
-        createdAt: {
-          gte: periodStart,
-          lte: periodEnd,
+    let tokenPurchases;
+    if (subscription.organizationId) {
+      tokenPurchases = await prisma.tokenPurchase.aggregate({
+        where: {
+          organizationId: subscription.organizationId,
+          createdAt: {
+            gte: periodStart,
+            lte: periodEnd,
+          },
         },
-      },
-      _sum: {
-        tokenAmount: true,
-      },
-    });
+        _sum: {
+          tokenAmount: true,
+        },
+      });
+    } else {
+      tokenPurchases = await prisma.tokenPurchase.aggregate({
+        where: {
+          userId,
+          createdAt: {
+            gte: periodStart,
+            lte: periodEnd,
+          },
+        },
+        _sum: {
+          tokenAmount: true,
+        },
+      });
+    }
 
     const additionalTokens = tokenPurchases._sum.tokenAmount || 0;
     const totalLimit = tokenLimit + additionalTokens;
@@ -396,6 +502,29 @@ export class SubscriptionsService {
     }
     
     return date;
+  }
+
+  private async findActiveSubscriptionForValidation(userId: string | null, organizationId: string | null) {
+    return prisma.subscription.findFirst({
+      where: {
+        ...(userId && { userId }),
+        ...(organizationId && { organizationId }),
+        status: 'active',
+        deletedAt: null,
+        OR: [
+          { endsAt: null },
+          { endsAt: { gte: new Date() } },
+        ],
+      },
+      include: {
+        subscriptionProducts: {
+          where: { deletedAt: null },
+          include: {
+            Product: true,
+          },
+        },
+      },
+    });
   }
 
   private mapAssistantToProduct(assistantId: string): string | null {

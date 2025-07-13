@@ -16,6 +16,7 @@ import { AuthGuard, AuthedRequest } from '../users/auth.guard';
 import { RolesGuard } from '../users/guards/roles.guard';
 import { Roles } from '../users/decorators/roles.decorator';
 import { Role } from '../../../generated/prisma';
+import { prisma } from '@services/prisma';
 import {
   CreateProductDto,
   UpdateProductDto,
@@ -139,5 +140,98 @@ export class ProductsController {
       return { used: 0, limit: 0, remaining: 0, percentUsed: 0 };
     }
     return activeSubscription.usage;
+  }
+
+  // Organization subscription endpoints (Admin only)
+  @Post('organizations/:organizationId/subscriptions')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async createOrganizationSubscription(
+    @Param('organizationId') organizationId: string,
+    @Body() createSubscriptionDto: CreateSubscriptionDto,
+  ) {
+    // Override any userId/orgId in the DTO with the URL parameter
+    const data = { ...createSubscriptionDto, organizationId, userId: undefined };
+    return this.subscriptionsService.createSubscription(organizationId, data);
+  }
+
+  @Get('organizations/:organizationId/subscriptions')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async getOrganizationSubscriptions(@Param('organizationId') organizationId: string) {
+    return prisma.subscription.findMany({
+      where: {
+        organizationId,
+        deletedAt: null,
+      },
+      include: {
+        subscriptionProducts: {
+          where: { deletedAt: null },
+          include: {
+            Product: true,
+            ProductPrice: true,
+          },
+        },
+        Organization: true,
+      },
+      orderBy: { startedAt: 'desc' },
+    });
+  }
+
+  @Get('organizations/:organizationId/usage')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async getOrganizationUsage(@Param('organizationId') organizationId: string) {
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        organizationId,
+        status: 'active',
+        deletedAt: null,
+        OR: [
+          { endsAt: null },
+          { endsAt: { gte: new Date() } },
+        ],
+      },
+    });
+
+    if (!subscription) {
+      return { used: 0, limit: 0, remaining: 0, percentUsed: 0, users: [] };
+    }
+
+    const usage = await this.subscriptionsService.getCurrentPeriodUsage('', subscription.id);
+    
+    // Get per-user breakdown
+    const periodStart = new Date();
+    periodStart.setDate(1);
+    periodStart.setHours(0, 0, 0, 0);
+    
+    const userUsage = await prisma.userTokenUsage.groupBy({
+      by: ['userId'],
+      where: {
+        organizationId,
+        date: { gte: periodStart },
+      },
+      _sum: {
+        tokensUsed: true,
+      },
+    });
+
+    // Get user details
+    const userIds = userUsage.map(u => u.userId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, email: true, fullName: true },
+    });
+
+    const userMap = new Map(users.map(u => [u.id, u]));
+    const userBreakdown = userUsage.map(u => ({
+      user: userMap.get(u.userId),
+      tokensUsed: u._sum.tokensUsed || 0,
+    }));
+
+    return {
+      ...usage,
+      users: userBreakdown.sort((a, b) => b.tokensUsed - a.tokensUsed),
+    };
   }
 }

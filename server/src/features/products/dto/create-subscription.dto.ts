@@ -12,8 +12,13 @@ export class SubscriptionProductDto {
 }
 
 export class CreateSubscriptionDto {
+  @IsOptional()
   @IsString()
-  userId: string;
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  organizationId?: string;
 
   @IsEnum(BillingInterval)
   interval: BillingInterval;
