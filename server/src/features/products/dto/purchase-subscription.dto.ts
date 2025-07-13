@@ -1,9 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional, Matches, IsUUID, IsArray, ArrayNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, Matches, IsArray, ArrayNotEmpty } from 'class-validator';
 
 export class PurchaseSubscriptionDto {
   @IsArray()
   @ArrayNotEmpty()
-  @IsUUID('4', { each: true })
+  @IsString({ each: true })
   productIds: string[];
 
   @IsString()

@@ -27,6 +27,7 @@ import { AdminTokenUsage } from './features/admin/pages/AdminTokenUsage';
 import { useIsOnboardingRequired } from './api/onboarding-api';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { SubscriptionPlansSimple } from './features/subscription/SubscriptionPlansSimple';
+import { SubscriptionCheckout } from './features/subscription/SubscriptionCheckout';
 
 // Guard for private routes (always returns true for now)
 function PrivateRoute() {
@@ -101,6 +102,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomeV2 /> },
       { path: '/onboarding', element: <OnboardingPage /> },
       { path: '/subscription/plans', element: <SubscriptionPlansSimple /> },
+      { path: '/subscription/checkout', element: <SubscriptionCheckout /> },
     ],
   },
   // Admin routes

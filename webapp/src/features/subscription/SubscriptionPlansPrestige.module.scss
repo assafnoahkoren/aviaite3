@@ -68,10 +68,8 @@
   flex: 1;
   min-height: 0;
   align-items: center;
-
-  &.contentWithCheckout {
-    grid-template-columns: 1fr 1fr 420px;
-  }
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .products {
