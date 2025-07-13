@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { MobxQuery, MobxMutation } from '../../infra/mobx-query';
 import { listChatsByUserId, createChat, deleteChat, type Thread, type CreateChatDto } from '../../api/chat-api';
+import { showMissingSubscriptionModal } from '../subscription/MissingSubscriptionModal';
 
 export class ChatHistoryStore {
   chatsQuery: MobxQuery<Thread[], unknown, [string]>;
@@ -19,6 +20,11 @@ export class ChatHistoryStore {
       mutationFn: createChat,
       onSuccess: () => {
         this.chatsQuery.refetch();
+      },
+      onError: (error: any) => {
+        if (error?.response?.data?.code === 'SUBSCRIPTION_REQUIRED') {
+          showMissingSubscriptionModal(error);
+        }
       },
     });
     this.deleteChatMutation = new MobxMutation({

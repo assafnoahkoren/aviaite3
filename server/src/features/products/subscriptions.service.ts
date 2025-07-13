@@ -317,7 +317,7 @@ export class SubscriptionsService {
       if (!hasProduct) {
         return {
           hasAccess: false,
-          reason: `Assistant requires ${mappedProductName} product`,
+          reason: `Product ${mappedProductName} not included in subscription`,
           subscription: this.formatSubscriptionResponse(subscription),
         };
       }
@@ -527,7 +527,7 @@ export class SubscriptionsService {
     });
   }
 
-  private mapAssistantToProduct(assistantId: string): string | null {
+  mapAssistantToProduct(assistantId: string): string | null {
     return ASSISTANT_PRODUCT_MAP[assistantId] || null;
   }
 }

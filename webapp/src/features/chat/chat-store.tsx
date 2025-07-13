@@ -13,6 +13,7 @@ import {
 import { createContext, useContext, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { SettingsStore } from '../settings/settings-store';
+import { showMissingSubscriptionModal } from '../subscription/MissingSubscriptionModal';
 
 export class ChatStore {
   currentThread: Thread | null = null;
@@ -33,6 +34,11 @@ export class ChatStore {
       onSuccess: () => {
         this.messagesQuery?.refetch();
       },
+      onError: (error: any) => {
+        if (error?.response?.data?.code === 'SUBSCRIPTION_REQUIRED') {
+          showMissingSubscriptionModal(error);
+        }
+      },
     });
 
     this.generateChatNameMutation = new MobxMutation({
@@ -45,7 +51,7 @@ export class ChatStore {
             }
           });
         }
-        queryClient.invalidateQueries({ queryKey: ['chats'] });
+        getQueryClient().invalidateQueries({ queryKey: ['chats'] });
       },
     });
 
@@ -163,6 +169,25 @@ export class ChatStore {
           this.streamingMessageId = null;
           this.isStreamLoading = false;
         });
+        
+        // Check if it's a subscription error from SSE
+        // SSE errors might come in a different format
+        if (error?.message?.includes('403')) {
+          // Try to parse error message for subscription details
+          showMissingSubscriptionModal({
+            response: {
+              data: {
+                code: 'SUBSCRIPTION_REQUIRED',
+                message: 'Subscription required to use this assistant',
+                details: {
+                  assistantId: this.currentThread?.assistantId,
+                  assistantName: this.currentAssistant()?.label,
+                  requiredAction: 'SUBSCRIBE',
+                }
+              }
+            }
+          });
+        }
       },
     });
   }

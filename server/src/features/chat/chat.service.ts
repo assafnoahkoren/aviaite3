@@ -75,11 +75,39 @@ export class ChatService {
     );
     
     if (!validation.hasAccess) {
-      throw new ForbiddenException({
+      // Find which assistant was requested
+      const assistant = assistants.find(a => a.id === assistantId);
+      const assistantName = assistant?.label || 'Unknown Assistant';
+      
+      // Map assistant to required product
+      const requiredProduct = this.subscriptionsService.mapAssistantToProduct(assistantId);
+      
+      // Create detailed error response
+      const errorDetails: any = {
         message: validation.reason || 'Access denied',
-        subscription: validation.subscription,
-        usage: validation.usage,
-      });
+        code: 'SUBSCRIPTION_REQUIRED',
+        details: {
+          assistantId,
+          assistantName,
+          requiredProduct,
+          currentSubscription: validation.subscription,
+          usage: validation.usage,
+        },
+      };
+      
+      // Add specific guidance based on the reason
+      if (validation.reason === 'No active subscription found') {
+        errorDetails.details.requiredAction = 'SUBSCRIBE';
+        errorDetails.details.suggestedProducts = requiredProduct ? [requiredProduct] : ['ace-737', 'ace-787'];
+      } else if (validation.reason?.includes('not included in subscription')) {
+        errorDetails.details.requiredAction = 'UPGRADE';
+        errorDetails.details.currentProducts = validation.subscription?.products || [];
+      } else if (validation.reason === 'Token limit exceeded for current period') {
+        errorDetails.details.requiredAction = 'PURCHASE_TOKENS';
+        errorDetails.details.resetDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+      }
+      
+      throw new ForbiddenException(errorDetails);
     }
     
     return validation;
