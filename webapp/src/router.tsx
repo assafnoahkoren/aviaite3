@@ -14,7 +14,7 @@ import { HomeV2 } from './features/home-v2/HomeV2';
 import { useCreateStore_Settings } from './features/settings/settings-store';
 import { useCreateStore_ChatHistory } from './features/chat-history/chat-history-store';
 import { useCreateStore_Chat } from './features/chat/chat-store';
-import { initMixpanelInstance } from './mixpanel';
+import { initMixpanelInstance, setCurrentUserInfo } from './mixpanel';
 import { AdminRoute } from './features/admin/AdminRoute';
 import { AdminLayout } from './features/admin/AdminLayout';
 import { AdminDashboard } from './features/admin/pages/AdminDashboard';
@@ -62,6 +62,12 @@ function PrivateRoute() {
       email: auth.user.email,
       name: auth.user.fullName,
       organizationId: auth.user.organizationId,
+    });
+    
+    // Set current user info for events
+    setCurrentUserInfo({
+      email: auth.user.email,
+      id: auth.user.id,
     });
     
     // If onboarding is required and user is not on onboarding page, redirect
