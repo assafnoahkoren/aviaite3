@@ -22,9 +22,10 @@ export const RegisterPage = observer(() => {
   const auth = useStore_Auth();
   const [searchParams] = useSearchParams();
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState<string | null>(null);
+  const emailDomain = '@elal.co.il';
 
   useEffect(() => {
     const tokenFromUrl = searchParams.get('token');
@@ -35,6 +36,7 @@ export const RegisterPage = observer(() => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const email = username + emailDomain;
     auth.registerMutation.mutate({ fullName, email, password, token: token || undefined });
   };
 
@@ -86,14 +88,26 @@ export const RegisterPage = observer(() => {
                     onChange={(e) => setFullName(e.target.value)}
                     required
                     leftSection={<IconUser size={16} />}
+                    placeholder="Full Name"
                   />
                   <TextInput
                     label="Email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={username}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // If user includes @, take only the part before it
+                      const cleanUsername = value.includes('@') ? value.split('@')[0] : value;
+                      setUsername(cleanUsername);
+                    }}
                     required
                     leftSection={<IconAt size={16} />}
+                    rightSection={
+                      <Text size="sm" c="dimmed">
+                        {emailDomain}
+                      </Text>
+                    }
+                    rightSectionWidth={100}
+                    placeholder="Email"
                   />
                   <PasswordInput
                     label="Password"
@@ -101,6 +115,7 @@ export const RegisterPage = observer(() => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     leftSection={<IconLock size={16} />}
+                    placeholder="Password"
                   />
                   {auth.registerMutation.isError && (
                     <Alert color="red">{String(auth.registerMutation.error)}</Alert>
