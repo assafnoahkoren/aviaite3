@@ -1,11 +1,12 @@
 // chat.service.ts
 // Service for handling chat logic
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
 import { TokenType } from '../../../generated/prisma';
+import { SubscriptionsService } from '../products/subscriptions.service';
 
 export const assistants = [
   {
@@ -60,8 +61,28 @@ export const assistants = [
 export class ChatService {
   private openai: OpenAI;
 
-  constructor() {
+  constructor(private readonly subscriptionsService: SubscriptionsService) {
     this.openai = new OpenAI({ apiKey: ENV.OPENAI_API_KEY });
+  }
+
+  /**
+   * Helper method to validate subscription access
+   */
+  private async validateAccess(userId: string, assistantId: string) {
+    const validation = await this.subscriptionsService.validateSubscriptionAccess(
+      userId,
+      { assistantId }
+    );
+    
+    if (!validation.hasAccess) {
+      throw new ForbiddenException({
+        message: validation.reason || 'Access denied',
+        subscription: validation.subscription,
+        usage: validation.usage,
+      });
+    }
+    
+    return validation;
   }
 
 
@@ -74,6 +95,7 @@ export class ChatService {
     modelUsed: string,
     inputTokens: number,
     outputTokens: number,
+    subscriptionId?: string,
   ) {
     // Model pricing in cents per 1M tokens
     const pricing: Record<string, { input: number; output: number }> = {
@@ -95,6 +117,7 @@ export class ChatService {
         userId,
         organizationId,
         productId: null,
+        subscriptionId,
         modelUsed,
         tokenType: TokenType.input,
         tokensUsed: inputTokens,
@@ -105,6 +128,7 @@ export class ChatService {
         userId,
         organizationId,
         productId: null,
+        subscriptionId,
         modelUsed,
         tokenType: TokenType.output,
         tokensUsed: outputTokens,
@@ -130,6 +154,9 @@ export class ChatService {
    * @param profileId - The ID of the profile
    */
   async createChat(userId: string, assistantId: string, profileId: string) {
+    // Validate subscription access before creating a new chat
+    await this.validateAccess(userId, assistantId);
+    
     const thread = await this.openai.beta.threads.create();
 
     return prisma.thread.create({
@@ -214,6 +241,10 @@ export class ChatService {
     if (!thread) {
       throw new Error('Thread not found');
     }
+    
+    // Validate subscription access
+    await this.validateAccess(userId, thread.assistantId);
+    
     const openaiThreadId = thread.openaiThreadId;
 
     // Create the user message in the OpenAI thread
@@ -247,9 +278,12 @@ export class ChatService {
    * @param threadId - The ID of the thread
    * @param userId - The ID of the user (for token tracking)
    */
-  async createStream(threadId: string, userId?: string) {
+  async createStream(threadId: string, userId: string) {
     const thread = await prisma.thread.findFirst({
-      where: { openaiThreadId: threadId },
+      where: { 
+        openaiThreadId: threadId,
+        userId, // Ensure thread belongs to the user
+      },
       include: {
         User: {
           select: {
@@ -260,8 +294,12 @@ export class ChatService {
       },
     });
     if (!thread) {
-      throw new Error('Thread not found');
+      throw new Error('Thread not found or access denied');
     }
+    
+    // Validate subscription access before starting stream
+    const validation = await this.validateAccess(userId, thread.assistantId);
+    
     const assistantId = thread.assistantId;
     const openaiThreadId = thread.openaiThreadId;
 
@@ -277,16 +315,16 @@ export class ChatService {
         
         // Check if usage data is available
         if (run && run.usage) {
-          const effectiveUserId = userId || thread.userId;
           // Assistants API model - check run details
           const modelUsed = run.model || 'gpt-4';
           
           await this.trackTokenUsage(
-            effectiveUserId,
+            userId,
             thread.User.organizationId,
             modelUsed,
             run.usage.prompt_tokens,
             run.usage.completion_tokens,
+            validation.subscription?.id,
           );
         }
       } catch (error) {
