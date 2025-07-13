@@ -420,10 +420,8 @@ export class SubscriptionsService {
 
     const usedTokens = usage._sum.tokensUsed || 0;
 
-    // Calculate total token limit from all products
-    const tokenLimit = subscription.subscriptionProducts.reduce((total, sp) => {
-      return total + (sp.Product.baseTokensPerMonth || 0);
-    }, 0);
+    // Use tokensLimit from subscription
+    const tokenLimit = subscription.tokensLimit || 0;
 
     // Check for additional token purchases
     let tokenPurchases;
@@ -579,14 +577,25 @@ export class SubscriptionsService {
       throw new BadRequestException('One or more products are invalid or inactive');
     }
 
-    // Calculate total amount
-    const totalAmount = products.reduce((sum, product) => {
+    // Calculate total amount and token limit
+    let totalAmount = 0;
+    let totalTokensLimit = 0;
+    
+    products.forEach(product => {
       const price = product.prices[0];
       if (!price) {
         throw new BadRequestException(`No active price found for product ${product.name}`);
       }
-      return sum + price.priceCents;
-    }, 0);
+      totalAmount += price.priceCents;
+      
+      // Add tokens from this product (unlimited = very large number)
+      if (product.baseTokensPerMonth === null) {
+        // Unlimited tokens - use a very large number
+        totalTokensLimit = 10_000_000;
+      } else {
+        totalTokensLimit += product.baseTokensPerMonth || 0;
+      }
+    });
 
     // Create subscription
     const startDate = new Date();
@@ -599,6 +608,7 @@ export class SubscriptionsService {
         interval: 'monthly',
         startedAt: startDate,
         endsAt: null,
+        tokensLimit: totalTokensLimit,
         subscriptionProducts: {
           create: products.map(product => ({
             productId: product.id,

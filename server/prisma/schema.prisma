@@ -186,6 +186,7 @@ model Subscription {
   startedAt            DateTime              @default(now())
   endsAt               DateTime?
   interval             BillingInterval
+  tokensLimit          Int                   @default(0) @map("tokens_limit") // Monthly token limit for this subscription
   subscriptionProducts SubscriptionProduct[]
   UserTokenUsages      UserTokenUsage[]      // Track which subscription was used
   deletedAt            DateTime?
