@@ -90,24 +90,24 @@ export function AdminTokenUsage() {
         {/* Summary Cards */}
         <div className={styles.summaryGrid}>
           <Paper p="lg" withBorder>
-            <Text size="sm" color="dimmed" weight={500}>Total Tokens</Text>
-            <Text size="xl" weight={700} mt="xs">{formatTokens(totals.tokens)}</Text>
+            <Text size="sm" c="dimmed" fw={500}>Total Tokens</Text>
+            <Text size="xl" fw={700} mt="xs">{formatTokens(totals.tokens)}</Text>
             <Text size="xs" c="dimmed" mt={4}>
               Last {selectedDays} days
             </Text>
           </Paper>
           
           <Paper p="lg" withBorder>
-            <Text size="sm" color="dimmed" weight={500}>Total Cost</Text>
-            <Text size="xl" weight={700} mt="xs">{formatCost(totals.cost)}</Text>
+            <Text size="sm" c="dimmed" fw={500}>Total Cost</Text>
+            <Text size="xl" fw={700} mt="xs">{formatCost(totals.cost)}</Text>
             <Text size="xs" c="dimmed" mt={4}>
               Last {selectedDays} days
             </Text>
           </Paper>
 
           <Paper p="lg" withBorder>
-            <Text size="sm" color="dimmed" weight={500}>Avg Daily Tokens</Text>
-            <Text size="xl" weight={700} mt="xs">
+            <Text size="sm" c="dimmed" fw={500}>Avg Daily Tokens</Text>
+            <Text size="xl" fw={700} mt="xs">
               {formatTokens(Math.round(totals.tokens / selectedDays))}
             </Text>
             <Text size="xs" c="dimmed" mt={4}>
@@ -116,8 +116,8 @@ export function AdminTokenUsage() {
           </Paper>
 
           <Paper p="lg" withBorder>
-            <Text size="sm" color="dimmed" weight={500}>Avg Daily Cost</Text>
-            <Text size="xl" weight={700} mt="xs">
+            <Text size="sm" c="dimmed" fw={500}>Avg Daily Cost</Text>
+            <Text size="xl" fw={700} mt="xs">
               {formatCost(Math.round(totals.cost / selectedDays))}
             </Text>
             <Text size="xs" c="dimmed" mt={4}>
@@ -137,14 +137,14 @@ export function AdminTokenUsage() {
           {/* Daily Trends Tab */}
           <Tabs.Panel value="daily" pt="lg">
             {dailyLoading ? (
-              <Text align="center" color="dimmed">Loading daily usage...</Text>
+              <Text ta="center" c="dimmed">Loading daily usage...</Text>
             ) : dailyUsage && dailyUsage.length > 0 ? (
               <Paper p="lg" withBorder>
-                <Text weight={600} mb="md">Token Usage Trend</Text>
+                <Text fw={600} mb="md">Token Usage Trend</Text>
                 <div className={styles.chartContainer}>
                   {/* Simple bar chart visualization */}
                   <div className={styles.barChart}>
-                    {dailyUsage.map((day, index) => {
+                    {dailyUsage.map((day) => {
                       const maxTokens = Math.max(...dailyUsage.map(d => d.totalTokens));
                       const height = (day.totalTokens / maxTokens) * 100;
                       return (
@@ -156,7 +156,7 @@ export function AdminTokenUsage() {
                               title={`${formatTokens(day.totalTokens)} tokens`}
                             />
                           </div>
-                          <Text size="xs" color="dimmed" className={styles.barLabel}>
+                          <Text size="xs" c="dimmed" className={styles.barLabel}>
                             {new Date(day.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
                           </Text>
                         </div>
@@ -166,17 +166,17 @@ export function AdminTokenUsage() {
                 </div>
               </Paper>
             ) : (
-              <Text align="center" color="dimmed">No usage data available</Text>
+              <Text ta="center" c="dimmed">No usage data available</Text>
             )}
           </Tabs.Panel>
 
           {/* Model Breakdown Tab */}
           <Tabs.Panel value="models" pt="lg">
             {modelLoading ? (
-              <Text align="center" color="dimmed">Loading model breakdown...</Text>
+              <Text ta="center" c="dimmed">Loading model breakdown...</Text>
             ) : modelBreakdown && modelBreakdown.length > 0 ? (
               <Paper p="lg" withBorder>
-                <Text weight={600} mb="md">Usage by Model</Text>
+                <Text fw={600} mb="md">Usage by Model</Text>
                 <Table highlightOnHover>
                   <thead>
                     <tr>
@@ -199,7 +199,7 @@ export function AdminTokenUsage() {
                         <td>{formatTokens(model.outputTokens)}</td>
                         <td>{formatTokens(model.totalTokens)}</td>
                         <td>
-                          <Text weight={600}>{formatCost(model.totalCostCents)}</Text>
+                          <Text fw={600}>{formatCost(model.totalCostCents)}</Text>
                         </td>
                         <td>{formatTokens(model.requestCount)}</td>
                         <td>{formatTokens(model.averageTokensPerRequest)}</td>
@@ -209,17 +209,17 @@ export function AdminTokenUsage() {
                 </Table>
               </Paper>
             ) : (
-              <Text align="center" color="dimmed">No model usage data available</Text>
+              <Text ta="center" c="dimmed">No model usage data available</Text>
             )}
           </Tabs.Panel>
 
           {/* Usage Records Tab */}
           <Tabs.Panel value="records" pt="lg">
             {allLoading ? (
-              <Text align="center" color="dimmed">Loading usage records...</Text>
+              <Text ta="center" c="dimmed">Loading usage records...</Text>
             ) : allUsage && allUsage.records.length > 0 ? (
               <Paper p="lg" withBorder>
-                <Text weight={600} mb="md">Recent Usage Records</Text>
+                <Text fw={600} mb="md">Recent Usage Records</Text>
                 <Table highlightOnHover>
                   <thead>
                     <tr>
@@ -255,14 +255,14 @@ export function AdminTokenUsage() {
                     ))}
                   </tbody>
                 </Table>
-                <Group position="center" mt="md">
-                  <Text size="sm" color="dimmed">
+                <Group justify="center" mt="md">
+                  <Text size="sm" c="dimmed">
                     Showing {allUsage.records.length} of {allUsage.pagination.total} records
                   </Text>
                 </Group>
               </Paper>
             ) : (
-              <Text align="center" color="dimmed">No usage records available</Text>
+              <Text ta="center" c="dimmed">No usage records available</Text>
             )}
           </Tabs.Panel>
         </Tabs>

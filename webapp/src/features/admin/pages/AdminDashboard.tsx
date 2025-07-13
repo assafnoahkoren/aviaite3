@@ -13,10 +13,22 @@ export function AdminDashboard() {
   if (!stats) return null;
 
   const formatCurrency = (cents: number) => {
+    const dollars = cents / 100;
+    
+    // Determine appropriate decimal places based on value
+    let fractionDigits = 3;
+    if (dollars < 0.01 && dollars > 0) {
+      fractionDigits = 6;
+    } else if (dollars < 1) {
+      fractionDigits = 4;
+    }
+    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(cents / 100);
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(dollars);
   };
 
   const formatNumber = (num: number) => {

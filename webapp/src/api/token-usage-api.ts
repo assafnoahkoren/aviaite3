@@ -240,10 +240,19 @@ export function useQ_getMyTokenUsage(startDate?: string, endDate?: string) {
 // Utility Functions
 
 /**
- * Format cents to dollars
+ * Format cents to dollars with appropriate decimal places
  */
 export function formatCost(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const dollars = cents / 100;
+  
+  // For very small values, show more decimal places
+  if (dollars < 0.01 && dollars > 0) {
+    return `$${dollars.toFixed(6)}`;
+  } else if (dollars < 1) {
+    return `$${dollars.toFixed(4)}`;
+  }
+  
+  return `$${dollars.toFixed(3)}`;
 }
 
 /**

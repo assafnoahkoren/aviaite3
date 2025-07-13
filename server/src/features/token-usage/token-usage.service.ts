@@ -321,8 +321,18 @@ export class TokenUsageService {
       prisma.userTokenUsage.count({ where }),
     ]);
 
+    // Override costInCents with live calculation
+    const recordsWithCalculatedCosts = records.map(record => ({
+      ...record,
+      costInCents: calculateTokenCost(
+        record.modelUsed,
+        record.tokensUsed,
+        record.tokenType
+      ),
+    }));
+
     return {
-      records,
+      records: recordsWithCalculatedCosts,
       pagination: {
         page,
         limit,

@@ -23,8 +23,8 @@ export function calculateTokenCost(
   const pricing = MODEL_PRICING[modelUsed] || MODEL_PRICING['gpt-4'];
   const pricePerMillion = tokenType === TokenType.input ? pricing.input : pricing.output;
   
-  // Calculate cost in cents
-  return Math.ceil((tokensUsed * pricePerMillion) / 1_000_000);
+  // Calculate cost in cents with decimal precision (don't round up)
+  return (tokensUsed * pricePerMillion) / 1_000_000;
 }
 
 /**
