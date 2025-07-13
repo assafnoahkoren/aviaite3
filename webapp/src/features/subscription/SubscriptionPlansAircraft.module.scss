@@ -122,42 +122,145 @@
 }
 
 .checkout {
-  background: var(--mantine-color-gray-0);
-  border-radius: var(--mantine-radius-md);
-  padding: var(--mantine-spacing-lg);
+  background: linear-gradient(135deg, var(--mantine-color-blue-0) 0%, var(--mantine-color-white) 100%);
+  border: 2px solid var(--mantine-color-blue-2);
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-xl);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  
+  &__header {
+    text-align: center;
+    margin-bottom: var(--mantine-spacing-xl);
+    position: relative;
+    z-index: 1;
+  }
   
   &__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: var(--mantine-spacing-md);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--mantine-color-blue-7);
+    margin-bottom: var(--mantine-spacing-xs);
+  }
+  
+  &__subtitle {
+    color: var(--mantine-color-dimmed);
+    font-size: 1rem;
   }
   
   &__selectedPlan {
     background: var(--mantine-color-white);
-    border: 1px solid var(--mantine-color-gray-3);
-    border-radius: var(--mantine-radius-sm);
-    padding: var(--mantine-spacing-sm);
-    margin-bottom: var(--mantine-spacing-md);
+    border: 2px solid var(--mantine-color-green-4);
+    border-radius: var(--mantine-radius-md);
+    padding: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-lg);
+    position: relative;
+    z-index: 1;
+    
+    &__badge {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: var(--mantine-color-green-5);
+      color: white;
+      padding: 4px 12px;
+      border-radius: var(--mantine-radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
   }
   
   &__form {
     display: grid;
     gap: var(--mantine-spacing-md);
+    position: relative;
+    z-index: 1;
   }
   
   &__testCard {
-    background: var(--mantine-color-blue-0);
-    border: 1px solid var(--mantine-color-blue-2);
-    border-radius: var(--mantine-radius-sm);
-    padding: var(--mantine-spacing-sm);
-    margin-bottom: var(--mantine-spacing-md);
+    background: linear-gradient(135deg, var(--mantine-color-yellow-0) 0%, var(--mantine-color-yellow-1) 100%);
+    border: 1px solid var(--mantine-color-yellow-3);
+    border-radius: var(--mantine-radius-md);
+    padding: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-lg);
+    box-shadow: 0 2px 8px rgba(255, 196, 0, 0.1);
+    
+    &__icon {
+      display: flex;
+      align-items: center;
+      gap: var(--mantine-spacing-xs);
+      margin-bottom: var(--mantine-spacing-xs);
+      
+      svg {
+        color: var(--mantine-color-yellow-7);
+      }
+    }
     
     &__number {
       font-family: monospace;
-      font-size: 1rem;
-      color: var(--mantine-color-blue-7);
+      font-size: 1.125rem;
+      color: var(--mantine-color-gray-8);
+      font-weight: 600;
       margin-top: 4px;
     }
+    
+    &__hint {
+      font-size: 0.75rem;
+      color: var(--mantine-color-dimmed);
+      margin-top: 4px;
+    }
+  }
+  
+  &__guarantee {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--mantine-spacing-xs);
+    margin-top: var(--mantine-spacing-lg);
+    padding: var(--mantine-spacing-sm);
+    background: var(--mantine-color-green-0);
+    border-radius: var(--mantine-radius-md);
+    font-size: 0.875rem;
+    color: var(--mantine-color-green-7);
+    
+    svg {
+      color: var(--mantine-color-green-6);
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  color: var(--mantine-color-gray-7);
+  text-decoration: none;
+  margin-bottom: var(--mantine-spacing-lg);
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: var(--mantine-color-blue-6);
   }
 }
 

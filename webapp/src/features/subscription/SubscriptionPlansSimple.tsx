@@ -4,14 +4,13 @@ import {
   Title, 
   Text, 
   Button, 
-  Stack, 
   Group, 
   TextInput, 
   Alert,
   Loader,
   Badge,
   Card,
-  Radio
+  ThemeIcon
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -23,9 +22,10 @@ import {
   IconCircleCheck,
   IconPlane,
   IconArrowLeft,
-  IconShieldCheck,
-  IconInfoCircle,
-  IconSparkles
+  IconInfinity,
+  IconRocket,
+  IconHeadset,
+  IconShieldCheck
 } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -35,9 +35,9 @@ import {
   purchaseSubscription,
   type PurchaseSubscriptionDto 
 } from '../../api/subscriptions-api';
-import styles from './SubscriptionPlansAircraft.module.scss';
+import styles from './SubscriptionPlansPrestige.module.scss';
 
-export function SubscriptionPlansAircraft() {
+export function SubscriptionPlansSimple() {
   const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
@@ -110,13 +110,8 @@ export function SubscriptionPlansAircraft() {
     },
   });
 
-  // Filter and group products
+  // Filter subscription products
   const subscriptionProducts = products?.filter(p => p.type === 'subscription' && p.isActive) || [];
-  
-  const aircraftGroups = {
-    '737': subscriptionProducts.filter(p => p.name.startsWith('737')),
-    '787': subscriptionProducts.filter(p => p.name.startsWith('787'))
-  };
 
   const handlePurchase = (values: PurchaseSubscriptionDto) => {
     if (!selectedProduct) return;
@@ -155,21 +150,7 @@ export function SubscriptionPlansAircraft() {
   const selectedProductDetails = subscriptionProducts.find(p => p.id === selectedProduct);
   const monthlyPrice = selectedProductDetails?.productPrices.find(p => p.interval === 'monthly' && p.isActive);
 
-  const getPlanLevel = (name: string) => {
-    if (name.includes('Starter')) return 'Starter';
-    if (name.includes('Professional')) return 'Professional';
-    if (name.includes('Max')) return 'Max';
-    return '';
-  };
-
-  const getPlanDescription = (level: string) => {
-    switch (level) {
-      case 'Starter': return '100K tokens/month • Basic support';
-      case 'Professional': return '500K tokens/month • Priority support';
-      case 'Max': return '2M tokens/month • Premium support';
-      default: return '';
-    }
-  };
+  const getAircraftModel = (name: string) => name.includes('737') ? '737' : '787';
 
   return (
     <Container className={styles.container}>
@@ -179,10 +160,14 @@ export function SubscriptionPlansAircraft() {
       </a>
 
       <div className={styles.header}>
-        <Title className={styles.header__title}>Choose Your Aircraft Assistant</Title>
+        <Title className={styles.header__title}>Premium Aircraft Intelligence</Title>
         <Text className={styles.header__subtitle}>
-          Select your preferred Boeing aircraft model and subscription plan
+          Elevate your operations with unlimited AI assistance
         </Text>
+        <div className={styles.header__badge}>
+          <IconInfinity size={14} />
+          <span>Unlimited Access</span>
+        </div>
       </div>
 
       {activeSubscription && (
@@ -196,118 +181,111 @@ export function SubscriptionPlansAircraft() {
         </Alert>
       )}
 
-      <div className={styles.aircraftCards}>
-        {Object.entries(aircraftGroups).map(([aircraft, products]) => (
-          <Card key={aircraft} className={styles.aircraftCard}>
-            <div className={styles.aircraftCard__header}>
-              <Title order={2} className={styles.aircraftCard__title}>
-                Boeing {aircraft}
-              </Title>
-              <div className={styles.aircraftCard__icon}>
-                <IconPlane size={28} />
-              </div>
-            </div>
+      <div className={`${styles.content} ${selectedProduct ? styles.contentWithCheckout : ''}`}>
+        {subscriptionProducts.map((product) => {
+          const monthlyPrice = product.productPrices.find(p => p.interval === 'monthly' && p.isActive);
+          const isCurrentPlan = activeSubscription?.products?.some(p => p.id === product.id) || false;
+          const isSelected = selectedProduct === product.id;
+          const isDisabled = activeSubscription !== null;
+          const aircraftModel = getAircraftModel(product.name);
 
-            <Radio.Group
-              value={selectedProduct}
-              onChange={setSelectedProduct}
+          return (
+            <Card
+              key={product.id}
+              className={`${styles.productCard} ${isSelected ? styles['productCard--selected'] : ''} ${isCurrentPlan ? styles['productCard--current'] : ''}`}
+              onClick={() => !isDisabled && setSelectedProduct(product.id)}
+              style={{ opacity: isDisabled && !isCurrentPlan ? 0.6 : 1 }}
             >
-              <div className={styles.aircraftCard__plans}>
-                {products
-                  .sort((a, b) => {
-                    const order = ['Starter', 'Professional', 'Max'];
-                    return order.indexOf(getPlanLevel(a.name)) - order.indexOf(getPlanLevel(b.name));
-                  })
-                  .map((product) => {
-                    const monthlyPrice = product.productPrices.find(p => p.interval === 'monthly' && p.isActive);
-                    const isCurrentPlan = activeSubscription?.products?.some(p => p.id === product.id) || false;
-                    const isDisabled = activeSubscription !== null;
-                    const level = getPlanLevel(product.name);
-
-                    return (
-                      <label
-                        key={product.id}
-                        className={`${styles.planOption} ${selectedProduct === product.id ? styles['planOption--selected'] : ''} ${isCurrentPlan ? styles['planOption--current'] : ''}`}
-                        style={{ opacity: isDisabled && !isCurrentPlan ? 0.6 : 1 }}
-                      >
-                        <div className={styles.planOption__content}>
-                          <Radio value={product.id} disabled={isDisabled} style={{ display: 'none' }} />
-                          <div className={styles.planOption__info}>
-                            <Text className={styles.planOption__name}>
-                              {level}
-                              {isCurrentPlan && (
-                                <Badge 
-                                  color="green" 
-                                  variant="light" 
-                                  size="xs"
-                                  ml="xs"
-                                >
-                                  Current
-                                </Badge>
-                              )}
-                            </Text>
-                            <Text className={styles.planOption__details}>
-                              {getPlanDescription(level)}
-                            </Text>
-                          </div>
-                          {monthlyPrice && (
-                            <Text className={styles.planOption__price}>
-                              ${(monthlyPrice.amount / 100).toFixed(2)}/mo
-                            </Text>
-                          )}
-                        </div>
-                      </label>
-                    );
-                  })}
+              <div className={styles.productCard__header}>
+                <div className={styles.productCard__icon}>
+                  <IconPlane />
+                </div>
+                <div className={styles.productCard__badge}>Boeing</div>
+                <Title className={styles.productCard__title}>
+                  {aircraftModel}
+                  {isCurrentPlan && (
+                    <Badge 
+                      color="green" 
+                      variant="light" 
+                      size="sm"
+                      ml="xs"
+                    >
+                      Current
+                    </Badge>
+                  )}
+                </Title>
+                <Text className={styles.productCard__subtitle}>
+                  Advanced AI Assistant
+                </Text>
               </div>
-            </Radio.Group>
-          </Card>
-        ))}
-      </div>
 
-      {selectedProduct && (
-        <Card className={styles.checkout}>
+              <div className={styles.productCard__price}>
+                {monthlyPrice && (
+                  <>
+                    <div className={styles.productCard__price__amount}>
+                      ${(monthlyPrice.amount / 100).toFixed(2)}
+                    </div>
+                    <div className={styles.productCard__price__period}>
+                      per month
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <Button
+                fullWidth
+                size="md"
+                disabled={isDisabled}
+                className={styles.productCard__button}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  !isDisabled && setSelectedProduct(product.id);
+                }}
+                styles={{
+                  root: {
+                    height: '48px',
+                    backgroundColor: isSelected ? 'var(--mantine-color-gray-9)' : 'transparent',
+                    color: isSelected ? 'white' : 'var(--mantine-color-gray-9)',
+                    border: '2px solid var(--mantine-color-gray-9)',
+                  }
+                }}
+              >
+                {isCurrentPlan ? 'Current Plan' : isSelected ? 'Selected' : 'Select Plan'}
+              </Button>
+            </Card>
+          );
+        })}
+
+        {selectedProduct && (
+          <Card className={styles.checkout}>
           <div className={styles.checkout__header}>
-            <IconSparkles size={48} color="var(--mantine-color-blue-6)" />
             <Title className={styles.checkout__title}>
-              Almost There!
+              Secure Checkout
             </Title>
             <Text className={styles.checkout__subtitle}>
-              Complete your purchase to unlock advanced AI assistance
+              Complete your purchase in seconds
             </Text>
           </div>
 
           <div className={styles.checkout__selectedPlan}>
-            <span className={styles.checkout__selectedPlan__badge}>YOUR SELECTION</span>
-            <Group justify="space-between" mt="xs">
+            <Group justify="space-between">
               <div>
-                <Text fw={700} size="lg">
-                  {selectedProductDetails?.name}
-                </Text>
-                <Text size="sm" c="dimmed">
-                  {selectedProductDetails?.baseTokensPerMonth?.toLocaleString()} tokens per month
-                </Text>
+                <Text size="sm" c="dimmed" mb={4}>Selected Plan</Text>
+                <Text fw={700} size="lg">{selectedProductDetails?.name}</Text>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <Text fw={700} size="xl" c="blue">
-                  ${monthlyPrice ? (monthlyPrice.amount / 100).toFixed(2) : '0'}
-                </Text>
+                <Text fw={700} size="xl">${monthlyPrice ? (monthlyPrice.amount / 100).toFixed(2) : '0'}</Text>
                 <Text size="xs" c="dimmed">per month</Text>
               </div>
             </Group>
           </div>
 
           <div className={styles.checkout__testCard}>
-            <div className={styles.checkout__testCard__icon}>
-              <IconInfoCircle size={20} />
-              <Text size="sm" fw={600}>Test Mode - Try it for free!</Text>
+            <div className={styles.checkout__testCard__label}>Test Mode</div>
+            <div className={styles.checkout__testCard__number}>
+              4242 4242 4242 4242
             </div>
-            <Text className={styles.checkout__testCard__number}>
-              Use test card: 4242 4242 4242 4242
-            </Text>
-            <Text className={styles.checkout__testCard__hint}>
-              Any future date for expiry • Any 3 digits for CVV
-            </Text>
+            <div className={styles.checkout__testCard__hint}>Use any future expiry • Any 3-digit CVV</div>
           </div>
 
           <form onSubmit={form.onSubmit(handlePurchase)} className={styles.checkout__form}>
@@ -365,36 +343,15 @@ export function SubscriptionPlansAircraft() {
               fullWidth
               loading={purchaseMutation.isPending}
               leftSection={<IconCreditCard size={20} />}
-              variant="gradient"
-              gradient={{ from: 'blue', to: 'cyan', deg: 45 }}
-              styles={{
-                root: {
-                  height: '48px',
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                }
-              }}
+              className={styles.prestigeButton}
+              mt="sm"
             >
-              Start Your Subscription - ${monthlyPrice ? (monthlyPrice.amount / 100).toFixed(2) : '0'}/mo
-            </Button>
-
-            <div className={styles.checkout__guarantee}>
-              <IconShieldCheck size={20} />
-              <Text size="sm" fw={500}>30-day money-back guarantee • Cancel anytime</Text>
-            </div>
-
-            <Button
-              variant="subtle"
-              onClick={() => setSelectedProduct(null)}
-              fullWidth
-              size="sm"
-              mt="xs"
-            >
-              Change Selection
+              <span>Start Premium Access • ${monthlyPrice ? (monthlyPrice.amount / 100).toFixed(2) : '0'}/mo</span>
             </Button>
           </form>
         </Card>
       )}
+      </div>
     </Container>
   );
 }
