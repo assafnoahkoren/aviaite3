@@ -55,30 +55,57 @@ export class ChatController {
   @UseGuards(AuthGuard)
   @Sse('api/chat/stream/:threadId')
   stream(@Param('threadId') threadId: string, @Req() req: AuthedRequest): Observable<any> {
-    const stream = this.chatService.createStream(threadId, req.user.id);
-
     return new Observable((observer) => {
-      stream.then(s => {
-        s.on('textCreated', (text) => {
-          observer.next({ data: { type: 'textCreated', value: text } });
-        });
-        s.on('textDelta', (delta) => {
-          observer.next({ data: { type: 'textDelta', value: delta.value } });
-        });
-        s.on('toolCallCreated', (toolCall) => {
-          observer.next({ data: { type: 'toolCallCreated', value: toolCall } });
-        });
-        s.on('toolCallDelta', (toolCallDelta) => {
-          observer.next({ data: { type: 'toolCallDelta', value: toolCallDelta } });
-        });
-        s.on('end', () => {
-          observer.next({ data: { type: 'end' } });
+      this.chatService.createStream(threadId, req.user.id)
+        .then(s => {
+          s.on('textCreated', (text) => {
+            observer.next({ data: { type: 'textCreated', value: text } });
+          });
+          s.on('textDelta', (delta) => {
+            observer.next({ data: { type: 'textDelta', value: delta.value } });
+          });
+          s.on('toolCallCreated', (toolCall) => {
+            observer.next({ data: { type: 'toolCallCreated', value: toolCall } });
+          });
+          s.on('toolCallDelta', (toolCallDelta) => {
+            observer.next({ data: { type: 'toolCallDelta', value: toolCallDelta } });
+          });
+          s.on('end', () => {
+            observer.next({ data: { type: 'end' } });
+            observer.complete();
+          });
+          s.on('error', (error) => {
+            // Send error through SSE before closing
+            observer.next({ 
+              data: { 
+                type: 'error', 
+                value: error.message || 'Stream error occurred' 
+              } 
+            });
+            observer.complete();
+          });
+        })
+        .catch(error => {
+          // Handle errors from createStream (e.g., subscription errors)
+          if (error.response && error.response.statusCode === 403) {
+            observer.next({ 
+              data: { 
+                type: 'error', 
+                value: 'Subscription required',
+                code: 'SUBSCRIPTION_REQUIRED',
+                details: error.response 
+              } 
+            });
+          } else {
+            observer.next({ 
+              data: { 
+                type: 'error', 
+                value: error.message || 'Failed to start stream' 
+              } 
+            });
+          }
           observer.complete();
         });
-        s.on('error', (error) => {
-          observer.error(error);
-        });
-      })
     });
   }
 

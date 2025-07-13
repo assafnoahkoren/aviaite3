@@ -123,6 +123,23 @@ export function streamChat(threadId: string, eventHandlers: any) {
                 eventHandlers.onEnd?.(value);
                 eventSource.close();
                 break;
+            case 'error':
+                // Handle structured errors from SSE
+                if (parsedData.code === 'SUBSCRIPTION_REQUIRED') {
+                    const error = new Error(parsedData.value);
+                    (error as any).response = {
+                        data: {
+                            code: 'SUBSCRIPTION_REQUIRED',
+                            message: parsedData.value,
+                            details: parsedData.details
+                        }
+                    };
+                    eventHandlers.onError?.(error);
+                } else {
+                    eventHandlers.onError?.(new Error(parsedData.value));
+                }
+                eventSource.close();
+                break;
             default:
                 console.warn('Unhandled event type:', type);
         }

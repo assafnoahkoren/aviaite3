@@ -170,23 +170,9 @@ export class ChatStore {
           this.isStreamLoading = false;
         });
         
-        // Check if it's a subscription error from SSE
-        // SSE errors might come in a different format
-        if (error?.message?.includes('403')) {
-          // Try to parse error message for subscription details
-          showMissingSubscriptionModal({
-            response: {
-              data: {
-                code: 'SUBSCRIPTION_REQUIRED',
-                message: 'Subscription required to use this assistant',
-                details: {
-                  assistantId: this.currentThread?.assistantId,
-                  assistantName: this.currentAssistant()?.label,
-                  requiredAction: 'SUBSCRIBE',
-                }
-              }
-            }
-          });
+        // Check if it's a subscription error
+        if (error?.response?.data?.code === 'SUBSCRIPTION_REQUIRED') {
+          showMissingSubscriptionModal(error);
         }
       },
     });
