@@ -65,7 +65,7 @@ export class AdminStatsService {
         where: { isActive: true, deletedAt: null },
       }),
       prisma.$queryRaw<[{ avg: number }]>`
-        SELECT AVG(user_count) as avg
+        SELECT AVG(user_count)::float as avg
         FROM (
           SELECT COUNT(u.id) as user_count
           FROM "Organization" o
@@ -121,13 +121,13 @@ export class AdminStatsService {
   }
 
   private async getRevenueStats() {
-    const monthlyRecurringRevenue = await prisma.$queryRaw<[{ mrr: number }]>`
+    const monthlyRecurringRevenue = await prisma.$queryRaw<[{ mrr: bigint }]>`
       SELECT SUM(
         CASE 
           WHEN s.interval = 'monthly' THEN pp."priceCents"
           WHEN s.interval = 'yearly' THEN pp."priceCents" / 12
         END
-      ) as mrr
+      )::bigint as mrr
       FROM "Subscription" s
       JOIN "SubscriptionProduct" sp ON sp."subscriptionId" = s.id
       JOIN "ProductPrice" pp ON pp.id = sp."productPriceId"
@@ -136,13 +136,13 @@ export class AdminStatsService {
       AND sp."deletedAt" IS NULL
     `;
 
-    const annualRecurringRevenue = await prisma.$queryRaw<[{ arr: number }]>`
+    const annualRecurringRevenue = await prisma.$queryRaw<[{ arr: bigint }]>`
       SELECT SUM(
         CASE 
           WHEN s.interval = 'monthly' THEN pp."priceCents" * 12
           WHEN s.interval = 'yearly' THEN pp."priceCents"
         END
-      ) as arr
+      )::bigint as arr
       FROM "Subscription" s
       JOIN "SubscriptionProduct" sp ON sp."subscriptionId" = s.id
       JOIN "ProductPrice" pp ON pp.id = sp."productPriceId"
@@ -152,7 +152,7 @@ export class AdminStatsService {
     `;
 
     const averageRevenuePerUser = await prisma.$queryRaw<[{ arpu: number }]>`
-      SELECT AVG(user_revenue) as arpu
+      SELECT AVG(user_revenue)::float as arpu
       FROM (
         SELECT u.id, SUM(
           CASE 
@@ -173,8 +173,8 @@ export class AdminStatsService {
     `;
 
     return {
-      monthlyRecurringRevenueCents: monthlyRecurringRevenue[0]?.mrr || 0,
-      annualRecurringRevenueCents: annualRecurringRevenue[0]?.arr || 0,
+      monthlyRecurringRevenueCents: Number(monthlyRecurringRevenue[0]?.mrr || 0n),
+      annualRecurringRevenueCents: Number(annualRecurringRevenue[0]?.arr || 0n),
       averageRevenuePerUserCents: Math.round(averageRevenuePerUser[0]?.arpu || 0),
     };
   }
@@ -362,8 +362,8 @@ export class AdminStatsService {
               deletedAt: null,
             },
           }),
-          prisma.$queryRaw<[{ revenue: number }]>`
-            SELECT SUM(pp."priceCents") as revenue
+          prisma.$queryRaw<[{ revenue: bigint }]>`
+            SELECT COALESCE(SUM(pp."priceCents"), 0)::bigint as revenue
             FROM "Subscription" s
             JOIN "SubscriptionProduct" sp ON sp."subscriptionId" = s.id
             JOIN "ProductPrice" pp ON pp.id = sp."productPriceId"
@@ -378,7 +378,7 @@ export class AdminStatsService {
           date: date.toISOString().split('T')[0],
           newUsers,
           newSubscriptions,
-          revenueCents: revenue[0]?.revenue || 0,
+          revenueCents: Number(revenue[0]?.revenue || 0n),
         };
       }),
     );
