@@ -125,21 +125,7 @@ export class ChatService {
     outputTokens: number,
     subscriptionId?: string,
   ) {
-    // Model pricing in cents per 1M tokens
-    const pricing: Record<string, { input: number; output: number }> = {
-      'gpt-3.5-turbo': { input: 50, output: 150 }, // $0.50/$1.50 per 1M tokens
-      'gpt-4': { input: 3000, output: 6000 }, // $30/$60 per 1M tokens
-      'gpt-4-turbo': { input: 1000, output: 3000 }, // $10/$30 per 1M tokens
-      'gpt-4o': { input: 500, output: 1500 }, // $5/$15 per 1M tokens
-    };
-
-    const modelPricing = pricing[modelUsed] || pricing['gpt-4'];
-    
-    // Calculate costs in cents
-    const inputCostCents = Math.ceil((inputTokens * modelPricing.input) / 1_000_000);
-    const outputCostCents = Math.ceil((outputTokens * modelPricing.output) / 1_000_000);
-
-    // Create usage records
+    // Create usage records without storing costs (will be calculated dynamically)
     const usageData = [
       {
         userId,
@@ -149,7 +135,7 @@ export class ChatService {
         modelUsed,
         tokenType: TokenType.input,
         tokensUsed: inputTokens,
-        costInCents: inputCostCents,
+        costInCents: 0, // Will be calculated dynamically when queried
         date: new Date(),
       },
       {
@@ -160,7 +146,7 @@ export class ChatService {
         modelUsed,
         tokenType: TokenType.output,
         tokensUsed: outputTokens,
-        costInCents: outputCostCents,
+        costInCents: 0, // Will be calculated dynamically when queried
         date: new Date(),
       },
     ];

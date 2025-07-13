@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '@services/prisma';
 import { TokenType } from '../../../generated/prisma';
+import { calculateTokenCost } from '@services/token-pricing';
 
 @Injectable()
 export class TokenUsageService {
@@ -23,31 +24,33 @@ export class TokenUsageService {
       }),
     };
 
-    const [usage, totalCost] = await Promise.all([
-      prisma.userTokenUsage.groupBy({
-        by: ['modelUsed', 'tokenType'],
-        where,
-        _sum: {
-          tokensUsed: true,
-          costInCents: true,
-        },
-      }),
-      prisma.userTokenUsage.aggregate({
-        where,
-        _sum: {
-          costInCents: true,
-        },
-      }),
-    ]);
+    const usage = await prisma.userTokenUsage.groupBy({
+      by: ['modelUsed', 'tokenType'],
+      where,
+      _sum: {
+        tokensUsed: true,
+      },
+    });
 
-    return {
-      usage: usage.map(item => ({
+    let totalCostCents = 0;
+    const usageWithCosts = usage.map(item => {
+      const cost = calculateTokenCost(
+        item.modelUsed,
+        item._sum.tokensUsed || 0,
+        item.tokenType
+      );
+      totalCostCents += cost;
+      return {
         model: item.modelUsed,
         tokenType: item.tokenType,
         totalTokens: item._sum.tokensUsed || 0,
-        totalCostCents: item._sum.costInCents || 0,
-      })),
-      totalCostCents: totalCost._sum.costInCents || 0,
+        totalCostCents: cost,
+      };
+    });
+
+    return {
+      usage: usageWithCosts,
+      totalCostCents,
     };
   }
 
@@ -70,39 +73,59 @@ export class TokenUsageService {
       }),
     };
 
-    const [usage, totalCost, userBreakdown] = await Promise.all([
+    const [usage, userBreakdownByType] = await Promise.all([
       prisma.userTokenUsage.groupBy({
         by: ['modelUsed', 'tokenType'],
         where,
         _sum: {
           tokensUsed: true,
-          costInCents: true,
-        },
-      }),
-      prisma.userTokenUsage.aggregate({
-        where,
-        _sum: {
-          costInCents: true,
         },
       }),
       prisma.userTokenUsage.groupBy({
-        by: ['userId'],
+        by: ['userId', 'modelUsed', 'tokenType'],
         where,
         _sum: {
           tokensUsed: true,
-          costInCents: true,
         },
-        orderBy: {
-          _sum: {
-            costInCents: 'desc',
-          },
-        },
-        take: 10, // Top 10 users
       }),
     ]);
 
-    // Get user details for the top users
-    const userIds = userBreakdown.map(u => u.userId);
+    // Calculate costs for organization usage
+    let totalCostCents = 0;
+    const usageWithCosts = usage.map(item => {
+      const cost = calculateTokenCost(
+        item.modelUsed,
+        item._sum.tokensUsed || 0,
+        item.tokenType
+      );
+      totalCostCents += cost;
+      return {
+        model: item.modelUsed,
+        tokenType: item.tokenType,
+        totalTokens: item._sum.tokensUsed || 0,
+        totalCostCents: cost,
+      };
+    });
+
+    // Calculate costs per user
+    const userCostMap = new Map<string, { totalTokens: number; totalCostCents: number }>();
+    userBreakdownByType.forEach(item => {
+      if (!userCostMap.has(item.userId)) {
+        userCostMap.set(item.userId, { totalTokens: 0, totalCostCents: 0 });
+      }
+      const userStats = userCostMap.get(item.userId)!;
+      const tokens = item._sum.tokensUsed || 0;
+      const cost = calculateTokenCost(item.modelUsed, tokens, item.tokenType);
+      userStats.totalTokens += tokens;
+      userStats.totalCostCents += cost;
+    });
+
+    // Get top 10 users by cost
+    const topUserEntries = Array.from(userCostMap.entries())
+      .sort((a, b) => b[1].totalCostCents - a[1].totalCostCents)
+      .slice(0, 10);
+
+    const userIds = topUserEntries.map(([userId]) => userId);
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
       select: { id: true, email: true, fullName: true },
@@ -110,19 +133,14 @@ export class TokenUsageService {
     const userMap = Object.fromEntries(users.map(u => [u.id, u]));
 
     return {
-      usage: usage.map(item => ({
-        model: item.modelUsed,
-        tokenType: item.tokenType,
-        totalTokens: item._sum.tokensUsed || 0,
-        totalCostCents: item._sum.costInCents || 0,
-      })),
-      totalCostCents: totalCost._sum.costInCents || 0,
-      topUsers: userBreakdown.map(item => ({
-        userId: item.userId,
-        email: userMap[item.userId]?.email || 'Unknown',
-        fullName: userMap[item.userId]?.fullName || null,
-        totalTokens: item._sum.tokensUsed || 0,
-        totalCostCents: item._sum.costInCents || 0,
+      usage: usageWithCosts,
+      totalCostCents,
+      topUsers: topUserEntries.map(([userId, stats]) => ({
+        userId,
+        email: userMap[userId]?.email || 'Unknown',
+        fullName: userMap[userId]?.fullName || null,
+        totalTokens: stats.totalTokens,
+        totalCostCents: stats.totalCostCents,
       })),
     };
   }
@@ -139,7 +157,7 @@ export class TokenUsageService {
 
     // Use groupBy instead of raw query to avoid BigInt serialization issues
     const usage = await prisma.userTokenUsage.groupBy({
-      by: ['date', 'tokenType'],
+      by: ['date', 'tokenType', 'modelUsed'],
       where: {
         date: { gte: startDate },
         deletedAt: null,
@@ -147,7 +165,6 @@ export class TokenUsageService {
       },
       _sum: {
         tokensUsed: true,
-        costInCents: true,
       },
       orderBy: {
         date: 'asc',
@@ -163,12 +180,13 @@ export class TokenUsageService {
         dateMap.set(dateStr, { input: 0, output: 0, cost: 0 });
       }
       const data = dateMap.get(dateStr)!;
+      const tokens = row._sum.tokensUsed || 0;
       if (row.tokenType === TokenType.input) {
-        data.input = row._sum.tokensUsed || 0;
+        data.input += tokens;
       } else {
-        data.output = row._sum.tokensUsed || 0;
+        data.output += tokens;
       }
-      data.cost += row._sum.costInCents || 0;
+      data.cost += calculateTokenCost(row.modelUsed, tokens, row.tokenType);
     });
 
     return Array.from(dateMap.entries()).map(([date, data]) => ({
@@ -204,7 +222,6 @@ export class TokenUsageService {
       where,
       _sum: {
         tokensUsed: true,
-        costInCents: true,
       },
       _count: {
         _all: true,
@@ -234,7 +251,7 @@ export class TokenUsageService {
       } else {
         data.outputTokens = item._sum.tokensUsed || 0;
       }
-      data.totalCost += item._sum.costInCents || 0;
+      data.totalCost += calculateTokenCost(item.modelUsed, item._sum.tokensUsed || 0, item.tokenType);
       data.requestCount += item._count._all;
     });
 

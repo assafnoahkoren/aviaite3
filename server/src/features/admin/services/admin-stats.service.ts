@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '@services/prisma';
+import { calculateTokenCost, MODEL_PRICING } from '@services/token-pricing';
+import { TokenType } from '../../../../generated/prisma';
 
 @Injectable()
 export class AdminStatsService {
@@ -181,7 +183,7 @@ export class AdminStatsService {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [totalTokensUsed, totalCost, usageByModel, dailyUsage] = await Promise.all([
+    const [totalTokensUsed, usageByModelAndType, dailyUsageByType] = await Promise.all([
       prisma.userTokenUsage.aggregate({
         where: {
           date: { gte: thirtyDaysAgo },
@@ -191,58 +193,90 @@ export class AdminStatsService {
           tokensUsed: true,
         },
       }),
-      prisma.userTokenUsage.aggregate({
-        where: {
-          date: { gte: thirtyDaysAgo },
-          deletedAt: null,
-        },
-        _sum: {
-          costInCents: true,
-        },
-      }),
       prisma.userTokenUsage.groupBy({
-        by: ['modelUsed'],
+        by: ['modelUsed', 'tokenType'],
         where: {
           date: { gte: thirtyDaysAgo },
           deletedAt: null,
         },
         _sum: {
           tokensUsed: true,
-          costInCents: true,
         },
       }),
       prisma.userTokenUsage.groupBy({
-        by: ['date'],
+        by: ['date', 'modelUsed', 'tokenType'],
         where: {
           date: { gte: thirtyDaysAgo },
           deletedAt: null,
         },
         _sum: {
           tokensUsed: true,
-          costInCents: true,
         },
         orderBy: {
           date: 'desc',
         },
-        take: 30,
       }),
     ]);
+
+    // Calculate total cost dynamically
+    let totalCostCents = 0;
+    usageByModelAndType.forEach(usage => {
+      const cost = calculateTokenCost(
+        usage.modelUsed,
+        usage._sum.tokensUsed || 0,
+        usage.tokenType
+      );
+      totalCostCents += cost;
+    });
+
+    // Group usage by model and calculate costs
+    const modelMap = new Map<string, { totalTokens: number; totalCostCents: number }>();
+    usageByModelAndType.forEach(usage => {
+      const model = usage.modelUsed;
+      if (!modelMap.has(model)) {
+        modelMap.set(model, { totalTokens: 0, totalCostCents: 0 });
+      }
+      const data = modelMap.get(model)!;
+      data.totalTokens += usage._sum.tokensUsed || 0;
+      data.totalCostCents += calculateTokenCost(
+        model,
+        usage._sum.tokensUsed || 0,
+        usage.tokenType
+      );
+    });
+
+    // Group daily usage and calculate costs
+    const dailyMap = new Map<string, { totalTokens: number; totalCostCents: number }>();
+    dailyUsageByType.forEach(usage => {
+      const dateStr = usage.date.toISOString().split('T')[0];
+      if (!dailyMap.has(dateStr)) {
+        dailyMap.set(dateStr, { totalTokens: 0, totalCostCents: 0 });
+      }
+      const data = dailyMap.get(dateStr)!;
+      data.totalTokens += usage._sum.tokensUsed || 0;
+      data.totalCostCents += calculateTokenCost(
+        usage.modelUsed,
+        usage._sum.tokensUsed || 0,
+        usage.tokenType
+      );
+    });
+
+    const dailyUsage = Array.from(dailyMap.entries())
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 30);
 
     return {
       last30Days: {
         totalTokens: totalTokensUsed._sum.tokensUsed || 0,
-        totalCostCents: totalCost._sum.costInCents || 0,
+        totalCostCents,
       },
-      byModel: usageByModel.map(usage => ({
-        model: usage.modelUsed,
-        totalTokens: usage._sum.tokensUsed || 0,
-        totalCostCents: usage._sum.costInCents || 0,
+      byModel: Array.from(modelMap.entries()).map(([model, data]) => ({
+        model,
+        totalTokens: data.totalTokens,
+        totalCostCents: data.totalCostCents,
       })),
-      dailyUsage: dailyUsage.map(day => ({
-        date: day.date,
-        totalTokens: day._sum.tokensUsed || 0,
-        totalCostCents: day._sum.costInCents || 0,
-      })),
+      dailyUsage,
     };
   }
 

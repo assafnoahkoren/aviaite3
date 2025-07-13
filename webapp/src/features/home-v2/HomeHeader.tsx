@@ -11,8 +11,9 @@ import {
   Stack,
   Button,
   Badge,
+  Divider,
 } from '@mantine/core';
-import { IconChevronDown, IconLogout, IconRobot, IconSettings, IconHelp, IconRefresh } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconRobot, IconSettings, IconHelp, IconRefresh, IconCreditCard } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
@@ -21,6 +22,7 @@ import { BiEvents } from '../../mixpanel';
 import { createMainTour } from '../onboarding/tours/mainTour';
 import { useResetOnboarding } from '../../api/onboarding-api';
 import { useNavigate } from 'react-router-dom';
+import { TokenUsage } from '../subscription/TokenUsage';
 
 interface HomeHeaderProps {
   opened: boolean;
@@ -128,6 +130,20 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
               </Text>
             </Menu.Item>
             <Menu.Divider />
+            
+            {/* Token Usage Section */}
+            <div style={{ padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-md)' }}>
+              <TokenUsage />
+            </div>
+            <Menu.Item
+              leftSection={<IconCreditCard style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+              component="a"
+              href="/subscription/plans"
+            >
+              Manage Subscription
+            </Menu.Item>
+            <Menu.Divider />
+            
             <Menu.Label>Settings</Menu.Label>
             <Menu.Item
               leftSection={<IconRobot style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
