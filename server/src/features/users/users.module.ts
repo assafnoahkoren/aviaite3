@@ -8,8 +8,10 @@ import { TutorialService } from './tutorial.service';
 import { OnboardingController } from './onboarding.controller';
 import { OnboardingService } from './onboarding.service';
 import { RolesGuard } from './guards/roles.guard';
+import { ProductsModule } from '../products/products.module';
 
 @Module({
+  imports: [ProductsModule],
   controllers: [UsersController, UserSettingsController, TutorialController, OnboardingController],
   providers: [UsersService, UserSettingsService, TutorialService, OnboardingService, RolesGuard],
   exports: [RolesGuard],

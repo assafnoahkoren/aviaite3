@@ -30,17 +30,24 @@ export function OnboardingPage() {
       const nextSlide = currentSlide + 1;
       setCurrentSlide(nextSlide);
       
-      // Save progress
-      await updateProgress.mutateAsync({
-        currentStep: nextSlide,
-        totalSteps: TOTAL_SLIDES,
-        stepData: {
-          preferences: {
-            fleet: selectedFleet ? `elal-${selectedFleet.toLowerCase()}` : undefined,
-            completed: nextSlide === 1,
+      // Save progress, including fleet selection after slide 1
+      if (currentSlide === 1 && selectedFleet) {
+        await updateProgress.mutateAsync({
+          currentStep: nextSlide,
+          totalSteps: TOTAL_SLIDES,
+          stepData: {
+            preferences: {
+              fleet: selectedFleet, // Save just "737" or "787"
+              completed: true,
+            },
           },
-        },
-      });
+        });
+      } else {
+        await updateProgress.mutateAsync({
+          currentStep: nextSlide,
+          totalSteps: TOTAL_SLIDES,
+        });
+      }
     }
   };
 

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -12,6 +6,264 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String               @id @default(cuid())
+  email                 String               @unique
+  password              String
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  fullName              String?
+  isActive              Boolean              @default(true)
+  organizationId        String?
+  verified              Boolean              @default(false)
+  role                  Role                 @default(USER)
+  settings              Json?
+  deletedAt             DateTime?
+  onboardingCompletedAt DateTime?
+  onboardingStatus      Json?
+  AccessControls        AccessControl[]
+  Subscriptions         Subscription[]
+  Threads               Thread[]
+  TokenBalances         TokenBalance[]
+  TokenPurchases        TokenPurchase[]
+  Organization          Organization?        @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  UserTokenUsages       UserTokenUsage[]
+  UserTutorialStatuses  UserTutorialStatus[]
+  VerificationTokens    VerificationToken[]
+
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model Organization {
+  id             String          @id @default(cuid())
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  isActive       Boolean         @default(true)
+  deletedAt      DateTime?
+  Subscriptions  Subscription[]
+  TokenBalances  TokenBalance[]
+  TokenPurchases TokenPurchase[]
+  Users          User[]
+
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+model Thread {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  assistantId    String
+  profileId      String
+  userId         String
+  openaiThreadId String
+  name           String?
+  deletedAt      DateTime?
+  User           User      @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model AccessControl {
+  id          String     @id @default(cuid())
+  userId      String
+  entityId    String
+  entityType  EntityType
+  accessType  String
+  accessLevel Int
+  isActive    Boolean    @default(true)
+  deletedAt   DateTime?
+  User        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@index([entityId, entityType])
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model VerificationToken {
+  id           String           @id @default(cuid())
+  entityId     String
+  entityType   EntityType
+  kind         VerificationKind
+  token        String
+  usedAt       DateTime?
+  createdAt    DateTime         @default(now())
+  expiresAt    DateTime
+  deletedAt    DateTime?
+  label        String?
+  usedByUserId String?
+  usedByUser   User?            @relation(fields: [usedByUserId], references: [id])
+
+  @@index([entityId, entityType])
+  @@index([expiresAt])
+  @@index([deletedAt])
+  @@index([usedByUserId])
+}
+
+model Product {
+  id                   String                @id @default(cuid())
+  name                 String
+  description          String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  baseTokensPerMonth   Int?
+  isRecurring          Boolean               @default(true)
+  prices               ProductPrice[]
+  SubscriptionProducts SubscriptionProduct[]
+  TokenBalances        TokenBalance[]
+  TokenPurchases       TokenPurchase[]
+  UserTokenUsages      UserTokenUsage[]
+
+  @@index([deletedAt])
+  @@index([isRecurring])
+}
+
+model ProductPrice {
+  id                   String                @id @default(cuid())
+  productId            String
+  interval             BillingInterval
+  priceCents           Int
+  currency             String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  Product              Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  SubscriptionProducts SubscriptionProduct[]
+
+  @@unique([productId, interval])
+  @@index([deletedAt])
+}
+
+model Subscription {
+  id                   String                @id @default(cuid())
+  userId               String?
+  status               String
+  startedAt            DateTime              @default(now())
+  endsAt               DateTime?
+  interval             BillingInterval
+  entityType           EntityType            @default(user)
+  entityId             String                @default("")
+  deletedAt            DateTime?
+  organizationId       String?
+  tokensLimit          Int                   @default(0) @map("tokens_limit")
+  Organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  User                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionProducts SubscriptionProduct[]
+  UserTokenUsages      UserTokenUsage[]
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model SubscriptionProduct {
+  id             String        @id @default(cuid())
+  subscriptionId String
+  productId      String
+  productPriceId String?
+  deletedAt      DateTime?
+  Product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ProductPrice   ProductPrice? @relation(fields: [productPriceId], references: [id])
+  Subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, productId])
+  @@index([deletedAt])
+}
+
+model UserTokenUsage {
+  id             String        @id @default(cuid())
+  userId         String
+  productId      String?
+  modelUsed      String
+  tokensUsed     Int
+  costInCents    Int
+  date           DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  organizationId String?
+  tokenType      TokenType
+  subscriptionId String?
+  Product        Product?      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  User           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([productId, date])
+  @@index([userId, productId, date])
+  @@index([date])
+  @@index([modelUsed])
+  @@index([deletedAt])
+  @@index([organizationId, date])
+  @@index([organizationId, productId, date])
+  @@index([tokenType])
+  @@index([subscriptionId])
+}
+
+model UserTutorialStatus {
+  id          String    @id @default(cuid())
+  userId      String
+  tutorialId  String
+  completedAt DateTime?
+  skippedAt   DateTime?
+  currentStep Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tutorialId])
+  @@index([userId])
+}
+
+model TokenPurchase {
+  id             String        @id @default(cuid())
+  userId         String?
+  productId      String
+  tokenAmount    Int
+  priceCents     Int
+  currency       String
+  createdAt      DateTime      @default(now())
+  expiresAt      DateTime?
+  deletedAt      DateTime?
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([productId])
+  @@index([expiresAt])
+  @@index([deletedAt])
+}
+
+model TokenBalance {
+  id                 String        @id @default(cuid())
+  userId             String?
+  productId          String
+  availableTokens    Int           @default(0)
+  monthlyResetTokens Int           @default(0)
+  purchasedTokens    Int           @default(0)
+  lastResetAt        DateTime      @default(now())
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  organizationId     String?
+  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product            Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user               User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@unique([organizationId, productId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([productId])
 }
 
 enum EntityType {
@@ -30,104 +282,6 @@ enum Role {
   ADMIN
 }
 
-model User {
-  id                   String                @id @default(cuid())
-  fullName             String?
-  email                String                @unique
-  password             String
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  Threads              Thread[]
-  organizationId       String?
-  Organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: NoAction)
-  isActive             Boolean               @default(true)
-  AccessControls       AccessControl[]
-  verified             Boolean               @default(false)
-  settings             Json?
-  role                 Role                  @default(USER)
-  Subscriptions        Subscription[]
-  UserTokenUsages      UserTokenUsage[]
-  TokenPurchases       TokenPurchase[]
-  TokenBalances        TokenBalance[]
-  VerificationTokens   VerificationToken[]   // Tokens used by this user
-  UserTutorialStatuses UserTutorialStatus[]
-  onboardingStatus     Json?                 // Stores current step and step data
-  onboardingCompletedAt DateTime?
-  deletedAt            DateTime?
-
-  @@index([organizationId])
-  @@index([deletedAt])
-}
-
-model Organization {
-  id             String          @id @default(cuid())
-  name           String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  Users          User[]
-  Subscriptions  Subscription[]
-  TokenPurchases TokenPurchase[]
-  TokenBalances  TokenBalance[]
-  isActive       Boolean         @default(true)
-  deletedAt      DateTime?
-
-  @@index([isActive])
-  @@index([deletedAt])
-}
-
-model Thread {
-  id             String    @id @default(cuid())
-  openaiThreadId String
-  userId         String
-  User           User      @relation(fields: [userId], references: [id], onDelete: NoAction)
-  name           String?
-  assistantId    String
-  profileId      String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  @@index([userId])
-  @@index([deletedAt])
-}
-
-model AccessControl {
-  id          String     @id @default(cuid())
-  userId      String
-  entityId    String
-  entityType  EntityType
-  accessType  String
-  accessLevel Int
-  User        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isActive    Boolean    @default(true)
-  deletedAt   DateTime?
-
-  @@index([isActive])
-  @@index([entityId, entityType])
-  @@index([userId])
-  @@index([deletedAt])
-}
-
-model VerificationToken {
-  id           String           @id @default(cuid())
-  entityId     String
-  entityType   EntityType
-  kind         VerificationKind
-  token        String
-  usedAt       DateTime?
-  createdAt    DateTime         @default(now())
-  expiresAt    DateTime
-  deletedAt    DateTime?
-  label        String? // Optional label for registration permits
-  usedByUserId String? // Track which user used this token
-  usedByUser   User?            @relation(fields: [usedByUserId], references: [id], onDelete: SetNull)
-
-  @@index([entityId, entityType])
-  @@index([expiresAt])
-  @@index([deletedAt])
-  @@index([usedByUserId])
-}
-
 enum BillingInterval {
   monthly
   yearly
@@ -136,176 +290,4 @@ enum BillingInterval {
 enum TokenType {
   input
   output
-}
-
-model Product {
-  id                   String                @id @default(cuid())
-  name                 String
-  description          String?
-  isRecurring          Boolean               @default(true) // true for subscriptions, false for one-time purchases
-  baseTokensPerMonth   Int?                  // Base tokens included with subscription (null for non-token products)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  prices               ProductPrice[]
-  SubscriptionProducts SubscriptionProduct[]
-  UserTokenUsages      UserTokenUsage[]
-  TokenPurchases       TokenPurchase[]
-  TokenBalances        TokenBalance[]
-  deletedAt            DateTime?
-
-  @@index([deletedAt])
-  @@index([isRecurring])
-}
-
-model ProductPrice {
-  id                   String                @id @default(cuid())
-  Product              Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId            String
-  interval             BillingInterval
-  priceCents           Int // E.g., 9900 = $99.00
-  currency             String // e.g., "USD"
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  SubscriptionProducts SubscriptionProduct[]
-  deletedAt            DateTime?
-
-  @@unique([productId, interval])
-  @@index([deletedAt])
-}
-
-model Subscription {
-  id                   String                @id @default(cuid())
-  
-  // Either user or organization subscription
-  User                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               String?
-  Organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId       String?
-  
-  status               String // e.g., "active", "cancelled"
-  startedAt            DateTime              @default(now())
-  endsAt               DateTime?
-  interval             BillingInterval
-  tokensLimit          Int                   @default(0) @map("tokens_limit") // Monthly token limit for this subscription
-  subscriptionProducts SubscriptionProduct[]
-  UserTokenUsages      UserTokenUsage[]      // Track which subscription was used
-  deletedAt            DateTime?
-
-  // Legacy fields kept for compatibility
-  entityType EntityType @default(user)
-  entityId   String     @default("") // Points to `User.id` or `Organization.id`
-
-  @@index([userId])
-  @@index([organizationId])
-  @@index([deletedAt])
-}
-
-model SubscriptionProduct {
-  id             String        @id @default(cuid())
-  Subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  subscriptionId String
-  Product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId      String
-  ProductPrice   ProductPrice? @relation(fields: [productPriceId], references: [id], onDelete: SetNull)
-  productPriceId String?
-  deletedAt      DateTime?
-
-  @@unique([subscriptionId, productId])
-  @@index([deletedAt])
-}
-
-model UserTokenUsage {
-  id String @id @default(cuid())
-
-  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-
-  organizationId String? // Denormalized from User for faster aggregation
-
-  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String?
-
-  // Track which subscription was used for this usage
-  Subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
-  subscriptionId String?
-
-  modelUsed   String // e.g. "gpt-4", "embedding-ada-002"
-  tokenType   TokenType // input or output tokens
-  tokensUsed  Int
-  costInCents Int // Total cost for this usage event in cents
-
-  date      DateTime  @default(now()) // Use the start of day UTC for daily grouping
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@index([userId, date])
-  @@index([productId, date])
-  @@index([userId, productId, date])
-  @@index([date])
-  @@index([modelUsed])
-  @@index([deletedAt])
-  @@index([organizationId, date])
-  @@index([organizationId, productId, date])
-  @@index([tokenType])
-  @@index([subscriptionId])
-}
-
-model UserTutorialStatus {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tutorialId  String    // e.g., "main_tour_v1"
-  completedAt DateTime?
-  skippedAt   DateTime?
-  currentStep Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@unique([userId, tutorialId])
-  @@index([userId])
-}
-
-model TokenPurchase {
-  id             String        @id @default(cuid())
-  userId         String?
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  productId      String
-  product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  tokenAmount    Int           // Number of tokens purchased
-  priceCents     Int           // Price paid in cents
-  currency       String        // e.g., "USD"
-  createdAt      DateTime      @default(now())
-  expiresAt      DateTime?     // Optional expiration for purchased tokens
-  deletedAt      DateTime?
-
-  @@index([userId])
-  @@index([organizationId])
-  @@index([productId])
-  @@index([expiresAt])
-  @@index([deletedAt])
-}
-
-model TokenBalance {
-  id                 String        @id @default(cuid())
-  userId             String?
-  user               User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId     String?
-  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  productId          String
-  product            Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  availableTokens    Int           @default(0) // Current available tokens
-  monthlyResetTokens Int           @default(0) // Tokens that reset monthly from subscription
-  purchasedTokens    Int           @default(0) // One-time purchased tokens
-  lastResetAt        DateTime      @default(now()) // Last time monthly tokens were reset
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-
-  @@unique([userId, productId])
-  @@unique([organizationId, productId])
-  @@index([userId])
-  @@index([organizationId])
-  @@index([productId])
 }
