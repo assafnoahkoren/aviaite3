@@ -7,7 +7,7 @@ import { SubscriptionsService } from '../products/subscriptions.service';
 
 const DEFAULT_ONBOARDING = {
   currentStep: 0,
-  totalSteps: 2,
+  totalSteps: 6,
   stepData: {},
 };
 
@@ -137,7 +137,10 @@ export class OnboardingService {
         });
 
         if (product && product.prices.length > 0) {
-          // Create a monthly subscription for the selected product
+          // Create a 1-month free trial subscription
+          const oneMonthFromNow = new Date();
+          oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+          
           await this.subscriptionsService.createSubscription(userId, {
             products: [{
               productId: product.id,
@@ -145,9 +148,11 @@ export class OnboardingService {
             }],
             interval: 'monthly',
             userId,
+            // Set the subscription to expire after 1 month (free trial period)
+            endsAt: oneMonthFromNow.toISOString(),
           });
 
-          console.log(`Created ${selectedFleet} subscription for user ${userId}`);
+          console.log(`Created ${selectedFleet} subscription with 1 month free trial (expires ${oneMonthFromNow.toISOString()}) for user ${userId}`);
         }
       } catch (error) {
         console.error('Failed to create subscription during onboarding:', error);

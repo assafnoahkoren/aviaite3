@@ -10,12 +10,13 @@ import {
 } from '../../api/onboarding-api';
 import { WelcomeSlide } from './slides/WelcomeSlide';
 import { FleetSelectionSlide } from './slides/FleetSelectionSlide';
+import { SubscriptionInfoSlide } from './slides/SubscriptionInfoSlide';
 import { HowItWorksSlide } from './slides/HowItWorksSlide';
 import { TipsSlide } from './slides/TipsSlide';
 import { ReadySlide } from './slides/ReadySlide';
 import styles from './OnboardingPage.module.scss';
 
-const TOTAL_SLIDES = 5;
+const TOTAL_SLIDES = 6;
 
 export function OnboardingPage() {
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ export function OnboardingPage() {
       if (currentSlide === 1 && selectedFleet) {
         await updateProgress.mutateAsync({
           currentStep: nextSlide,
-          totalSteps: TOTAL_SLIDES,
           stepData: {
             preferences: {
               fleet: selectedFleet, // Save just "737" or "787"
@@ -45,7 +45,6 @@ export function OnboardingPage() {
       } else {
         await updateProgress.mutateAsync({
           currentStep: nextSlide,
-          totalSteps: TOTAL_SLIDES,
         });
       }
     }
@@ -60,7 +59,6 @@ export function OnboardingPage() {
   const handleComplete = async () => {
     await updateProgress.mutateAsync({
       currentStep: TOTAL_SLIDES,
-      totalSteps: TOTAL_SLIDES,
       stepData: {
         welcome: {
           completed: true,
@@ -74,6 +72,10 @@ export function OnboardingPage() {
   const canProceed = () => {
     if (currentSlide === 1) {
       return !!selectedFleet;
+    }
+    // Can't proceed from subscription info slide if no fleet selected
+    if (currentSlide === 2 && !selectedFleet) {
+      return false;
     }
     return true;
   };
@@ -98,10 +100,12 @@ export function OnboardingPage() {
           />
         );
       case 2:
-        return <HowItWorksSlide />;
+        return <SubscriptionInfoSlide selectedFleet={selectedFleet} />;
       case 3:
-        return <TipsSlide />;
+        return <HowItWorksSlide />;
       case 4:
+        return <TipsSlide />;
+      case 5:
         return <ReadySlide />;
       default:
         return null;

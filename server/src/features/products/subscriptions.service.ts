@@ -124,7 +124,7 @@ export class SubscriptionsService {
   }
 
   async createSubscription(userIdOrOrgId: string, data: CreateSubscriptionDto) {
-    const { products, interval, userId, organizationId } = data;
+    const { products, interval, userId, organizationId, endsAt } = data;
     
     // Determine if this is a user or organization subscription
     const isOrgSubscription = !!organizationId;
@@ -171,6 +171,24 @@ export class SubscriptionsService {
       });
     }
 
+    // Calculate token limit based on products
+    let tokensLimit = 0;
+    for (const product of products) {
+      const productData = await prisma.product.findUnique({
+        where: { id: product.productId },
+      });
+      
+      if (productData) {
+        if (productData.baseTokensPerMonth === null) {
+          // Unlimited tokens
+          tokensLimit = 10_000_000;
+          break;
+        } else {
+          tokensLimit += productData.baseTokensPerMonth || 0;
+        }
+      }
+    }
+
     // Create new subscription
     const subscription = await prisma.subscription.create({
       data: {
@@ -179,6 +197,8 @@ export class SubscriptionsService {
         status: 'active',
         interval,
         startedAt: new Date(),
+        ...(endsAt && { endsAt: new Date(endsAt) }),
+        tokensLimit,
         entityType: isOrgSubscription ? 'organization' : 'user',
         entityId: targetOrgId || targetUserId || '',
         subscriptionProducts: {

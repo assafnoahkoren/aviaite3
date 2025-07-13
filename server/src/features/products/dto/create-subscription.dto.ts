@@ -31,6 +31,10 @@ export class CreateSubscriptionDto {
   @IsDateString()
   startedAt?: string;
 
+  @IsOptional()
+  @IsDateString()
+  endsAt?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SubscriptionProductDto)
