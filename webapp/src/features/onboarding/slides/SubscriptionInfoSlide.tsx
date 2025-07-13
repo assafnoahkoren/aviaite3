@@ -112,13 +112,7 @@ export function SubscriptionInfoSlide({ selectedFleet }: SubscriptionInfoSlidePr
                   </ThemeIcon>
                   <Text size="sm">Real-time answers to aviation questions</Text>
                 </Group>
-                
-                <Group gap="xs">
-                  <ThemeIcon size="sm" radius="xl" color="teal" variant="light">
-                    <IconCheck size={16} />
-                  </ThemeIcon>
-                  <Text size="sm">Cancel anytime</Text>
-                </Group>
+
               </Stack>
 
               <Paper p="md" radius="sm" bg="yellow.0" mt="md">

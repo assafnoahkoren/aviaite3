@@ -56,7 +56,7 @@ export function WelcomeSlide() {
     {
       icon: IconShieldCheck,
       title: 'Regulation Compliant',
-      description: 'Built for El Al pilots',
+      description: 'Built for El Al pilots. Your data is secure and not shared with anyone',
       color: 'indigo',
     },
   ];
