@@ -1,0 +1,211 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-xl);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: calc(var(--mantine-spacing-xl) * 2);
+
+  &__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--mantine-spacing-md);
+  }
+
+  &__subtitle {
+    font-size: 1.25rem;
+    color: var(--mantine-color-dimmed);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--mantine-spacing-xl);
+  margin-bottom: calc(var(--mantine-spacing-xl) * 2);
+}
+
+.plan {
+  background: var(--mantine-color-white);
+  border: 2px solid var(--mantine-color-gray-2);
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-xl);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--recommended {
+    border-color: var(--mantine-color-blue-5);
+    
+    &::before {
+      content: 'RECOMMENDED';
+      position: absolute;
+      top: 20px;
+      right: -30px;
+      background: var(--mantine-color-blue-5);
+      color: white;
+      padding: 4px 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transform: rotate(45deg);
+    }
+  }
+
+  &--current {
+    border-color: var(--mantine-color-green-5);
+    background: var(--mantine-color-green-0);
+  }
+
+  &__name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-xs);
+    text-transform: capitalize;
+  }
+
+  &__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--mantine-spacing-xs);
+    margin-bottom: var(--mantine-spacing-md);
+
+    &__amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--mantine-color-blue-6);
+    }
+
+    &__period {
+      color: var(--mantine-color-dimmed);
+    }
+  }
+
+  &__description {
+    color: var(--mantine-color-dimmed);
+    margin-bottom: var(--mantine-spacing-lg);
+    min-height: 3rem;
+  }
+
+  &__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--mantine-spacing-xl);
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: var(--mantine-spacing-sm);
+      padding: var(--mantine-spacing-xs) 0;
+      
+      svg {
+        color: var(--mantine-color-green-6);
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  &__tokens {
+    background: var(--mantine-color-gray-0);
+    border-radius: var(--mantine-radius-md);
+    padding: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-lg);
+    text-align: center;
+
+    &__amount {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--mantine-color-blue-6);
+    }
+
+    &__label {
+      font-size: 0.875rem;
+      color: var(--mantine-color-dimmed);
+    }
+  }
+}
+
+.checkout {
+  background: var(--mantine-color-white);
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-xl);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-lg);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+  }
+
+  &__summary {
+    background: var(--mantine-color-gray-0);
+    border-radius: var(--mantine-radius-md);
+    padding: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-lg);
+
+    &__row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--mantine-spacing-xs) 0;
+
+      &--total {
+        font-weight: 600;
+        font-size: 1.125rem;
+        border-top: 1px solid var(--mantine-color-gray-3);
+        margin-top: var(--mantine-spacing-xs);
+        padding-top: var(--mantine-spacing-sm);
+      }
+    }
+  }
+
+  &__testCard {
+    background: var(--mantine-color-blue-0);
+    border: 1px solid var(--mantine-color-blue-2);
+    border-radius: var(--mantine-radius-md);
+    padding: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-md);
+
+    &__title {
+      font-weight: 600;
+      color: var(--mantine-color-blue-7);
+      margin-bottom: var(--mantine-spacing-xs);
+    }
+
+    &__number {
+      font-family: monospace;
+      font-size: 1.125rem;
+      color: var(--mantine-color-blue-8);
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.error {
+  text-align: center;
+  padding: calc(var(--mantine-spacing-xl) * 2);
+  
+  &__icon {
+    color: var(--mantine-color-red-5);
+    margin-bottom: var(--mantine-spacing-md);
+  }
+}

@@ -1,15 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { prisma } from '@services/prisma';
 import { Prisma, BillingInterval } from '../../../generated/prisma';
 import { CreateSubscriptionDto, UpdateSubscriptionDto, ValidationResponseDto } from './dto';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { PurchaseSubscriptionDto, PurchaseResponseDto } from './dto/purchase-subscription.dto';
+import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 
-// Assistant to Product mapping
+// Assistant to Product mapping - now maps to product name prefixes
 export const ASSISTANT_PRODUCT_MAP: Record<string, string> = {
-  'asst_GiwIP1vySr6XctY9w7NvunLw': 'ace-737', // Co-Pilot-737-V2
-  'asst_StHM7qcEs2TkCFvc89KGBETy': 'ace-737', // elal-737
-  'asst_fZC1wK2LvYo8a93nqMVgGrnf': 'ace-787', // 787-NEW
-  'asst_9cw3eNl5AIUH1YAsyDmKgK85': 'ace-787', // elal-787
+  'asst_GiwIP1vySr6XctY9w7NvunLw': '737', // Co-Pilot-737-V2
+  'asst_StHM7qcEs2TkCFvc89KGBETy': '737', // elal-737
+  'asst_fZC1wK2LvYo8a93nqMVgGrnf': '787', // 787-NEW
+  'asst_9cw3eNl5AIUH1YAsyDmKgK85': '787', // elal-787
 };
 
 @Injectable()
@@ -309,15 +310,15 @@ export class SubscriptionsService {
         };
       }
 
-      // Check if user has the mapped product
+      // Check if user has any product that starts with the mapped prefix (737 or 787)
       const hasProduct = subscription.subscriptionProducts.some(
-        (sp) => sp.Product.name === mappedProductName,
+        (sp) => sp.Product.name.startsWith(mappedProductName),
       );
       
       if (!hasProduct) {
         return {
           hasAccess: false,
-          reason: `Product ${mappedProductName} not included in subscription`,
+          reason: `No ${mappedProductName} subscription found`,
           subscription: this.formatSubscriptionResponse(subscription),
         };
       }
@@ -529,5 +530,108 @@ export class SubscriptionsService {
 
   mapAssistantToProduct(assistantId: string): string | null {
     return ASSISTANT_PRODUCT_MAP[assistantId] || null;
+  }
+
+  async purchaseSubscription(
+    userId: string,
+    dto: PurchaseSubscriptionDto,
+  ): Promise<PurchaseResponseDto> {
+    // For testing, only accept specific test card
+    const TEST_CARD = '4242424242424242';
+    if (dto.cardNumber !== TEST_CARD) {
+      throw new ForbiddenException('Only test card 4242 4242 4242 4242 is accepted in test mode');
+    }
+
+    // Validate expiry date
+    const [month, year] = dto.cardExpiry.split('/').map(Number);
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100;
+    const currentMonth = currentDate.getMonth() + 1;
+    
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      throw new BadRequestException('Card has expired');
+    }
+
+    // Check if user already has an active subscription
+    const existingSubscription = await this.findActiveSubscriptionForValidation(userId, null);
+    if (existingSubscription) {
+      throw new BadRequestException('You already have an active subscription');
+    }
+
+    // Fetch products and their prices
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: dto.productIds },
+        deletedAt: null,
+      },
+      include: {
+        prices: {
+          where: {
+            deletedAt: null,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (products.length !== dto.productIds.length) {
+      throw new BadRequestException('One or more products are invalid or inactive');
+    }
+
+    // Calculate total amount
+    const totalAmount = products.reduce((sum, product) => {
+      const price = product.prices[0];
+      if (!price) {
+        throw new BadRequestException(`No active price found for product ${product.name}`);
+      }
+      return sum + price.priceCents;
+    }, 0);
+
+    // Create subscription
+    const startDate = new Date();
+    const nextBillingDate = addMonths(startDate, 1);
+
+    const subscription = await prisma.subscription.create({
+      data: {
+        userId,
+        status: 'active',
+        interval: 'monthly',
+        startedAt: startDate,
+        endsAt: null,
+        subscriptionProducts: {
+          create: products.map(product => ({
+            productId: product.id,
+            productPriceId: product.prices[0].id,
+          })),
+        },
+      },
+      include: {
+        subscriptionProducts: {
+          include: {
+            Product: true,
+            ProductPrice: true,
+          },
+        },
+      },
+    });
+
+    // In a real application, you would:
+    // 1. Process the payment through a payment gateway
+    // 2. Store the payment method securely
+    // 3. Set up recurring billing
+
+    return {
+      subscriptionId: subscription.id,
+      status: 'success',
+      message: 'Subscription activated successfully',
+      products: products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.prices[0].priceCents,
+      })),
+      totalAmount,
+      nextBillingDate,
+    };
   }
 }

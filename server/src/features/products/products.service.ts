@@ -8,7 +8,7 @@ export class ProductsService {
   async getAllProducts(includeDeleted = false) {
     const where: Prisma.ProductWhereInput = includeDeleted ? {} : { deletedAt: null };
     
-    return prisma.product.findMany({
+    const products = await prisma.product.findMany({
       where,
       include: {
         prices: {
@@ -24,6 +24,23 @@ export class ProductsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Transform to match frontend expectations
+    const transformed = products.map(product => ({
+      ...product,
+      type: product.isRecurring ? 'subscription' : 'addon',
+      isActive: product.deletedAt === null,
+      productPrices: product.prices.map(price => ({
+        ...price,
+        amount: price.priceCents,
+        isActive: price.deletedAt === null,
+      })),
+      // Keep original prices for backward compatibility
+      prices: product.prices,
+    }));
+    
+    console.log('Transformed products:', JSON.stringify(transformed[0], null, 2));
+    return transformed;
   }
 
   async getProductById(productId: string) {
@@ -49,7 +66,19 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    return product;
+    // Transform to match frontend expectations
+    return {
+      ...product,
+      type: product.isRecurring ? 'subscription' : 'addon',
+      isActive: product.deletedAt === null,
+      productPrices: product.prices.map(price => ({
+        ...price,
+        amount: price.priceCents,
+        isActive: price.deletedAt === null,
+      })),
+      // Keep original prices for backward compatibility
+      prices: product.prices,
+    };
   }
 
   async createProduct(data: CreateProductDto) {
@@ -75,7 +104,19 @@ export class ProductsService {
       },
     });
 
-    return product;
+    // Transform to match frontend expectations
+    return {
+      ...product,
+      type: product.isRecurring ? 'subscription' : 'addon',
+      isActive: product.deletedAt === null,
+      productPrices: product.prices.map(price => ({
+        ...price,
+        amount: price.priceCents,
+        isActive: price.deletedAt === null,
+      })),
+      // Keep original prices for backward compatibility
+      prices: product.prices,
+    };
   }
 
   async updateProduct(productId: string, data: UpdateProductDto) {
@@ -99,7 +140,19 @@ export class ProductsService {
       },
     });
 
-    return updatedProduct;
+    // Transform to match frontend expectations
+    return {
+      ...updatedProduct,
+      type: updatedProduct.isRecurring ? 'subscription' : 'addon',
+      isActive: updatedProduct.deletedAt === null,
+      productPrices: updatedProduct.prices.map(price => ({
+        ...price,
+        amount: price.priceCents,
+        isActive: price.deletedAt === null,
+      })),
+      // Keep original prices for backward compatibility
+      prices: updatedProduct.prices,
+    };
   }
 
   async deleteProduct(productId: string) {

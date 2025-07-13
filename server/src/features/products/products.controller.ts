@@ -24,6 +24,7 @@ import {
   UpdateSubscriptionDto,
   ValidateAccessDto,
 } from './dto';
+import { PurchaseSubscriptionDto } from './dto/purchase-subscription.dto';
 
 @Controller('api/products')
 @UseGuards(AuthGuard)
@@ -131,6 +132,11 @@ export class ProductsController {
   @Post('subscriptions/validate-access')
   async validateAccess(@Body() validateAccessDto: ValidateAccessDto, @Req() req: AuthedRequest) {
     return this.subscriptionsService.validateSubscriptionAccess(req.user.id, validateAccessDto);
+  }
+
+  @Post('subscriptions/purchase')
+  async purchaseSubscription(@Body() purchaseDto: PurchaseSubscriptionDto, @Req() req: AuthedRequest) {
+    return this.subscriptionsService.purchaseSubscription(req.user.id, purchaseDto);
   }
 
   @Get('subscriptions/usage')

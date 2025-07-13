@@ -1,0 +1,131 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-xl);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--mantine-spacing-xl);
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-xs);
+  }
+
+  &__subtitle {
+    color: var(--mantine-color-dimmed);
+  }
+}
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+  margin-bottom: var(--mantine-spacing-xl);
+}
+
+.planCard {
+  padding: var(--mantine-spacing-md);
+  border: 2px solid var(--mantine-color-gray-2);
+  border-radius: var(--mantine-radius-md);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: var(--mantine-color-blue-4);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  &--selected {
+    background: var(--mantine-color-blue-0);
+    border-color: var(--mantine-color-blue-5);
+  }
+  
+  &--current {
+    background: var(--mantine-color-green-0);
+    border-color: var(--mantine-color-green-4);
+    cursor: not-allowed;
+  }
+  
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--mantine-spacing-md);
+  }
+  
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-xl);
+    flex: 1;
+  }
+  
+  &__name {
+    font-weight: 600;
+    font-size: 1.125rem;
+    min-width: 120px;
+  }
+  
+  &__price {
+    font-weight: 700;
+    color: var(--mantine-color-blue-6);
+    font-size: 1.25rem;
+  }
+  
+  &__tokens {
+    color: var(--mantine-color-dimmed);
+    font-size: 0.875rem;
+  }
+  
+  &__badge {
+    margin-left: var(--mantine-spacing-xs);
+  }
+}
+
+.checkout {
+  background: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-lg);
+  
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-md);
+  }
+  
+  &__form {
+    display: grid;
+    gap: var(--mantine-spacing-md);
+  }
+  
+  &__testCard {
+    background: var(--mantine-color-blue-0);
+    border: 1px solid var(--mantine-color-blue-2);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--mantine-spacing-sm);
+    margin-bottom: var(--mantine-spacing-md);
+    
+    &__number {
+      font-family: monospace;
+      font-size: 1rem;
+      color: var(--mantine-color-blue-7);
+      margin-top: 4px;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error {
+  text-align: center;
+  padding: var(--mantine-spacing-xl);
+}

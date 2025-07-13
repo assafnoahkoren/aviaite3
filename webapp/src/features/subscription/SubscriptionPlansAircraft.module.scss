@@ -1,0 +1,174 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-xl);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--mantine-spacing-xl);
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-xs);
+  }
+
+  &__subtitle {
+    color: var(--mantine-color-dimmed);
+  }
+}
+
+.aircraftCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--mantine-spacing-xl);
+  margin-bottom: var(--mantine-spacing-xl);
+}
+
+.aircraftCard {
+  border: 2px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-lg);
+  background: var(--mantine-color-white);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--mantine-color-blue-4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--mantine-spacing-md);
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--mantine-color-blue-7);
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--mantine-radius-md);
+    background: var(--mantine-color-blue-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mantine-color-blue-6);
+  }
+
+  &__plans {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-xs);
+  }
+}
+
+.planOption {
+  padding: var(--mantine-spacing-sm);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--mantine-color-gray-0);
+    border-color: var(--mantine-color-blue-4);
+  }
+
+  &--selected {
+    background: var(--mantine-color-blue-0);
+    border-color: var(--mantine-color-blue-5);
+  }
+
+  &--current {
+    background: var(--mantine-color-green-0);
+    border-color: var(--mantine-color-green-4);
+    cursor: not-allowed;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  &__details {
+    font-size: 0.8rem;
+    color: var(--mantine-color-dimmed);
+  }
+
+  &__price {
+    font-weight: 700;
+    color: var(--mantine-color-blue-6);
+    font-size: 1.1rem;
+  }
+}
+
+.checkout {
+  background: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-lg);
+  
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--mantine-spacing-md);
+  }
+  
+  &__selectedPlan {
+    background: var(--mantine-color-white);
+    border: 1px solid var(--mantine-color-gray-3);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--mantine-spacing-sm);
+    margin-bottom: var(--mantine-spacing-md);
+  }
+  
+  &__form {
+    display: grid;
+    gap: var(--mantine-spacing-md);
+  }
+  
+  &__testCard {
+    background: var(--mantine-color-blue-0);
+    border: 1px solid var(--mantine-color-blue-2);
+    border-radius: var(--mantine-radius-sm);
+    padding: var(--mantine-spacing-sm);
+    margin-bottom: var(--mantine-spacing-md);
+    
+    &__number {
+      font-family: monospace;
+      font-size: 1rem;
+      color: var(--mantine-color-blue-7);
+      margin-top: 4px;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.error {
+  text-align: center;
+  padding: var(--mantine-spacing-xl);
+}
