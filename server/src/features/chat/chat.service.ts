@@ -267,8 +267,8 @@ export class ChatService {
     
     const openaiThreadId = thread.openaiThreadId;
 
-    // Save the message to our database
-    await this.messagesService.addMessage({
+    // Save the message to our database (category will be added later)
+    const userMessage = await this.messagesService.addMessage({
       threadId: thread.id,
       role: MessageRole.user,
       content,
@@ -418,15 +418,27 @@ Respond with ONLY the category name, nothing else.`
     try {
       // Save the assistant's complete response to our database
       if (assistantResponse) {
-        // Categorize the response using GPT-3.5-turbo
+        // Categorize the assistant's response
         const category = await this.categorizeMessage(assistantResponse);
         
+        // Save the assistant's response with category
         await this.messagesService.addMessage({
           threadId: thread.id,
           role: MessageRole.assistant,
           content: assistantResponse,
           category,
         });
+        
+        // Update the user's last question with the same category
+        const lastUserMessages = await this.messagesService.getMessagesByThreadAndRole(
+          thread.id,
+          MessageRole.user
+        );
+        const lastUserMessage = lastUserMessages[lastUserMessages.length - 1];
+        
+        if (lastUserMessage && !lastUserMessage.category) {
+          await this.messagesService.updateMessageCategory(lastUserMessage.id, category);
+        }
       }
 
       // Get the final run from the stream

@@ -74,4 +74,13 @@ export class MessagesService {
 
     return messages;
   }
+
+  async updateMessageCategory(messageId: string, category: MessageCategory) {
+    const message = await prisma.message.update({
+      where: { id: messageId },
+      data: { category },
+    });
+
+    return message;
+  }
 }
