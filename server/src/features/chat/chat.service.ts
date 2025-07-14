@@ -5,7 +5,7 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
-import { TokenType, MessageRole, Thread, User, Prisma } from '../../../generated/prisma';
+import { TokenType, MessageRole, Thread, User, Prisma, MessageCategory } from '../../../generated/prisma';
 import { SubscriptionsService } from '../products/subscriptions.service';
 import { MessagesService } from './messages.service';
 import { ValidationResponseDto } from '../products/dto/validate-access.dto';
@@ -359,6 +359,52 @@ export class ChatService {
   }
 
   /**
+   * Categorizes a message using GPT-3.5-turbo
+   * @private
+   */
+  private async categorizeMessage(content: string): Promise<MessageCategory> {
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a message categorizer for aviation-related content. Categorize the following message into EXACTLY ONE of these categories:
+- WARNINGS_ALERTS: Messages about warnings, cautions, alerts, or safety-critical information
+- LIMITATIONS: Messages about aircraft limitations, operational limits, or restrictions
+- SYSTEM_OPERATIONS: Messages about aircraft systems operations, functionality, or technical details
+- FLIGHT_CONTROLS: Messages about flight control systems, control surfaces, or manual flying
+- AUTOPILOT_FMC: Messages about autopilot, FMC, navigation, or automated flight systems
+- PROCEDURES: Messages about standard procedures, checklists, or operational procedures
+- OTHER: Messages that don't fit clearly into the above categories
+
+Respond with ONLY the category name, nothing else.`
+          },
+          {
+            role: 'user',
+            content: content
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 20,
+      });
+
+      const categoryString = completion.choices[0]?.message?.content?.trim();
+      
+      // Map the response to the enum value
+      if (categoryString && Object.values(MessageCategory).includes(categoryString as MessageCategory)) {
+        return categoryString as MessageCategory;
+      }
+      
+      // Default to OTHER if we can't determine the category
+      return MessageCategory.OTHER;
+    } catch (error) {
+      console.error('Error categorizing message:', error);
+      return MessageCategory.OTHER;
+    }
+  }
+
+  /**
    * Handles stream completion - saves assistant message and tracks token usage
    * @private
    */
@@ -372,10 +418,14 @@ export class ChatService {
     try {
       // Save the assistant's complete response to our database
       if (assistantResponse) {
+        // Categorize the response using GPT-3.5-turbo
+        const category = await this.categorizeMessage(assistantResponse);
+        
         await this.messagesService.addMessage({
           threadId: thread.id,
           role: MessageRole.assistant,
           content: assistantResponse,
+          category,
         });
       }
 

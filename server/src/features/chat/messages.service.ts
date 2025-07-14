@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '@services/prisma';
-import { MessageRole } from '../../../generated/prisma';
+import { MessageRole, MessageCategory } from '../../../generated/prisma';
 
 @Injectable()
 export class MessagesService {
@@ -8,8 +8,9 @@ export class MessagesService {
     threadId: string;
     role: MessageRole;
     content: string;
+    category?: MessageCategory;
   }) {
-    const { threadId, role, content } = params;
+    const { threadId, role, content, category } = params;
 
     // Verify thread exists
     const thread = await prisma.thread.findUnique({
@@ -26,6 +27,7 @@ export class MessagesService {
         threadId,
         role,
         content,
+        category,
       },
     });
 

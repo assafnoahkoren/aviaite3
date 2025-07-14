@@ -71,18 +71,20 @@ model Thread {
 }
 
 model Message {
-  id        String      @id @default(cuid())
+  id        String           @id @default(cuid())
   threadId  String
   role      MessageRole
-  content   String      @db.Text
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  content   String           @db.Text
+  category  MessageCategory?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   deletedAt DateTime?
-  Thread    Thread      @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  Thread    Thread           @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId])
   @@index([createdAt])
   @@index([deletedAt])
+  @@index([category])
 }
 
 model AccessControl {
@@ -312,4 +314,14 @@ enum MessageRole {
   user
   assistant
   system
+}
+
+enum MessageCategory {
+  WARNINGS_ALERTS
+  LIMITATIONS
+  OTHER
+  SYSTEM_OPERATIONS
+  FLIGHT_CONTROLS
+  AUTOPILOT_FMC
+  PROCEDURES
 }
