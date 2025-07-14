@@ -28,6 +28,8 @@ export function OnboardingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedFleet, setSelectedFleet] = useState<string>('');
   const [trialSubscriptionCreated, setTrialSubscriptionCreated] = useState(false);
+  const [isPilotChecked, setIsPilotChecked] = useState(false);
+  const [isTosChecked, setIsTosChecked] = useState(false);
 
   const handleNext = async () => {
     if (currentSlide < TOTAL_SLIDES - 1) {
@@ -96,6 +98,10 @@ export function OnboardingPage() {
     if (currentSlide === 2 && !selectedFleet) {
       return false;
     }
+    // Can't complete onboarding without accepting both checkboxes
+    if (currentSlide === 5) {
+      return isPilotChecked && isTosChecked;
+    }
     return true;
   };
 
@@ -125,7 +131,14 @@ export function OnboardingPage() {
       case 4:
         return <TipsSlide />;
       case 5:
-        return <ReadySlide />;
+        return (
+          <ReadySlide 
+            isPilotChecked={isPilotChecked}
+            isTosChecked={isTosChecked}
+            onPilotCheckChange={setIsPilotChecked}
+            onTosCheckChange={setIsTosChecked}
+          />
+        );
       default:
         return null;
     }
@@ -183,6 +196,7 @@ export function OnboardingPage() {
             ) : (
               <Button
                 onClick={handleComplete}
+                disabled={!canProceed()}
                 loading={completeMutation.isPending}
                 leftSection={<IconRocket size={16} />}
               >
