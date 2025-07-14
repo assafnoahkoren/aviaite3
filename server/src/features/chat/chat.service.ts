@@ -5,9 +5,11 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
-import { TokenType, MessageRole } from '../../../generated/prisma';
+import { TokenType, MessageRole, Thread, User, Prisma } from '../../../generated/prisma';
 import { SubscriptionsService } from '../products/subscriptions.service';
 import { MessagesService } from './messages.service';
+import { ValidationResponseDto } from '../products/dto/validate-access.dto';
+import { AssistantStream } from 'openai/lib/AssistantStream';
 
 export const assistants = [
   {
@@ -343,40 +345,60 @@ export class ChatService {
     });
 
     // Track token usage and save assistant message when the run completes
-    stream.on('end', () => {void (async () => {
-      try {
-        // Save the assistant's complete response to our database
-        if (assistantResponse) {
-          await this.messagesService.addMessage({
-            threadId: thread.id,
-            role: MessageRole.assistant,
-            content: assistantResponse,
-          });
-        }
-
-        // Get the final run from the stream
-        const run = stream.currentRun();
-        
-        // Check if usage data is available
-        if (run && run.usage) {
-          // Assistants API model - check run details
-          const modelUsed = run.model || 'gpt-4';
-          
-          await this.trackTokenUsage(
-            userId,
-            thread.User.organizationId,
-            modelUsed,
-            run.usage.prompt_tokens,
-            run.usage.completion_tokens,
-            validation.subscription?.id,
-          );
-        }
-      } catch (error) {
-        console.error('Error tracking token usage for stream:', error);
-      }
-    })()});
+    stream.on('end', () => {
+      void this.handleStreamCompletion(
+        stream,
+        thread,
+        userId,
+        assistantResponse,
+        validation,
+      );
+    });
 
     return stream;
+  }
+
+  /**
+   * Handles stream completion - saves assistant message and tracks token usage
+   * @private
+   */
+  private async handleStreamCompletion(
+    stream: AssistantStream,
+    thread: Thread & { User: { id: string; organizationId: string | null } },
+    userId: string,
+    assistantResponse: string,
+    validation: ValidationResponseDto,
+  ) {
+    try {
+      // Save the assistant's complete response to our database
+      if (assistantResponse) {
+        await this.messagesService.addMessage({
+          threadId: thread.id,
+          role: MessageRole.assistant,
+          content: assistantResponse,
+        });
+      }
+
+      // Get the final run from the stream
+      const run = stream.currentRun();
+      
+      // Check if usage data is available
+      if (run && run.usage) {
+        // Assistants API model - check run details
+        const modelUsed = run.model || 'gpt-4';
+        
+        await this.trackTokenUsage(
+          userId,
+          thread.User.organizationId,
+          modelUsed,
+          run.usage.prompt_tokens,
+          run.usage.completion_tokens,
+          validation.subscription?.id,
+        );
+      }
+    } catch (error) {
+      console.error('Error tracking token usage for stream:', error);
+    }
   }
 
   async generateChatName(threadId: string, userId: string) {
