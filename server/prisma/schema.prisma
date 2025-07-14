@@ -64,8 +64,24 @@ model Thread {
   name           String?
   deletedAt      DateTime?
   User           User      @relation(fields: [userId], references: [id], onDelete: NoAction)
+  Messages       Message[]
 
   @@index([userId])
+  @@index([deletedAt])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  threadId  String
+  role      MessageRole
+  content   String      @db.Text
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+  Thread    Thread      @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([createdAt])
   @@index([deletedAt])
 }
 
@@ -290,4 +306,10 @@ enum BillingInterval {
 enum TokenType {
   input
   output
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
 }

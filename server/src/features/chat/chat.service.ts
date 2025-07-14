@@ -5,8 +5,9 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
-import { TokenType } from '../../../generated/prisma';
+import { TokenType, MessageRole } from '../../../generated/prisma';
 import { SubscriptionsService } from '../products/subscriptions.service';
+import { MessagesService } from './messages.service';
 
 export const assistants = [
   {
@@ -61,7 +62,10 @@ export const assistants = [
 export class ChatService {
   private openai: OpenAI;
 
-  constructor(private readonly subscriptionsService: SubscriptionsService) {
+  constructor(
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly messagesService: MessagesService,
+  ) {
     this.openai = new OpenAI({ apiKey: ENV.OPENAI_API_KEY });
   }
 
@@ -261,6 +265,13 @@ export class ChatService {
     
     const openaiThreadId = thread.openaiThreadId;
 
+    // Save the message to our database
+    await this.messagesService.addMessage({
+      threadId: thread.id,
+      role: MessageRole.user,
+      content,
+    });
+
     // Create the user message in the OpenAI thread
     const message = await this.openai.beta.threads.messages.create(
       openaiThreadId,
@@ -321,9 +332,28 @@ export class ChatService {
       assistant_id: assistantId,
     });
 
-    // Track token usage when the run completes
-    stream.on('end', async () => {
+    // Variable to accumulate the assistant's response
+    let assistantResponse = '';
+
+    // Capture text deltas to build the complete response
+    stream.on('textDelta', (delta) => {
+      if (delta.value) {
+        assistantResponse += delta.value;
+      }
+    });
+
+    // Track token usage and save assistant message when the run completes
+    stream.on('end', () => {void (async () => {
       try {
+        // Save the assistant's complete response to our database
+        if (assistantResponse) {
+          await this.messagesService.addMessage({
+            threadId: thread.id,
+            role: MessageRole.assistant,
+            content: assistantResponse,
+          });
+        }
+
         // Get the final run from the stream
         const run = stream.currentRun();
         
@@ -344,7 +374,7 @@ export class ChatService {
       } catch (error) {
         console.error('Error tracking token usage for stream:', error);
       }
-    });
+    })()});
 
     return stream;
   }
