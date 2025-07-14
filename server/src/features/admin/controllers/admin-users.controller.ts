@@ -13,8 +13,7 @@ import { RolesGuard } from '@features/users/guards/roles.guard';
 import { Roles } from '@features/users/decorators/roles.decorator';
 import { Role } from '../../../../generated/prisma';
 import { AdminUsersService } from '../services/admin-users.service';
-import { PaginationDto } from '../dto/pagination.dto';
-import { UpdateUserDto, UserFilterDto } from '../dto/admin-user.dto';
+import { UpdateUserDto, UserQueryDto } from '../dto/admin-user.dto';
 
 @Controller('api/admin/users')
 @UseGuards(AuthGuard, RolesGuard)
@@ -23,10 +22,9 @@ export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
   @Get()
-  async getUsers(
-    @Query() pagination: PaginationDto,
-    @Query() filters: UserFilterDto,
-  ) {
+  async getUsers(@Query() query: UserQueryDto) {
+    const { page, limit, search, sortBy, sortOrder, ...filters } = query;
+    const pagination = { page, limit, search, sortBy, sortOrder };
     return this.adminUsersService.getUsers(pagination, filters);
   }
 
