@@ -4,6 +4,7 @@ import { Button, ActionIcon, Tooltip } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { MobxQuery, MobxMutation } from '../../../infra/mobx-query';
 import { adminRegistrationTokensApi, type RegistrationToken, type TokensResponse } from '../../../api/admin-registration-tokens';
+import { BulkGenerateTokensButton } from '../components/BulkGenerateTokensButton';
 import styles from './AdminRegistrationPermits.module.scss';
 
 export const AdminRegistrationPermits = observer(() => {
@@ -51,6 +52,7 @@ export const AdminRegistrationPermits = observer(() => {
     [tokensQuery]
   );
 
+
   const handleGenerateToken = () => {
     setGenerateModalOpened(true);
   };
@@ -82,12 +84,15 @@ export const AdminRegistrationPermits = observer(() => {
     <div className={styles.registrationPermits}>
       <div className={styles.header}>
         <h1>Registration Permits</h1>
-        <Button
-          leftSection={<IconPlus size={16} />}
-          onClick={handleGenerateToken}
-        >
-          Generate New Token
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={handleGenerateToken}
+          >
+            Generate New Token
+          </Button>
+          <BulkGenerateTokensButton onSuccess={() => tokensQuery.refetch()} />
+        </div>
       </div>
 
       <div className={styles.tableContainer}>
