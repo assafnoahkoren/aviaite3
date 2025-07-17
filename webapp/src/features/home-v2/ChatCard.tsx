@@ -11,9 +11,10 @@ import { useStore_ChatHistory } from '../chat-history/chat-history-store';
 
 interface ChatCardProps {
 	chat: Thread;
+	closeSidebar?: () => void;
 }
 
-export const ChatCard = observer(({ chat }: ChatCardProps) => {
+export const ChatCard = observer(({ chat, closeSidebar }: ChatCardProps) => {
 	const chatStore = useStore_Chat();
 	const chatHistoryStore = useStore_ChatHistory();
 	const [opened, { open, close }] = useDisclosure(false);
@@ -37,7 +38,10 @@ export const ChatCard = observer(({ chat }: ChatCardProps) => {
 
 			<UnstyledButton
 				className={cx(classes.card, { [classes.active]: isActive })}
-				onClick={() => chatStore.setCurrentChat(chat)}
+				onClick={() => {
+					chatStore.setCurrentChat(chat);
+					closeSidebar?.();
+				}}
 				p="xs"
 			>
 				<Group justify="space-between" wrap="nowrap">

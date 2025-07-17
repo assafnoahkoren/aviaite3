@@ -7,7 +7,11 @@ import { useStore_Chat } from '../chat/chat-store';
 import { useStore_Auth } from '../auth/auth-store';
 import { useStore_Settings } from '../settings/settings-store';
 
-export const HomeSidebar = observer(() => {
+interface HomeSidebarProps {
+  closeSidebar?: () => void;
+}
+
+export const HomeSidebar = observer(({ closeSidebar }: HomeSidebarProps) => {
   const chatHistoryStore = useStore_ChatHistory();
   const chatStore = useStore_Chat();
   const auth = useStore_Auth();
@@ -25,6 +29,7 @@ export const HomeSidebar = observer(() => {
       })
       .then((newChat) => {
         chatStore.setCurrentChat(newChat);
+        closeSidebar?.();
       });
   };
 
@@ -68,7 +73,7 @@ export const HomeSidebar = observer(() => {
       <Text c="dark" size="xs" ps="lg" pt="md" pb="xs">
         Chats history
       </Text>
-      <ChatHistoryList />
+      <ChatHistoryList closeSidebar={closeSidebar} />
     </Stack>
   );
 }); 

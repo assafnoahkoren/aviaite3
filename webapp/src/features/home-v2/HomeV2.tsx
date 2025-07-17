@@ -48,7 +48,7 @@ export const HomeV2 = observer(() => {
             {desktopOpened ? <IconArrowLeft /> : <IconMenu2 />}
           </ActionIcon>
         </Box>
-        <HomeSidebar />
+        <HomeSidebar closeSidebar={() => opened && toggle()} />
       </AppShell.Navbar>
       <AppShell.Main style={{ position: 'relative' }}>
         <HomeMain />

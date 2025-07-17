@@ -4,7 +4,11 @@ import { Stack, Text } from '@mantine/core';
 import { ChatCard } from './ChatCard';
 import classes from './ChatHistoryList.module.scss';
 
-export const ChatHistoryList = observer(() => {
+interface ChatHistoryListProps {
+  closeSidebar?: () => void;
+}
+
+export const ChatHistoryList = observer(({ closeSidebar }: ChatHistoryListProps) => {
   const chatHistoryStore = useStore_ChatHistory();
 
   if (chatHistoryStore.chatsQuery.isLoading) {
@@ -20,7 +24,7 @@ export const ChatHistoryList = observer(() => {
   return (
     <Stack gap="0" p="sm" pt="0" className={classes.scrollable} style={{ flex: 1, overflowY: 'auto' }} data-tour="chat-history">
       {chats.map((chat) => (
-        <ChatCard key={chat.id} chat={chat} />
+        <ChatCard key={chat.id} chat={chat} closeSidebar={closeSidebar} />
       ))}
     </Stack>
   );
