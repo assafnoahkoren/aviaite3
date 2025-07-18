@@ -72,6 +72,12 @@ export function AdminLayout() {
           >
             Token Usage
           </NavLink>
+          <NavLink 
+            to="/admin/organization-statistics"
+            className={({ isActive }) => isActive ? styles.activeLink : styles.navLink}
+          >
+            Organization Statistics
+          </NavLink>
         </nav>
 
         <div className={styles.sidebarFooter}>
