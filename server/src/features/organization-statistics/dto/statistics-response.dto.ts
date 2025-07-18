@@ -35,11 +35,11 @@ export interface UsageTrendDataPoint {
   userCount: number;
 }
 
-export interface WeeklyUsageTrendResult {
+export interface DailyUsageTrendResult {
   startDate: Date;
   endDate: Date;
   dataPoints: UsageTrendDataPoint[];
-  trendPercentage: number; // compared to previous week
+  trendPercentage: number; // compared to previous period
   totalMessages: number;
   totalUniqueUsers: number;
 }
@@ -61,20 +61,19 @@ export interface CategoryQuestionCount {
   percentage: number;
 }
 
-export interface WeeklyCategoryData {
-  week: Date;
+export interface DailyCategoryData {
+  date: Date;
   categories: CategoryQuestionCount[];
   totalQuestions: number;
 }
 
-export interface WeeklyQuestionsByCategoryResult {
+export interface DailyQuestionsByCategoryResult {
   startDate: Date;
   endDate: Date;
-  data: WeeklyCategoryData[];
-  categoryTrends: {
+  data: DailyCategoryData[];
+  categoryTotals: {
     category: string;
-    trendPercentage: number;
-    previousWeekCount: number;
-    currentWeekCount: number;
+    totalCount: number;
+    percentage: number;
   }[];
 }

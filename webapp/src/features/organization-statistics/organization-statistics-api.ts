@@ -39,7 +39,7 @@ export interface UsageTrendDataPoint {
   userCount: number;
 }
 
-export interface WeeklyUsageTrendResult {
+export interface DailyUsageTrendResult {
   startDate: string;
   endDate: string;
   dataPoints: UsageTrendDataPoint[];
@@ -59,10 +59,6 @@ export interface AverageQuestionsResult {
   averageQuestionsPerDay: number;
 }
 
-export interface WeeklyStatisticsParams {
-  organizationId?: string;
-  startDate: string;
-}
 
 export interface CategoryQuestionCount {
   category: string;
@@ -70,21 +66,20 @@ export interface CategoryQuestionCount {
   percentage: number;
 }
 
-export interface WeeklyCategoryData {
-  week: string;
+export interface DailyCategoryData {
+  date: string;
   categories: CategoryQuestionCount[];
   totalQuestions: number;
 }
 
-export interface WeeklyQuestionsByCategoryResult {
+export interface DailyQuestionsByCategoryResult {
   startDate: string;
   endDate: string;
-  data: WeeklyCategoryData[];
-  categoryTrends: {
+  data: DailyCategoryData[];
+  categoryTotals: {
     category: string;
-    trendPercentage: number;
-    previousWeekCount: number;
-    currentWeekCount: number;
+    totalCount: number;
+    percentage: number;
   }[];
 }
 
@@ -127,17 +122,18 @@ export async function getDailyQuestionsPerUser(params: StatisticsParams): Promis
   return res.data;
 }
 
-export async function getWeeklyUsageTrend(params: WeeklyStatisticsParams): Promise<WeeklyUsageTrendResult> {
+export async function getDailyUsageTrend(params: StatisticsParams): Promise<DailyUsageTrendResult> {
   const queryParams = new URLSearchParams({
     startDate: params.startDate,
+    endDate: params.endDate,
   });
 
   if (params.organizationId) {
     queryParams.append('organizationId', params.organizationId);
   }
 
-  const res = await api.get<WeeklyUsageTrendResult>(
-    `/organization-statistics/weekly-usage-trend?${queryParams.toString()}`
+  const res = await api.get<DailyUsageTrendResult>(
+    `/organization-statistics/daily-usage-trend?${queryParams.toString()}`
   );
   return res.data;
 }
@@ -158,17 +154,18 @@ export async function getAverageQuestionsPerUser(params: StatisticsParams): Prom
   return res.data;
 }
 
-export async function getWeeklyQuestionsByCategory(params: WeeklyStatisticsParams): Promise<WeeklyQuestionsByCategoryResult> {
+export async function getDailyQuestionsByCategory(params: StatisticsParams): Promise<DailyQuestionsByCategoryResult> {
   const queryParams = new URLSearchParams({
     startDate: params.startDate,
+    endDate: params.endDate,
   });
 
   if (params.organizationId) {
     queryParams.append('organizationId', params.organizationId);
   }
 
-  const res = await api.get<WeeklyQuestionsByCategoryResult>(
-    `/organization-statistics/weekly-questions-by-category?${queryParams.toString()}`
+  const res = await api.get<DailyQuestionsByCategoryResult>(
+    `/organization-statistics/daily-questions-by-category?${queryParams.toString()}`
   );
   return res.data;
 }
@@ -190,11 +187,11 @@ export function useQ_getDailyQuestionsPerUser(params: StatisticsParams) {
   });
 }
 
-export function useQ_getWeeklyUsageTrend(params: WeeklyStatisticsParams) {
+export function useQ_getDailyUsageTrend(params: StatisticsParams) {
   return useQuery({
-    queryKey: ['organization-statistics', 'weekly-usage-trend', params],
-    queryFn: () => getWeeklyUsageTrend(params),
-    enabled: !!params.startDate,
+    queryKey: ['organization-statistics', 'daily-usage-trend', params],
+    queryFn: () => getDailyUsageTrend(params),
+    enabled: !!params.startDate && !!params.endDate,
   });
 }
 
@@ -206,10 +203,10 @@ export function useQ_getAverageQuestionsPerUser(params: StatisticsParams) {
   });
 }
 
-export function useQ_getWeeklyQuestionsByCategory(params: WeeklyStatisticsParams) {
+export function useQ_getDailyQuestionsByCategory(params: StatisticsParams) {
   return useQuery({
-    queryKey: ['organization-statistics', 'weekly-questions-by-category', params],
-    queryFn: () => getWeeklyQuestionsByCategory(params),
-    enabled: !!params.startDate,
+    queryKey: ['organization-statistics', 'daily-questions-by-category', params],
+    queryFn: () => getDailyQuestionsByCategory(params),
+    enabled: !!params.startDate && !!params.endDate,
   });
 }

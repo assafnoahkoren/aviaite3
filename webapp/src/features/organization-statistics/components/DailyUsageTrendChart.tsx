@@ -1,19 +1,20 @@
 import { Stack, Paper, Text, Group, LoadingOverlay } from '@mantine/core';
 import { IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useQ_getWeeklyUsageTrend } from '../organization-statistics-api';
-import type { WeeklyStatisticsComponentProps } from '../types';
+import { useQ_getDailyUsageTrend } from '../organization-statistics-api';
+import type { StatisticsComponentProps } from '../types';
 
-export function WeeklyUsageTrendChart({ organizationId, startDate }: WeeklyStatisticsComponentProps) {
-  // Fetch weekly usage trend data
-  const { data: trendData, isLoading } = useQ_getWeeklyUsageTrend({
+export function DailyUsageTrendChart({ organizationId, startDate, endDate }: StatisticsComponentProps) {
+  // Fetch daily usage trend data
+  const { data: trendData, isLoading } = useQ_getDailyUsageTrend({
     organizationId,
     startDate,
+    endDate,
   });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -40,7 +41,14 @@ export function WeeklyUsageTrendChart({ organizationId, startDate }: WeeklyStati
     <>
       <Paper p="md" shadow="xs">
         <Stack gap="md">
-          <Text fw={600}>Weekly Usage Overview</Text>
+          <Group justify="space-between">
+            <Text fw={600}>Daily Usage Trend</Text>
+            {trendData && (
+              <Text size="sm" c="dimmed">
+                {new Date(trendData.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(trendData.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </Text>
+            )}
+          </Group>
           
           <Group gap="xl">
             <Paper p="md" radius="md" bg="blue.0" style={{ flex: 1 }}>
@@ -59,7 +67,7 @@ export function WeeklyUsageTrendChart({ organizationId, startDate }: WeeklyStati
             
             <Paper p="md" radius="md" bg={`${trendColor}.0`} style={{ flex: 1 }}>
               <Stack gap="xs">
-                <Text size="sm" c="dimmed">Week-over-Week Change</Text>
+                <Text size="sm" c="dimmed">Period-over-Period Change</Text>
                 <Group gap="xs" align="center">
                   <Text size="xl" fw={700} c={`${trendColor}.6`}>
                     {Math.abs(trendData?.trendPercentage || 0)}%
@@ -76,7 +84,7 @@ export function WeeklyUsageTrendChart({ organizationId, startDate }: WeeklyStati
         <LoadingOverlay visible={isLoading} />
         
         <Stack gap="md">
-          <Text fw={600}>Weekly Usage Trend</Text>
+          <Text fw={600}>Messages and Users by Day</Text>
 
           {trendData && trendData.dataPoints.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -120,7 +128,7 @@ export function WeeklyUsageTrendChart({ organizationId, startDate }: WeeklyStati
             </ResponsiveContainer>
           ) : (
             <Text c="dimmed" ta="center" py="xl">
-              No data available for the selected week
+              No data available for the selected period
             </Text>
           )}
         </Stack>

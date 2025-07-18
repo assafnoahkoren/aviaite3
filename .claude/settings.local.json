@@ -14,7 +14,8 @@
       "Bash(npm install:*)",
       "Bash(grep:*)",
       "Bash(npx ts-node:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

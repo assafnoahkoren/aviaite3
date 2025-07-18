@@ -6,11 +6,11 @@ import {
   DailyQuestionsRangeResult,
   DailyQuestionsResult,
   UserQuestionCount,
-  WeeklyUsageTrendResult,
+  DailyUsageTrendResult,
   UsageTrendDataPoint,
   AverageQuestionsResult,
-  WeeklyQuestionsByCategoryResult,
-  WeeklyCategoryData,
+  DailyQuestionsByCategoryResult,
+  DailyCategoryData,
   CategoryQuestionCount
 } from './dto/statistics-response.dto';
 import { MessageCategory } from '../../../generated/prisma';
@@ -204,31 +204,32 @@ export class OrganizationStatisticsService {
     };
   }
 
-  async getWeeklyUsageTrend(
+  async getDailyUsageTrend(
     organizationId: string | undefined,
     startDate: Date,
-  ): Promise<WeeklyUsageTrendResult> {
-    // Calculate date ranges
-    const weekStart = new Date(startDate);
-    weekStart.setHours(0, 0, 0, 0);
+    endDate: Date,
+  ): Promise<DailyUsageTrendResult> {
+    // Normalize dates
+    const normalizedStartDate = new Date(startDate);
+    normalizedStartDate.setHours(0, 0, 0, 0);
     
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+    const normalizedEndDate = new Date(endDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);
     
-    // Previous week for comparison
-    const prevWeekStart = new Date(weekStart);
-    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+    // Calculate previous period for comparison
+    const periodLength = Math.ceil((normalizedEndDate.getTime() - normalizedStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const prevPeriodStart = new Date(normalizedStartDate);
+    prevPeriodStart.setDate(prevPeriodStart.getDate() - periodLength);
     
-    const prevWeekEnd = new Date(prevWeekStart);
-    prevWeekEnd.setDate(prevWeekEnd.getDate() + 6);
-    prevWeekEnd.setHours(23, 59, 59, 999);
+    const prevPeriodEnd = new Date(prevPeriodStart);
+    prevPeriodEnd.setDate(prevPeriodEnd.getDate() + periodLength - 1);
+    prevPeriodEnd.setHours(23, 59, 59, 999);
 
-    // Initialize data points for current week
+    // Initialize data points for date range
     const dataPoints: UsageTrendDataPoint[] = [];
-    const currentDate = new Date(weekStart);
+    const currentDate = new Date(normalizedStartDate);
     
-    while (currentDate <= weekEnd) {
+    while (currentDate <= normalizedEndDate) {
       dataPoints.push({
         date: new Date(currentDate),
         messageCount: 0,
@@ -237,12 +238,12 @@ export class OrganizationStatisticsService {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Get current week messages
-    const currentWeekMessages = await prisma.message.findMany({
+    // Get messages for current period
+    const currentPeriodMessages = await prisma.message.findMany({
       where: {
         createdAt: {
-          gte: weekStart,
-          lte: weekEnd,
+          gte: normalizedStartDate,
+          lte: normalizedEndDate,
         },
         role: 'user',
         Thread: {
@@ -261,12 +262,12 @@ export class OrganizationStatisticsService {
       },
     });
 
-    // Get previous week message count for trend
-    const prevWeekCount = await prisma.message.count({
+    // Get previous period message count for trend
+    const prevPeriodCount = await prisma.message.count({
       where: {
         createdAt: {
-          gte: prevWeekStart,
-          lte: prevWeekEnd,
+          gte: prevPeriodStart,
+          lte: prevPeriodEnd,
         },
         role: 'user',
         Thread: {
@@ -277,12 +278,12 @@ export class OrganizationStatisticsService {
       },
     });
 
-    // Process current week data
+    // Process current period data
     const usersByDay = new Map<string, Set<string>>();
     const messagesByDay = new Map<string, number>();
     const allUsers = new Set<string>();
 
-    currentWeekMessages.forEach(message => {
+    currentPeriodMessages.forEach(message => {
       const dateKey = message.createdAt.toISOString().split('T')[0];
       const userId = message.Thread.userId;
       
@@ -304,14 +305,14 @@ export class OrganizationStatisticsService {
       point.userCount = usersByDay.get(dateKey)?.size || 0;
     });
 
-    const totalMessages = currentWeekMessages.length;
-    const trendPercentage = prevWeekCount > 0 
-      ? Math.round(((totalMessages - prevWeekCount) / prevWeekCount) * 100)
+    const totalMessages = currentPeriodMessages.length;
+    const trendPercentage = prevPeriodCount > 0 
+      ? Math.round(((totalMessages - prevPeriodCount) / prevPeriodCount) * 100)
       : 0;
 
     return {
-      startDate: weekStart,
-      endDate: weekEnd,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
       dataPoints,
       trendPercentage,
       totalMessages,
@@ -379,37 +380,37 @@ export class OrganizationStatisticsService {
     };
   }
 
-  async getWeeklyQuestionsByCategory(
+  async getDailyQuestionsByCategory(
     organizationId: string | undefined,
     startDate: Date,
-  ): Promise<WeeklyQuestionsByCategoryResult> {
-    // Calculate 4 weeks date range
-    const weekStart = new Date(startDate);
-    weekStart.setHours(0, 0, 0, 0);
+    endDate: Date,
+  ): Promise<DailyQuestionsByCategoryResult> {
+    // Normalize dates
+    const normalizedStartDate = new Date(startDate);
+    normalizedStartDate.setHours(0, 0, 0, 0);
     
-    const fourWeeksEnd = new Date(weekStart);
-    fourWeeksEnd.setDate(fourWeeksEnd.getDate() + 27); // 4 weeks - 1 day
-    fourWeeksEnd.setHours(23, 59, 59, 999);
+    const normalizedEndDate = new Date(endDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);
 
-    // Initialize data for 4 weeks
-    const weeklyData: WeeklyCategoryData[] = [];
-    for (let week = 0; week < 4; week++) {
-      const currentWeekStart = new Date(weekStart);
-      currentWeekStart.setDate(currentWeekStart.getDate() + (week * 7));
-      
-      weeklyData.push({
-        week: new Date(currentWeekStart),
+    // Initialize data for each day
+    const dailyData: DailyCategoryData[] = [];
+    const currentDate = new Date(normalizedStartDate);
+    
+    while (currentDate <= normalizedEndDate) {
+      dailyData.push({
+        date: new Date(currentDate),
         categories: [],
         totalQuestions: 0,
       });
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Get all messages within the 4-week period
+    // Get all messages within the date range
     const messages = await prisma.message.findMany({
       where: {
         createdAt: {
-          gte: weekStart,
-          lte: fourWeeksEnd,
+          gte: normalizedStartDate,
+          lte: normalizedEndDate,
         },
         role: 'user',
         category: {
@@ -427,77 +428,69 @@ export class OrganizationStatisticsService {
       },
     });
 
-    // Group messages by week and category
-    const weekCategoryMap = new Map<number, Map<MessageCategory, number>>();
+    // Group messages by day and category
+    const dayCategoryMap = new Map<string, Map<MessageCategory, number>>();
+    const overallCategoryTotals = new Map<MessageCategory, number>();
     
     messages.forEach(message => {
-      const weekNumber = Math.floor(
-        (message.createdAt.getTime() - weekStart.getTime()) / (7 * 24 * 60 * 60 * 1000)
-      );
+      const dateKey = message.createdAt.toISOString().split('T')[0];
       
-      if (weekNumber >= 0 && weekNumber < 4 && message.category) {
-        if (!weekCategoryMap.has(weekNumber)) {
-          weekCategoryMap.set(weekNumber, new Map());
+      if (message.category) {
+        // Update daily counts
+        if (!dayCategoryMap.has(dateKey)) {
+          dayCategoryMap.set(dateKey, new Map());
         }
         
-        const categoryMap = weekCategoryMap.get(weekNumber)!;
+        const categoryMap = dayCategoryMap.get(dateKey)!;
         categoryMap.set(
           message.category,
           (categoryMap.get(message.category) || 0) + 1
         );
+        
+        // Update overall totals
+        overallCategoryTotals.set(
+          message.category,
+          (overallCategoryTotals.get(message.category) || 0) + 1
+        );
       }
     });
 
-    // Fill in the data for each week
-    weekCategoryMap.forEach((categoryMap, weekNumber) => {
-      const totalQuestions = Array.from(categoryMap.values()).reduce((sum, count) => sum + count, 0);
+    // Fill in the data for each day
+    dailyData.forEach(dayData => {
+      const dateKey = dayData.date.toISOString().split('T')[0];
+      const categoryMap = dayCategoryMap.get(dateKey);
       
-      const categories: CategoryQuestionCount[] = Array.from(categoryMap.entries())
-        .map(([category, count]) => ({
-          category: category,
-          count: count,
-          percentage: totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0,
-        }))
-        .sort((a, b) => b.count - a.count);
-      
-      weeklyData[weekNumber].categories = categories;
-      weeklyData[weekNumber].totalQuestions = totalQuestions;
+      if (categoryMap) {
+        const totalQuestions = Array.from(categoryMap.values()).reduce((sum, count) => sum + count, 0);
+        
+        const categories: CategoryQuestionCount[] = Array.from(categoryMap.entries())
+          .map(([category, count]) => ({
+            category: category,
+            count: count,
+            percentage: totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0,
+          }))
+          .sort((a, b) => b.count - a.count);
+        
+        dayData.categories = categories;
+        dayData.totalQuestions = totalQuestions;
+      }
     });
 
-    // Calculate trends (comparing last week to previous week)
-    const categoryTrends: any[] = [];
-    
-    // Get unique categories across all weeks
-    const allCategories = new Set<MessageCategory>();
-    weekCategoryMap.forEach(categoryMap => {
-      categoryMap.forEach((_, category) => allCategories.add(category));
-    });
-
-    // Calculate trend for each category
-    allCategories.forEach(category => {
-      const previousWeekCount = weekCategoryMap.get(2)?.get(category) || 0;
-      const currentWeekCount = weekCategoryMap.get(3)?.get(category) || 0;
-      
-      const trendPercentage = previousWeekCount > 0
-        ? Math.round(((currentWeekCount - previousWeekCount) / previousWeekCount) * 100)
-        : currentWeekCount > 0 ? 100 : 0;
-
-      categoryTrends.push({
+    // Calculate overall category totals
+    const totalQuestions = messages.length;
+    const categoryTotals = Array.from(overallCategoryTotals.entries())
+      .map(([category, count]) => ({
         category: category,
-        trendPercentage,
-        previousWeekCount,
-        currentWeekCount,
-      });
-    });
-
-    // Sort trends by current week count
-    categoryTrends.sort((a, b) => b.currentWeekCount - a.currentWeekCount);
+        totalCount: count,
+        percentage: totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0,
+      }))
+      .sort((a, b) => b.totalCount - a.totalCount);
 
     return {
-      startDate: weekStart,
-      endDate: fourWeeksEnd,
-      data: weeklyData,
-      categoryTrends,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
+      data: dailyData,
+      categoryTotals,
     };
   }
 }

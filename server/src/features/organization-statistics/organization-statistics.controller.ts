@@ -4,9 +4,9 @@ import { AuthGuard } from '@features/users/auth.guard';
 import { 
   DailyUniqueUsersRangeResult, 
   DailyQuestionsRangeResult,
-  WeeklyUsageTrendResult,
+  DailyUsageTrendResult,
   AverageQuestionsResult,
-  WeeklyQuestionsByCategoryResult 
+  DailyQuestionsByCategoryResult 
 } from './dto/statistics-response.dto';
 
 @Controller('organization-statistics')
@@ -47,16 +47,18 @@ export class OrganizationStatisticsController {
     );
   }
 
-  @Get('weekly-usage-trend')
-  async getWeeklyUsageTrend(
+  @Get('daily-usage-trend')
+  async getDailyUsageTrend(
     @Query('organizationId') organizationId: string,
     @Query('startDate') startDate: string,
-  ): Promise<WeeklyUsageTrendResult> {
+    @Query('endDate') endDate: string,
+  ): Promise<DailyUsageTrendResult> {
     const orgId = !organizationId || organizationId === 'all' ? undefined : organizationId;
     
-    return this.organizationStatisticsService.getWeeklyUsageTrend(
+    return this.organizationStatisticsService.getDailyUsageTrend(
       orgId,
       new Date(startDate),
+      new Date(endDate),
     );
   }
 
@@ -75,16 +77,18 @@ export class OrganizationStatisticsController {
     );
   }
 
-  @Get('weekly-questions-by-category')
-  async getWeeklyQuestionsByCategory(
+  @Get('daily-questions-by-category')
+  async getDailyQuestionsByCategory(
     @Query('organizationId') organizationId: string,
     @Query('startDate') startDate: string,
-  ): Promise<WeeklyQuestionsByCategoryResult> {
+    @Query('endDate') endDate: string,
+  ): Promise<DailyQuestionsByCategoryResult> {
     const orgId = !organizationId || organizationId === 'all' ? undefined : organizationId;
     
-    return this.organizationStatisticsService.getWeeklyQuestionsByCategory(
+    return this.organizationStatisticsService.getDailyQuestionsByCategory(
       orgId,
       new Date(startDate),
+      new Date(endDate),
     );
   }
 }
