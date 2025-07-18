@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import { Stack, Paper, Text, Group, Select, LoadingOverlay } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
-import { IconCalendar } from '@tabler/icons-react';
+import { Stack, Paper, Text, Group, LoadingOverlay } from '@mantine/core';
 import { 
   LineChart, 
   Line, 
@@ -9,54 +6,18 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer, 
-  Legend 
+  ResponsiveContainer
 } from 'recharts';
 import { useQ_getDailyUniqueUsers } from '../organization-statistics-api';
-import { getAdminOrganizations } from '../../../api/admin-api';
-import { useQuery } from '@tanstack/react-query';
+import type { StatisticsComponentProps } from '../types';
 
-export function DailyUniqueUsersChart() {
-  const today = new Date();
-  const weekAgo = new Date();
-  weekAgo.setDate(today.getDate() - 7);
-  
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([weekAgo, today]);
-  const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined);
-
-  // Fetch organizations for the selector
-  const { data: organizationsData } = useQuery({
-    queryKey: ['admin-organizations', { page: 1, limit: 100 }],
-    queryFn: () => getAdminOrganizations({ page: 1, limit: 100 }),
-  });
-
-  // Convert dates to ISO string format for API
-  const startDateStr = dateRange[0] instanceof Date 
-    ? dateRange[0].toISOString().split('T')[0]
-    : dateRange[0] 
-    ? new Date(dateRange[0]).toISOString().split('T')[0] 
-    : '';
-    
-  const endDateStr = dateRange[1] instanceof Date 
-    ? dateRange[1].toISOString().split('T')[0]
-    : dateRange[1] 
-    ? new Date(dateRange[1]).toISOString().split('T')[0] 
-    : '';
-
+export function DailyUniqueUsersChart({ organizationId, startDate, endDate }: StatisticsComponentProps) {
   // Fetch daily unique users data
   const { data: dailyUsersData, isLoading } = useQ_getDailyUniqueUsers({
-    organizationId: selectedOrgId,
-    startDate: startDateStr,
-    endDate: endDateStr,
+    organizationId,
+    startDate,
+    endDate,
   });
-
-  const organizationOptions = [
-    { value: '', label: 'All Organizations' },
-    ...(organizationsData?.data.map(org => ({
-      value: org.id,
-      label: org.name,
-    })) || []),
-  ];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -96,95 +57,64 @@ export function DailyUniqueUsersChart() {
     : 0;
 
   return (
-    <>
-      <Paper p="md" shadow="xs">
-        <Stack gap="md">
-          <Group align="flex-end">
-            <DatePickerInput
-              type="range"
-              label="Date Range"
-              placeholder="Select date range"
-              value={dateRange}
-              onChange={(value) => {
-                setDateRange(value as [Date | null, Date | null]);
-              }}
-              leftSection={<IconCalendar size={16} />}
-              maxDate={today}
-              style={{ flex: 1, maxWidth: 300 }}
-            />
-            
-            <Select
-              label="Organization"
-              placeholder="Select organization"
-              data={organizationOptions}
-              value={selectedOrgId || ''}
-              onChange={(value) => setSelectedOrgId(value || undefined)}
-              style={{ flex: 1, maxWidth: 250 }}
-              searchable
-            />
-          </Group>
+    <Paper p="md" shadow="xs" pos="relative">
+      <LoadingOverlay visible={isLoading} />
+      
+      <Stack gap="md">
+        <Text fw={600}>Daily Unique Users Trend</Text>
 
-          <Group gap="xl">
-            <Paper p="md" radius="md" bg="blue.0" style={{ flex: 1 }}>
-              <Stack gap="xs">
-                <Text size="sm" c="dimmed">Total Unique Users</Text>
-                <Text size="xl" fw={700}>{totalUniqueUsers}</Text>
-              </Stack>
-            </Paper>
-            
-            <Paper p="md" radius="md" bg="green.0" style={{ flex: 1 }}>
-              <Stack gap="xs">
-                <Text size="sm" c="dimmed">Average Daily Users</Text>
-                <Text size="xl" fw={700}>{averageUsers}</Text>
-              </Stack>
-            </Paper>
-          </Group>
-        </Stack>
-      </Paper>
+        <Group gap="xl">
+          <Paper p="md" radius="md" bg="blue.0" style={{ flex: 1 }}>
+            <Stack gap="xs">
+              <Text size="sm" c="dimmed">Total Unique Users</Text>
+              <Text size="xl" fw={700}>{totalUniqueUsers}</Text>
+            </Stack>
+          </Paper>
+          
+          <Paper p="md" radius="md" bg="green.0" style={{ flex: 1 }}>
+            <Stack gap="xs">
+              <Text size="sm" c="dimmed">Average Daily Users</Text>
+              <Text size="xl" fw={700}>{averageUsers}</Text>
+            </Stack>
+          </Paper>
+        </Group>
 
-      <Paper p="md" shadow="xs" pos="relative">
-        <LoadingOverlay visible={isLoading} />
-        
-        <Stack gap="md">
-          <Text fw={600}>Daily Unique Users Trend</Text>
-
-          {dailyUsersData && dailyUsersData.data.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart
-                data={dailyUsersData.data.map((day, index) => ({
-                  date: formatDate(day.date),
-                  uniqueUsers: day.uniqueUsers,
-                  index: index,
-                }))}
-                margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  angle={-45}
-                  textAnchor="end"
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="uniqueUsers" 
-                  stroke="#228be6"
-                  strokeWidth={2}
-                  name="Unique Users"
-                  dot={{ fill: '#228be6', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <Text c="dimmed" ta="center" py="xl">
-              No data available for the selected period
-            </Text>
-          )}
-        </Stack>
-      </Paper>
-    </>
+        {dailyUsersData && dailyUsersData.data.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart
+              data={dailyUsersData.data.map((day, index) => ({
+                date: formatDate(day.date),
+                uniqueUsers: day.uniqueUsers,
+                index: index,
+              }))}
+              margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="date" 
+                angle={-45}
+                textAnchor="end"
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Line 
+                type="monotone" 
+                dataKey="uniqueUsers" 
+                stroke="#228be6"
+                strokeWidth={2}
+                name="Unique Users"
+                dot={{ fill: '#228be6', r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <Text c="dimmed" ta="center" py="xl">
+            No data available for the selected period
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }
