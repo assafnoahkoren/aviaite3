@@ -138,3 +138,7 @@ VITE_SERVER_URL=http://localhost:3001
 - Organization-based multi-tenancy
 - Chat threads and messages
 - Subscription and billing models
+
+## Best Practices
+
+- When creating new files, use tsc to check them
