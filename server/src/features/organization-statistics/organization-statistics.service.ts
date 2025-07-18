@@ -7,7 +7,7 @@ export class OrganizationStatisticsService {
   constructor() {}
 
   async getDailyUniqueUsers(
-    organizationId: string | null,
+    organizationId: string | undefined,
     startDate: Date,
     endDate: Date,
   ): Promise<DailyUniqueUsersRangeResult> {
@@ -85,7 +85,7 @@ export class OrganizationStatisticsService {
   }
 
   async getDailyQuestionsPerUser(
-    organizationId: string | null,
+    organizationId: string | undefined,
     startDate: Date,
     endDate: Date,
   ): Promise<any> {
@@ -94,7 +94,7 @@ export class OrganizationStatisticsService {
   }
 
   async getWeeklyUsageTrend(
-    organizationId: string | null,
+    organizationId: string | undefined,
     startDate: Date,
   ): Promise<any> {
     // TODO: Implement weekly usage trend
@@ -102,7 +102,7 @@ export class OrganizationStatisticsService {
   }
 
   async getAverageQuestionsPerUser(
-    organizationId: string | null,
+    organizationId: string | undefined,
     startDate: Date,
     endDate: Date,
   ): Promise<any> {
@@ -111,7 +111,7 @@ export class OrganizationStatisticsService {
   }
 
   async getWeeklyQuestionsByCategory(
-    organizationId: string | null,
+    organizationId: string | undefined,
     startDate: Date,
   ): Promise<any> {
     // TODO: Implement questions per category per week with trend
