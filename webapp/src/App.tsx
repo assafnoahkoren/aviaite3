@@ -20,12 +20,12 @@ setQueryClient(queryClient);
 function App() {
   const authStore = useCreateStore_Auth();
   
-  // Temporarily return maintenance page
-  return (
-    <MantineProvider theme={theme}>
-      <UnderMaintenance />;
-    </MantineProvider>
-  );
+  // // Temporarily return maintenance page
+  // return (
+  //   <MantineProvider theme={theme}>
+  //     <UnderMaintenance />;
+  //   </MantineProvider>
+  // );
   
   return (
     <React.StrictMode>
