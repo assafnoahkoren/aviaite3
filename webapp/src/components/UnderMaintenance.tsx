@@ -8,7 +8,7 @@ export function UnderMaintenance() {
       <Paper shadow="md" p="xl" radius="md" className={classes.paper}>
         <Stack align="center" gap="md">
           <Image src="/logos/ace-by-aviaite-dark.png" alt="Ace by Aviaite logo" w={150} />
-          <Title order={1}>Under Maintenance</Title>
+          <Title order={1} ta="center">Under Maintenance</Title>
           <Text size="lg" c="dimmed" ta="center">
             We're currently performing maintenance.
             <br />
