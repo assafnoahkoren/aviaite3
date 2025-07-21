@@ -80,7 +80,7 @@ export const HomeHeader = observer(({ opened, toggle }: HomeHeaderProps) => {
           <Group gap="xs" wrap="nowrap" align="end" visibleFrom="sm" data-tour="logo">
             <img src="/logos/ace-dark.png" height={24} />
             <Text fw={600} size="xs" opacity={0.5} style={{ lineHeight: '1' }}>
-              by aviate
+              by aviaite
             </Text>
           </Group>
         </Group>

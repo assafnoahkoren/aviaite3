@@ -11,6 +11,7 @@ import { useCreateStore_Auth } from './features/auth/auth-store';
 import { setQueryClient } from './infra/mobx-query';
 import './App.css';
 import { theme } from './theme';
+import { UnderMaintenance } from './components/UnderMaintenance';
 
 const queryClient = new QueryClient();
 // Set the query client for MobX queries to use the same instance
@@ -18,6 +19,14 @@ setQueryClient(queryClient);
 
 function App() {
   const authStore = useCreateStore_Auth();
+  
+  // Temporarily return maintenance page
+  return (
+    <MantineProvider theme={theme}>
+      <UnderMaintenance />;
+    </MantineProvider>
+  );
+  
   return (
     <React.StrictMode>
       <ClickToComponent editor="cursor" />

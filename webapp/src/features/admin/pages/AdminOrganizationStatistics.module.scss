@@ -1,0 +1,7 @@
+@media print {
+  .pdfOnly {
+    display: block !important;
+  }
+}
+
+// For react-to-pdf, we'll use inline styles instead
