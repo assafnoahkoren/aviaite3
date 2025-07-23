@@ -42,6 +42,45 @@ export interface Message {
   role: 'user' | 'assistant';
 }
 
+// Filter and pagination types
+export interface ChatsFilter {
+  userIds?: string[];
+  fromCreatedAt?: string;
+  toCreatedAt?: string;
+}
+
+export enum ChatsOrderBy {
+  CREATED_AT_ASC = 'createdAt_asc',
+  CREATED_AT_DESC = 'createdAt_desc',
+  MESSAGE_COUNT_ASC = 'messageCount_asc',
+  MESSAGE_COUNT_DESC = 'messageCount_desc',
+}
+
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+}
+
+export interface GetChatsByFilterDto {
+  filter?: ChatsFilter;
+  orderBy?: ChatsOrderBy;
+  pagination?: PaginationOptions;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ThreadWithCount extends Thread {
+  _count?: {
+    Messages: number;
+  };
+}
+
 // List all assistants
 export async function listAssistants(): Promise<Assistant[]> {
   const res = await api.get('/api/chat/assistants');
@@ -58,6 +97,12 @@ export async function createChat(dto: CreateChatDto): Promise<Thread> {
 // List all chats (threads) for the current user (guarded)
 export async function listChatsByUserId(): Promise<Thread[]> {
   const res = await api.get('/api/chat/user');
+  return res.data;
+}
+
+// Get chats by filter with pagination and ordering
+export async function getChatsByFilter(dto: GetChatsByFilterDto): Promise<PaginatedResponse<ThreadWithCount>> {
+  const res = await api.post('/api/chat/filter', dto);
   return res.data;
 }
 
@@ -167,6 +212,14 @@ export function useQ_listChatsByUserId() {
   return useQuery({
     queryKey: ['chats'],
     queryFn: listChatsByUserId,
+  });
+}
+
+export function useQ_getChatsByFilter(dto: GetChatsByFilterDto) {
+  return useQuery({
+    queryKey: ['chats', 'filter', dto],
+    queryFn: () => getChatsByFilter(dto),
+    enabled: !!dto, // Only run query if dto is provided
   });
 }
 
