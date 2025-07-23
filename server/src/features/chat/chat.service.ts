@@ -10,6 +10,12 @@ import { SubscriptionsService } from '../products/subscriptions.service';
 import { MessagesService } from './messages.service';
 import { ValidationResponseDto } from '../products/dto/validate-access.dto';
 import { AssistantStream } from 'openai/lib/AssistantStream';
+import {
+  ChatsFilter,
+  ChatsOrderBy,
+  GetChatsByFilterOptions,
+  PaginatedResponse,
+} from './chat.types';
 
 export const assistants = [
   {
@@ -198,6 +204,94 @@ export class ChatService {
       where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /**
+   * Gets chats by filter with pagination and ordering
+   * @param options - Filter, ordering, and pagination options
+   * @returns Paginated response with threads (without messages)
+   */
+  async getChatsByFilter(
+    options: GetChatsByFilterOptions,
+  ): Promise<PaginatedResponse<Thread>> {
+    const { filter, orderBy, pagination } = options;
+    
+    // Build where clause
+    const where: Prisma.ThreadWhereInput = {
+      deletedAt: null,
+    };
+
+    if (filter) {
+      if (filter.userIds && filter.userIds.length > 0) {
+        where.userId = { in: filter.userIds };
+      }
+      
+      if (filter.fromCreatedAt || filter.toCreatedAt) {
+        where.createdAt = {};
+        if (filter.fromCreatedAt) {
+          where.createdAt.gte = filter.fromCreatedAt;
+        }
+        if (filter.toCreatedAt) {
+          where.createdAt.lte = filter.toCreatedAt;
+        }
+      }
+    }
+
+    // Build orderBy clause
+    let orderByClause: Prisma.ThreadOrderByWithRelationInput = {};
+    
+    if (orderBy) {
+      switch (orderBy) {
+        case ChatsOrderBy.CREATED_AT_ASC:
+          orderByClause = { createdAt: 'asc' };
+          break;
+        case ChatsOrderBy.CREATED_AT_DESC:
+          orderByClause = { createdAt: 'desc' };
+          break;
+        case ChatsOrderBy.MESSAGE_COUNT_ASC:
+        case ChatsOrderBy.MESSAGE_COUNT_DESC:
+          // For message count ordering, we'll need to include message count
+          orderByClause = {
+            Messages: {
+              _count: orderBy === ChatsOrderBy.MESSAGE_COUNT_ASC ? 'asc' : 'desc',
+            },
+          };
+          break;
+        default:
+          orderByClause = { createdAt: 'desc' };
+      }
+    } else {
+      orderByClause = { createdAt: 'desc' };
+    }
+
+    // Set pagination defaults
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    // Execute queries in parallel
+    const [threads, total] = await Promise.all([
+      prisma.thread.findMany({
+        where,
+        orderBy: orderByClause,
+        skip,
+        take: limit,
+        include: {
+          _count: {
+            select: { Messages: true },
+          },
+        },
+      }),
+      prisma.thread.count({ where }),
+    ]);
+
+    return {
+      data: threads,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async softDeleteChat(threadId: string, userId: string) {

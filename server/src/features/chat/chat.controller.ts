@@ -1,12 +1,14 @@
 // chat.controller.ts
 // Controller for handling chat-related HTTP requests
 
-import { Controller, Get, Post, Body, Param, Req, UseGuards, Sse, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, UseGuards, Sse, Delete, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { GetChatsByFilterDto } from './dto/get-chats-by-filter.dto';
 import { AuthGuard, AuthedRequest } from '../users/auth.guard';
 import { Observable } from 'rxjs';
+import { GetChatsByFilterOptions } from './chat.types';
 
 @Controller()
 export class ChatController {
@@ -31,6 +33,21 @@ export class ChatController {
   @Get('api/chat/user')
   async listChatsByUserId(@Req() req: AuthedRequest) {
     return await this.chatService.listChatsByUserId(req.user.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('api/chat/filter')
+  async getChatsByFilter(@Body() dto: GetChatsByFilterDto) {
+    const options: GetChatsByFilterOptions = {
+      filter: dto.filter ? {
+        userIds: dto.filter.userIds,
+        fromCreatedAt: dto.filter.fromCreatedAt ? new Date(dto.filter.fromCreatedAt) : undefined,
+        toCreatedAt: dto.filter.toCreatedAt ? new Date(dto.filter.toCreatedAt) : undefined,
+      } : undefined,
+      orderBy: dto.orderBy,
+      pagination: dto.pagination,
+    };
+    return await this.chatService.getChatsByFilter(options);
   }
 
   @UseGuards(AuthGuard)
