@@ -63,6 +63,7 @@ export function ThreadsFilterBar({ onFiltersChange }: ThreadsFilterBarProps) {
   return (
     <Paper p="md" withBorder mb="md">
       <Group>
+        {/* Hidden for now - uncomment when user data is available
         <MultiSelect
           label="Filter by Users"
           placeholder="Select users..."
@@ -74,6 +75,7 @@ export function ThreadsFilterBar({ onFiltersChange }: ThreadsFilterBarProps) {
           style={{ minWidth: 300 }}
           leftSection={<IconSearch size={16} />}
         />
+        */}
 
         <DatePickerInput
           type="range"
