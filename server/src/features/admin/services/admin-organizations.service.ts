@@ -144,21 +144,27 @@ export class AdminOrganizationsService {
       tokenUsageByModel,
     ] = await Promise.all([
       prisma.user.count({
-        where: { organizationId, deletedAt: null },
+        where: { organizationId, role: { not: 'ADMIN' }, deletedAt: null },
       }),
       prisma.user.count({
-        where: { organizationId, isActive: true, deletedAt: null },
+        where: { organizationId, role: { not: 'ADMIN' }, isActive: true, deletedAt: null },
       }),
       prisma.thread.count({
         where: {
-          User: { organizationId },
+          User: { 
+            organizationId,
+            role: { not: 'ADMIN' },
+          },
           deletedAt: null,
         },
       }),
       prisma.userTokenUsage.groupBy({
         by: ['modelUsed'],
         where: {
-          User: { organizationId },
+          User: { 
+            organizationId,
+            role: { not: 'ADMIN' },
+          },
           deletedAt: null,
         },
         _sum: {

@@ -33,7 +33,7 @@ export class AdminStatsService {
   }
 
   private async getUserStats() {
-    const [total, active, verified, admins, newThisMonth] = await Promise.all([
+    const [total, active, verified, admins, newThisMonth, totalNonAdmin, activeNonAdmin] = await Promise.all([
       prisma.user.count({ where: { deletedAt: null } }),
       prisma.user.count({ where: { isActive: true, deletedAt: null } }),
       prisma.user.count({ where: { verified: true, deletedAt: null } }),
@@ -46,15 +46,18 @@ export class AdminStatsService {
           deletedAt: null,
         },
       }),
+      // Non-admin stats
+      prisma.user.count({ where: { role: { not: 'ADMIN' }, deletedAt: null } }),
+      prisma.user.count({ where: { role: { not: 'ADMIN' }, isActive: true, deletedAt: null } }),
     ]);
 
     return {
-      total,
-      active,
+      total: totalNonAdmin, // Show only non-admin users in total
+      active: activeNonAdmin, // Show only active non-admin users
       verified,
       admins,
       newThisMonth,
-      activePercentage: total > 0 ? (active / total) * 100 : 0,
+      activePercentage: totalNonAdmin > 0 ? (activeNonAdmin / totalNonAdmin) * 100 : 0,
     };
   }
 
@@ -69,7 +72,7 @@ export class AdminStatsService {
         FROM (
           SELECT COUNT(u.id) as user_count
           FROM "Organization" o
-          LEFT JOIN "User" u ON u."organizationId" = o.id AND u."deletedAt" IS NULL
+          LEFT JOIN "User" u ON u."organizationId" = o.id AND u."deletedAt" IS NULL AND u."role" != 'ADMIN'
           WHERE o."deletedAt" IS NULL
           GROUP BY o.id
         ) as org_users
@@ -168,6 +171,7 @@ export class AdminStatsService {
         AND s."deletedAt" IS NULL
         AND sp."deletedAt" IS NULL
         AND u."deletedAt" IS NULL
+        AND u."role" != 'ADMIN'
         GROUP BY u.id
       ) as user_revenues
     `;
@@ -350,6 +354,7 @@ export class AdminStatsService {
                 gte: date,
                 lt: nextDate,
               },
+              role: { not: 'ADMIN' },
               deletedAt: null,
             },
           }),

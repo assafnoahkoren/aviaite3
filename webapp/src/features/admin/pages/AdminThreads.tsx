@@ -112,8 +112,8 @@ export function AdminThreads() {
                       <Table.Td>
                         <Group gap="xs">
                           <IconUser size={14} />
-                          <Text size="sm" truncate style={{ maxWidth: 150 }}>
-                            {thread.userId}
+                          <Text size="sm" truncate style={{ maxWidth: 200 }}>
+                            {thread.User?.fullName || thread.User?.email || thread.userId}
                           </Text>
                         </Group>
                       </Table.Td>

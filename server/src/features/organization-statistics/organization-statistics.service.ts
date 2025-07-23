@@ -54,7 +54,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
       select: {
@@ -134,7 +137,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
       select: {
@@ -249,7 +255,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
       select: {
@@ -273,7 +282,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
     });
@@ -346,7 +358,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
       select: {
@@ -419,7 +434,10 @@ export class OrganizationStatisticsService {
         Thread: {
           User: organizationId ? {
             organizationId: organizationId,
-          } : undefined,
+            role: { not: 'ADMIN' },
+          } : {
+            role: { not: 'ADMIN' },
+          },
         },
       },
       select: {

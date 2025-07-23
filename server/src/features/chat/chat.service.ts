@@ -5,7 +5,7 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { OpenAI } from 'openai';
 import { ENV } from '../../services/env';
 import { prisma } from '../../services/prisma';
-import { TokenType, MessageRole, Thread, User, Prisma, MessageCategory } from '../../../generated/prisma';
+import { TokenType, MessageRole, Thread, User, Prisma, MessageCategory, Role } from '../../../generated/prisma';
 import { SubscriptionsService } from '../products/subscriptions.service';
 import { MessagesService } from './messages.service';
 import { ValidationResponseDto } from '../products/dto/validate-access.dto';
@@ -219,6 +219,11 @@ export class ChatService {
     // Build where clause
     const where: Prisma.ThreadWhereInput = {
       deletedAt: null,
+      User: {
+        role: {
+          not: Role.ADMIN,
+        },
+      },
     };
 
     if (filter) {
@@ -279,6 +284,13 @@ export class ChatService {
         include: {
           _count: {
             select: { Messages: true },
+          },
+          User: {
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+            },
           },
         },
       }),

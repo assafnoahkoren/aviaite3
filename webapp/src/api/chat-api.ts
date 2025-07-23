@@ -79,6 +79,11 @@ export interface ThreadWithCount extends Thread {
   _count?: {
     Messages: number;
   };
+  User?: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  };
 }
 
 // List all assistants
