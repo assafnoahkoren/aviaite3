@@ -5,6 +5,7 @@ import { AdminSubscriptionsController } from './controllers/admin-subscriptions.
 import { AdminProductsController } from './controllers/admin-products.controller';
 import { AdminStatsController } from './controllers/admin-stats.controller';
 import { AdminRegistrationTokensController } from './controllers/admin-registration-tokens.controller';
+import { AdminChatController } from './controllers/admin-chat.controller';
 import { AdminUsersService } from './services/admin-users.service';
 import { AdminOrganizationsService } from './services/admin-organizations.service';
 import { AdminSubscriptionsService } from './services/admin-subscriptions.service';
@@ -20,6 +21,7 @@ import { AdminRegistrationTokensService } from './services/admin-registration-to
     AdminProductsController,
     AdminStatsController,
     AdminRegistrationTokensController,
+    AdminChatController,
   ],
   providers: [
     AdminUsersService,
