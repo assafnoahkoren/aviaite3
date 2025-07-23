@@ -340,3 +340,52 @@ export async function getAdminGrowthStats(period: 'day' | 'week' | 'month' = 'mo
   const { data } = await api.get('/api/admin/stats/growth', { params: { period } });
   return data;
 }
+
+// Chat Management
+export interface AdminThreadMessage {
+  id: string;
+  threadId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  category: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminThreadMessagesResponse {
+  thread: {
+    id: string;
+    name: string | null;
+    assistantId: string;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  messages: AdminThreadMessage[];
+  messageCount: number;
+}
+
+export interface AdminThreadDetails {
+  id: string;
+  name: string | null;
+  assistantId: string;
+  profileId: string;
+  userId: string;
+  openaiThreadId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  _count: {
+    Messages: number;
+  };
+}
+
+export async function getAdminThreadMessages(threadId: string): Promise<AdminThreadMessagesResponse> {
+  const { data } = await api.get(`/api/admin/chat/thread/${threadId}/messages`);
+  return data;
+}
+
+export async function getAdminThreadDetails(threadId: string): Promise<AdminThreadDetails> {
+  const { data } = await api.get(`/api/admin/chat/thread/${threadId}`);
+  return data;
+}
