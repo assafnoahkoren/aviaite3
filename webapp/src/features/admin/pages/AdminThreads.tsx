@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { Container, Title, Paper, Table, Text, Badge, Group, Button, Stack, Pagination, Center, Loader, Alert } from '@mantine/core';
+import { Container, Title, Paper, Table, Text, Badge, Group, Button, Stack, Pagination, Center, Loader, Alert, Modal } from '@mantine/core';
 import { IconMessageCircle, IconUser, IconCalendar, IconExternalLink } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ThreadsFilterBar } from '../components/ThreadsFilterBar';
+import { StaticMessageList } from '../components/StaticMessageList';
 import { useQ_getChatsByFilter, type GetChatsByFilterDto, type ThreadWithCount } from '../../../api/chat-api';
 import { useQ_listAssistants } from '../../../api/chat-api';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,8 @@ export function AdminThreads() {
   const [filters, setFilters] = useState<GetChatsByFilterDto>({
     pagination: { page: 1, limit: 20 }
   });
+  const [selectedThread, setSelectedThread] = useState<ThreadWithCount | null>(null);
+  const [modalOpened, setModalOpened] = useState(false);
 
   // Fetch threads with current filters
   const { data: threadsData, isLoading, error } = useQ_getChatsByFilter(filters);
@@ -43,6 +46,16 @@ export function AdminThreads() {
     if (messageCount < 5) return 'blue';
     if (messageCount < 20) return 'green';
     return 'violet';
+  };
+
+  const handleViewMessages = (thread: ThreadWithCount) => {
+    setSelectedThread(thread);
+    setModalOpened(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpened(false);
+    setSelectedThread(null);
   };
 
   return (
@@ -132,7 +145,7 @@ export function AdminThreads() {
                           variant="subtle"
                           size="xs"
                           leftSection={<IconExternalLink size={14} />}
-                          onClick={() => navigate(`/chat/${thread.id}`)}
+                          onClick={() => handleViewMessages(thread)}
                         >
                           View
                         </Button>
@@ -161,6 +174,26 @@ export function AdminThreads() {
           )}
         </Paper>
       </Stack>
+
+      <Modal
+        opened={modalOpened}
+        onClose={handleCloseModal}
+        size="xl"
+        title={
+          <Group>
+            <Text fw={600}>Thread Messages</Text>
+            {selectedThread && (
+              <Badge variant="light" color="blue">
+                {getAssistantLabel(selectedThread.assistantId)}
+              </Badge>
+            )}
+          </Group>
+        }
+      >
+        {selectedThread && (
+          <StaticMessageList threadId={selectedThread.id} />
+        )}
+      </Modal>
     </Container>
   );
 }
