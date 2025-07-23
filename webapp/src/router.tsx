@@ -25,6 +25,7 @@ import { AdminSubscriptions } from './features/admin/pages/AdminSubscriptions';
 import { AdminRegistrationPermits } from './features/admin/pages/AdminRegistrationPermits';
 import { AdminTokenUsage } from './features/admin/pages/AdminTokenUsage';
 import { AdminOrganizationStatistics } from './features/admin/pages/AdminOrganizationStatistics';
+import { AdminThreads } from './features/admin/pages/AdminThreads';
 import { useIsOnboardingRequired } from './api/onboarding-api';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { SubscriptionPlansSimple } from './features/subscription/SubscriptionPlansSimple';
@@ -129,6 +130,7 @@ export const router = createBrowserRouter([
           { path: 'registration-permits', element: <AdminRegistrationPermits /> },
           { path: 'token-usage', element: <AdminTokenUsage /> },
           { path: 'organization-statistics', element: <AdminOrganizationStatistics /> },
+          { path: 'threads', element: <AdminThreads /> },
         ],
       },
     ],

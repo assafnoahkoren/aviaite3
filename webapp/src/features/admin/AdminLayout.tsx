@@ -78,6 +78,12 @@ export function AdminLayout() {
           >
             Organization Statistics
           </NavLink>
+          <NavLink 
+            to="/admin/threads"
+            className={({ isActive }) => isActive ? styles.activeLink : styles.navLink}
+          >
+            Chat Threads
+          </NavLink>
         </nav>
 
         <div className={styles.sidebarFooter}>
