@@ -20,11 +20,13 @@ export function NoAccess() {
           <IconRocket size={64} className={styles.icon} />
           
           <Title order={1} className={styles.title}>
-            Thank You for Participating in Our Beta!
+            Thank You for participating in Our Beta!
           </Title>
           
           <Text size="lg" ta="center" className={styles.description}>
-            Our beta testing phase has come to an end. We want to express our heartfelt 
+            Our beta testing phase has come to an end.
+            <br />
+            We want to express our heartfelt 
             gratitude for your valuable participation and feedback.
           </Text>
 
@@ -67,23 +69,37 @@ export function NoAccess() {
           </Paper>
 
           <Text size="md" ta="center" className={styles.subdescription}>
-            Your insights have been instrumental in shaping our product. We're working 
-            hard to incorporate your feedback and will be back soon with an even better 
-            experience.
+            Your insights have been instrumental in shaping our product.
+            <br />
+            We're working 
+            hard to incorporate your feedback and <b>will be back soon with an even better experience </b>
           </Text>
 
           <Text size="sm" ta="center" c="dimmed">
             Stay tuned for exciting updates!
           </Text>
           
-          <Button 
-            variant="filled" 
-            size="md"
-            onClick={handleLogout}
-            fullWidth
-          >
-            Sign Out
-          </Button>
+          <Stack gap="sm" w="100%">
+            <Button 
+              variant="outline" 
+              size="md"
+              component="a"
+              href="https://wa.me/972543304732"
+              target="_blank"
+              fullWidth
+            >
+              Interested in extended access? Contact us
+            </Button>
+            
+            <Button 
+              variant="filled" 
+              size="md"
+              onClick={handleLogout}
+              fullWidth
+            >
+              Sign Out
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
     </Container>
