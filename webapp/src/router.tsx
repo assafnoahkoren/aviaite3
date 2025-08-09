@@ -4,6 +4,8 @@ import {
   Outlet,
   useLocation,
 } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { LoginPage } from './features/auth/login-page';
 import { RegisterPage } from './features/auth/register-page';
 import { VerifyPage } from './features/auth/verify-page';
@@ -30,8 +32,10 @@ import { useIsOnboardingRequired } from './api/onboarding-api';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { SubscriptionPlansSimple } from './features/subscription/SubscriptionPlansSimple';
 import { SubscriptionCheckout } from './features/subscription/SubscriptionCheckout';
+import { getCurrentUser } from './api/user-api';
+import { NoAccess } from './components/NoAccess';
 
-// Guard for private routes (always returns true for now)
+// Guard for private routes
 function PrivateRoute() {
   const auth = useStore_Auth();
   const location = useLocation();
@@ -42,6 +46,30 @@ function PrivateRoute() {
   
   const isAuthenticated = !!auth.user && !!auth.token;
   const isOnboardingRoute = location.pathname.startsWith('/onboarding');
+  
+  // Fetch current user data and refresh every 30 seconds or on window focus
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnWindowFocus: true, // Refresh when window gains focus
+    refetchIntervalInBackground: false, // Don't refresh in background
+  });
+  
+  // Update auth store when fresh user data is fetched
+  useEffect(() => {
+    if (currentUser && isAuthenticated) {
+      // Update the user in auth store with fresh data
+      auth.setCurrentUser(currentUser, auth.token);
+      
+      // Check if user has access
+      if (currentUser.hasAccess === false) {
+        // User no longer has access, show NoAccess component
+        // We'll handle this below in the render logic
+      }
+    }
+  }, [currentUser, isAuthenticated]);
   
   // Show loading state while checking onboarding status
   if (isAuthenticated && isOnboardingLoading) {
@@ -60,6 +88,12 @@ function PrivateRoute() {
   }
   
   if (isAuthenticated && auth.user) {
+    // Check if user has access (using fresh data if available, otherwise cached data)
+    const userToCheck = currentUser || auth.user;
+    if (userToCheck.hasAccess === false) {
+      return <NoAccess />;
+    }
+    
     initMixpanelInstance(auth.user.id, {
       email: auth.user.email,
       name: auth.user.fullName,

@@ -16,6 +16,7 @@ model User {
   updatedAt             DateTime             @updatedAt
   fullName              String?
   isActive              Boolean              @default(true)
+  hasAccess             Boolean              @default(true)
   organizationId        String?
   verified              Boolean              @default(false)
   role                  Role                 @default(USER)

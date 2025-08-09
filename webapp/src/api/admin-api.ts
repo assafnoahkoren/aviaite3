@@ -25,6 +25,7 @@ export interface AdminUser {
   fullName: string | null;
   role: UserRole;
   isActive: boolean;
+  hasAccess: boolean;
   verified: boolean;
   organizationId: string | null;
   createdAt: string;
@@ -61,6 +62,7 @@ export interface UpdateUserDto {
   email?: string;
   role?: UserRole;
   isActive?: boolean;
+  hasAccess?: boolean;
   verified?: boolean;
   organizationId?: string | null;
 }

@@ -176,6 +176,7 @@ export class UsersService {
 		if (!user.verified) {
 			throw new UnauthorizedException('Please verify your email before logging in.');
 		}
+		// Don't check hasAccess here - let frontend handle it with NoAccess component
 		const token = JwtUtil.signUserJwt(user);
 		const { password, ...userWithoutPassword } = user;
 		return { message: 'Login successful', userId: user.id, token, user: userWithoutPassword };
@@ -312,5 +313,31 @@ export class UsersService {
 
 		const { password, ...userWithoutPassword } = updatedUser;
 		return { success: true, message: 'Password has been reset successfully.', user: userWithoutPassword };
+	}
+
+	async getCurrentUser(userId: string): Promise<any> {
+		const user = await prisma.user.findUnique({ 
+			where: { id: userId },
+			select: {
+				id: true,
+				email: true,
+				fullName: true,
+				role: true,
+				isActive: true,
+				hasAccess: true,
+				verified: true,
+				organizationId: true,
+				createdAt: true,
+				updatedAt: true,
+				onboardingStatus: true,
+				onboardingCompletedAt: true,
+			}
+		});
+		
+		if (!user) {
+			throw new BadRequestException('User not found');
+		}
+		
+		return user;
 	}
 } 

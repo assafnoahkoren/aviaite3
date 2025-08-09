@@ -5,6 +5,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
+  hasAccess: boolean;
   verified: boolean;
   organizationId?: string | null;
   role: UserRole;

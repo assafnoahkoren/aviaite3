@@ -25,6 +25,10 @@ export class UpdateUserDto {
   verified?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  hasAccess?: boolean;
+
+  @IsOptional()
   @IsString()
   organizationId?: string | null;
 }
@@ -41,6 +45,10 @@ export class UserFilterDto {
   @IsOptional()
   @IsBoolean()
   verified?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  hasAccess?: boolean;
 
   @IsOptional()
   @IsString()
@@ -61,6 +69,11 @@ export class UserQueryDto extends PaginationDto {
   @Type(() => Boolean)
   @IsBoolean()
   verified?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasAccess?: boolean;
 
   @IsOptional()
   @IsString()

@@ -80,6 +80,11 @@ export async function deleteSettings(): Promise<void> {
   await api.delete('/api/users/settings');
 }
 
+export async function getCurrentUser(): Promise<User> {
+  const res = await api.get('/api/users/me');
+  return res.data;
+}
+
 export function useM_register() {
   return useMutation({
     mutationFn: register,

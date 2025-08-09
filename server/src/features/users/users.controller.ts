@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from '@features/users/users.service';
 import { RegisterDto } from '@features/users/dto/register.dto';
 import { LoginDto } from '@features/users/dto/login.dto';
+import { AuthGuard, AuthedRequest } from './auth.guard';
 
 @Controller()
 export class UsersController {
@@ -34,5 +35,11 @@ export class UsersController {
     @Body('newPassword') newPassword: string,
   ) {
     return this.usersService.resetPassword(userId, token, newPassword);
+  }
+
+  @Get('api/users/me')
+  @UseGuards(AuthGuard)
+  async getCurrentUser(@Req() req: AuthedRequest) {
+    return this.usersService.getCurrentUser(req.user.id);
   }
 } 

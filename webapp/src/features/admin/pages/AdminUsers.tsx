@@ -14,7 +14,11 @@ export function AdminUsers() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'users', { page, search }],
-    queryFn: () => getAdminUsers({ page, limit: 20, search }),
+    queryFn: async () => {
+      const result = await getAdminUsers({ page, limit: 20, search });
+      console.log('Admin users data:', result);
+      return result;
+    },
   });
 
   const updateMutation = useMutation({
@@ -35,15 +39,19 @@ export function AdminUsers() {
   });
 
   const handleEdit = (user: AdminUser) => {
+    console.log('Editing user:', user);
+    console.log('User hasAccess value:', user.hasAccess);
     setEditingUser(user);
     setEditForm({
       fullName: user.fullName || '',
       email: user.email,
       role: user.role,
       isActive: user.isActive,
+      hasAccess: user.hasAccess ?? true,  // Default to true if undefined
       verified: user.verified,
       organizationId: user.organizationId,
     });
+    console.log('Edit form hasAccess:', user.hasAccess);
   };
 
   const handleSave = () => {
@@ -92,6 +100,7 @@ export function AdminUsers() {
               <th>Email</th>
               <th>Role</th>
               <th>Status</th>
+              <th>Access</th>
               <th>Organization</th>
               <th>Created</th>
               <th>Actions</th>
@@ -118,6 +127,13 @@ export function AdminUsers() {
                       <span className={`${styles.badge} ${styles.badgeVerified}`}>Verified</span>
                     )}
                   </div>
+                </td>
+                <td>
+                  {user.hasAccess !== false ? (
+                    <span className={`${styles.badge} ${styles.badgeActive}`}>Allowed</span>
+                  ) : (
+                    <span className={`${styles.badge} ${styles.badgeInactive}`}>Blocked</span>
+                  )}
                 </td>
                 <td>{user.Organization?.name || '-'}</td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
@@ -219,6 +235,16 @@ export function AdminUsers() {
                     onChange={(e) => setEditForm({ ...editForm, verified: e.target.checked })}
                   />
                   Verified
+                </label>
+              </div>
+              <div className={styles.formGroup}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editForm.hasAccess ?? true}
+                    onChange={(e) => setEditForm({ ...editForm, hasAccess: e.target.checked })}
+                  />
+                  Has Access (allows login)
                 </label>
               </div>
               <div className={styles.modalActions}>
